@@ -14,6 +14,8 @@ const GenCrud = (props) => {
         return acc;
     }, {});
 
+    const idCol = columnInfo.filter(c => c.isId)[0];
+
     const addNew = () => {
         setDspState('addNew');
     }
@@ -39,7 +41,7 @@ const GenCrud = (props) => {
                                                 displayFields.map(fn => <td>{row[fn]}</td>)
                                             }
                                             <td>
-                                                <button>Delete</button>
+                                                {idCol && <button onClick={() => props.doDelete(idCol.field, row[idCol.field])}>Delete</button>}
                                                 <button>Edit</button>
                                             </td>
                                         </tr>
