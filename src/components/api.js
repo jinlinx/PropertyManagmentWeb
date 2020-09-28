@@ -1,6 +1,6 @@
 //import { get } from 'superagent';
 
-const getUrl =  sql => `http://192.168.1.115:8081/doQuery?sql=${sql}`;
+const getUrl =  sql => `http://192.168.1.119:8081/doQuery?sql=${sql}`;
 const request = require('superagent');
 const get = require('lodash/get');
 
