@@ -10,7 +10,7 @@ function TenantList() {
         { field: 'email', desc: 'Email', },
         { field: 'phone', desc: 'Phone', },
         { field: 'ssn', desc: 'SSN', },
-        { field: 'driverID', desc: 'Driver License', },
+        //{ field: 'driverID', desc: 'Driver License', },
         { field: 'driverIDState', desc: 'State', },
         { field: 'momName', desc: 'Mother', },
         { field: 'momPhone', desc: 'Mom\'s phone number', },
@@ -28,7 +28,7 @@ function TenantList() {
 
     const doAdd = data => {
         const sql = `insert into tenantInfo (${columnInf.map(c => c.field).join(',')}) values (${
-            columnInf.map(f=>data[f]||'').map(v=>`'${v}'`).join(',')
+            columnInf.map(f=>data[f.field]||'').map(v=>`'${v}'`).join(',')
             })`;
             getData(sql).then(res => {
                 
