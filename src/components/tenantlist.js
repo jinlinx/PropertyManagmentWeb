@@ -1,9 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import { getData, getModel, sqlGet, sqlAdd, sqlDelete } from './api';
+//import { getData, getModel, sqlGet, sqlAdd, sqlDelete } from './api';
 import GenCrud from './GenCrud';
 import mod from './models';
+import {createHelper} from './datahelper';
 
 function TenantList() {
+    const helper=createHelper('tenantInfo');
     // [
     //     { field: 'tenantID', desc: 'Id', type: 'uuid', required: true, isId: true },
     //     { field: 'firstName', desc: 'First Name', required: true },
@@ -22,7 +24,8 @@ function TenantList() {
     const [loading, setLoading] = useState(true);
     const [columnInf, setColumnInf] = useState([]);
     const reload = () => {
-        sqlGet('tenantInfo', columnInf.map(f=>f.field)).then(res => {
+        //sqlGet('tenantInfo',columnInf.map(f => f.field))
+        helper.loadData().then(res => {
             setTenants(res);
             setLoading(false);
         });
@@ -31,10 +34,11 @@ function TenantList() {
 
     useEffect(() => {
         const ld = async ()=>{
-            if (!mod.models.tenantInfo) {
-                mod.models.tenantInfo = await getModel('tenantInfo');
-            }
-            console.log(mod);
+            //if (!mod.models.tenantInfo) {
+                //mod.models.tenantInfo = await getModel('tenantInfo');
+            //}
+            //console.log(mod);
+            await helper.loadModel();
             setColumnInf(mod.models.tenantInfo.fields);
             reload();
         }
@@ -44,11 +48,12 @@ function TenantList() {
     const doAdd = (data,id) => {
         //const sql = `insert into tenantInfo (${columnInf.map(c => `\`${c.field}\``).join(',')}) values (${columnInf.map(f => data[f.field] || '').map(v => `'${v}'`).join(',')
         //    })`;
-        const submitData = columnInf.reduce((acc, f) => {
-            acc[f.field] = data[f.field];
-            return acc;
-        }, {});
-        sqlAdd('tenantInfo',submitData, !id).then(() => {
+        //const submitData = columnInf.reduce((acc, f) => {
+        //    acc[f.field] = data[f.field];
+        //    return acc;
+        //}, {});
+        //sqlAdd('tenantInfo',submitData, !id)
+        helper.saveData(data, id).then(() => {
             setLoading(true);
             console.log('reloading');
             reload();
@@ -60,7 +65,8 @@ function TenantList() {
 
     const doDelete = (name,id) => {
         setLoading(true);
-        sqlDelete('tenantInfo', id).then(() => {
+        //sqlDelete('tenantInfo',id)
+        helper.deleteData(id).then(() => {
             reload();
         })
     }
