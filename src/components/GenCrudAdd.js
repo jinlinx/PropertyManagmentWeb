@@ -2,16 +2,24 @@ import React, {useState} from 'react';
 import { v1 } from 'uuid';
 const GenCrudAdd = (props) => {
 
-    const { columnInfo , doAdd, onCancel}
-        = props;
-    const initData = columnInfo.reduce((acc, col) => {
-        acc[col.field] = '';
-        if (col.type === 'uuid') {
-            acc[col.field] = v1();
+    const {columnInfo,doAdd,onCancel,
+        editItem, //only available during edit
+        onError,
+    }
+        =props;
+    let id='';
+    const initData=columnInfo.reduce((acc,col) => {        
+        acc[col.field]='';        
+        if(editItem) {
+            const val=editItem[col.field];
+            acc[col.field]=val===0? 0:val||'';
+            if(col.isId) {
+                id=val;
+            }
         }
         return acc;
     }, {});
-    const requiredFields = columnInfo.filter(c => c.required).map(c=>c.field);
+    const requiredFields = columnInfo.filter(c => c.required && !c.isId).map(c=>c.field);
 
     const [data, setData] = useState(initData);
 
@@ -25,7 +33,13 @@ const GenCrudAdd = (props) => {
 
         const missed = requiredFields.filter(r => !data[r]);
         if (missed.length === 0) {
-           handleChange(e, doAdd(data));
+           handleChange(e, doAdd(data,id));
+        } else {
+            onError({
+                message: `missing required fields ${missed.length}`,
+                missed,
+            });
+            return;
         }
         onCancel();
     }

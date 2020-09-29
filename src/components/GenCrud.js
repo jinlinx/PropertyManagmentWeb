@@ -8,7 +8,8 @@ const GenCrud = (props) => {
         rows,
     } = props;
 
-    const [ dspState, setDspState ] = useState('dsp');
+    const [dspState,setDspState]=useState('dsp');
+    const [editItem,setEditItem]=useState(null);
     const columnMap = columnInfo.reduce((acc, col) => {
         acc[col.field] = col;
         return acc;
@@ -28,21 +29,25 @@ const GenCrud = (props) => {
                         <thead>
                             <tr>
                                 {
-                                    displayFields.map(name => <th>{columnMap[name].desc}</th>)
+                                    displayFields.map((name,ind) => <th key={ind}>{columnMap[name].desc}</th>)
                                 }
                             </tr>
                         </thead>
                         <tbody>
                             {rows.length > 0 ? (
-                                rows.map(row => {
+                                rows.map((row,ind) => {
                                     return (
-                                        <tr>
+                                        <tr key={ind}>
                                             {
-                                                displayFields.map(fn => <td>{row[fn]}</td>)
+                                                displayFields.map((fn,find) => <td key={find}>{row[fn]}</td>)
                                             }
                                             <td>
                                                 {idCol && <button onClick={() => props.doDelete(idCol.field, row[idCol.field])}>Delete</button>}
-                                                <button>Edit</button>
+                                                {idCol&&<button onClick={() => {
+                                                    setEditItem(row);
+                                                    setDspState('edit');
+                                                }}>Edit</button>
+                                                }
                                             </td>
                                         </tr>
                                     )
@@ -63,6 +68,10 @@ const GenCrud = (props) => {
             {
                 dspState === 'addNew' &&
                 <GenCrudAdd {...props} onCancel={()=>setDspState('dsp')}></GenCrudAdd>
+            }
+            {
+                dspState==='edit' &&
+                <GenCrudAdd {...props} editItem={editItem} idCol={idCol} onCancel={() => setDspState('dsp')}></GenCrudAdd>
             }
         </div>
     )
