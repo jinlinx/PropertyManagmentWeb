@@ -39,7 +39,7 @@ function TenantList() {
             //}
             //console.log(mod);
             await helper.loadModel();
-            setColumnInf(mod.models.tenantInfo.fields);
+            setColumnInf(helper.getModelFields());
             reload();
         }
         ld();
