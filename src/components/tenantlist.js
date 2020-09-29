@@ -41,14 +41,14 @@ function TenantList() {
         ld();
     }, []);
 
-    const doAdd = data => {
+    const doAdd = (data,id) => {
         //const sql = `insert into tenantInfo (${columnInf.map(c => `\`${c.field}\``).join(',')}) values (${columnInf.map(f => data[f.field] || '').map(v => `'${v}'`).join(',')
         //    })`;
         const submitData = columnInf.reduce((acc, f) => {
             acc[f.field] = data[f.field];
             return acc;
         }, {});
-        sqlAdd('tenantInfo',submitData, true).then(() => {
+        sqlAdd('tenantInfo',submitData, !id).then(() => {
             setLoading(true);
             console.log('reloading');
             reload();
