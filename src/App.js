@@ -7,13 +7,14 @@ import Maintaneselist from './components/maintaneselist';
 import Paymentlist from './components/paymentlist';
 import Reportlist from './components/reportlist';
 import Tenantlist from './components/tenantlist';
+import OwnerList from './components/ownerList';
 
 //
 
 function App() {
 
   const [showPage, setShowPage] = useState(0);
-  const pages = [ <Propertylist />, <Leaselist />, <Tenantlist/>, <Paymentlist/>,<Maintaneselist/>, <Reportlist/>]
+  const pages = [ <Propertylist />, <Leaselist />, <Tenantlist/>, <OwnerList/>, <Paymentlist/>,<Maintaneselist/>, <Reportlist/>]
   return (
     <div className="App" >
       
@@ -34,15 +35,18 @@ function App() {
             }}>Leases</button></td>
             <td class='topButtonTbl'><button class='blueButton' onClick={() => {
               setShowPage(3);
-            }}>Tenants</button></td>
-            <td class='topButtonTbl'><button class='blueButton' onClick={() => {
+          }}>Tenants</button></td>
+           <td class='topButtonTbl'><button class='blueButton' onClick={() => {
               setShowPage(4);
-            }}>Payments</button></td>
+            }}>Owners</button></td>
             <td class='topButtonTbl'><button class='blueButton' onClick={() => {
               setShowPage(5);
-            }}>Maintanese</button></td>
+            }}>Payments</button></td>
             <td class='topButtonTbl'><button class='blueButton' onClick={() => {
               setShowPage(6);
+            }}>Maintanese</button></td>
+            <td class='topButtonTbl'><button class='blueButton' onClick={() => {
+              setShowPage(7);
             }}>Reports</button></td>
         </tr>
 
