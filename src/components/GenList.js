@@ -53,6 +53,7 @@ function GenList(props) {
             (loading||!columnInf)? <p>Loading</p>:
                 <div>
                     <GenCrud
+                        {...props}
                         displayFields={displayFields}
                         columnInfo={
                             columnInf

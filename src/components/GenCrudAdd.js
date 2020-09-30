@@ -1,5 +1,7 @@
 import React, {useState} from 'react';
 import { v1 } from 'uuid';
+import Select from 'react-dropdown-select';
+import {createHelper} from './datahelper';
 const GenCrudAdd = (props) => {
 
     const {columnInfo,doAdd,onCancel,
@@ -22,7 +24,7 @@ const GenCrudAdd = (props) => {
     const requiredFields = columnInfo.filter(c => c.required && !c.isId).map(c=>c.field);
 
     const [data, setData] = useState(initData);
-
+    const [optsData, setOptsData] = useState({});
     const handleChange = e => {
         const {name, value} = e.target;
         setData({...data, [name]: value});
@@ -44,13 +46,43 @@ const GenCrudAdd = (props) => {
         onCancel();
     }
 
+    const optsDataReqSent = {
+
+    }
     return (
         <form>
             {
                 columnInfo.map(c => {
+                    let foreignSel = null;
+                    if (c.foreignKey) {
+                        const optKey = c.foreignKey.table;
+                        const lm = async () => {
+                            if (!optsData[optKey] && !optsDataReqSent[optKey]) {
+                                optsDataReqSent[optKey] = true;
+                                const helper = createHelper(optKey);
+                                await helper.loadModel();
+                                const optData = await helper.loadData();
+                                setOptsData({
+                                    ...optsData,
+                                    [optKey]: props.processForeignKey(c.foreignKey, optData)
+                                });
+                            }
+                        }
+                        lm();
+                        
+                        //{value:1,label:'opt1'},{value:2,label:'opt2'}
+
+                        foreignSel = <Select options={optsData[optKey]}
+                        values={['']}
+                        onChange={(value) => console.log(value)}></Select>
+                    }
                     return <div>
                         <label>{c.desc}</label>
-                        <input className="u-full-width" type="text" value={data[c.field]} name={c.field} onChange={handleChange} />
+                        {
+                        foreignSel || <input className="u-full-width" type="text" value={data[c.field]} name={c.field} onChange={handleChange} />
+                        
+                        }
+                        
                     </div>
                 })
             }
