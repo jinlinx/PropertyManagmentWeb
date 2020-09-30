@@ -48,7 +48,7 @@ function GenList(props) {
     }
     const displayFields=props.displayFields||helper.getModelFields().map(f => f.isId? null:f.field).filter(x => x);
     return <div>
-        <p class='subHeader'>List of Tenants</p>
+        <p class='subHeader'>{props.title}</p>
         {
             (loading||!columnInf)? <p>Loading</p>:
                 <div>

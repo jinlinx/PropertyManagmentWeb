@@ -1,21 +1,8 @@
-import React from 'react';
-function LeaseList() {
-    return <div>
-        <p class='subHeader'>List of Leases</p> 
-        <table class='listTable'>
-            <tr>
-                <td class='listTblCell'>House</td>
-                <td class='listTblCell'>Start Term</td>
-                <td class='listTblCell'>End Term</td>
-                <td class='listTblCell'>Deposit</td>
-                <td class='listTblCell'>Comments</td>
-                <td class='listTblCell'></td>
+import React  from 'react';
+import GenList from './GenList';
 
-            </tr>
-
-
-        </table>
-    </div>
+function LeaseList() {  
+    return <GenList table={'leaseInfo'} title={'Lease List'} /> 
 }
 
 export default LeaseList;
