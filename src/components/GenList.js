@@ -11,9 +11,9 @@ function GenList(props) {
     // ];
     const [tenants,setTenants]=useState([]);
     const [loading,setLoading]=useState(true);
-    const [columnInf,setColumnInf]=useState([]);
+    const [columnInf,setColumnInf]=useState(props.columnInfo || []);
     const reload=() => {
-        helper.loadData().then(res => {
+        helper.loadData(props.loadMapper).then(res => {
             setTenants(res);
             setLoading(false);
         });
@@ -26,7 +26,7 @@ function GenList(props) {
             setColumnInf(helper.getModelFields());
             reload();
         }
-        ld();
+        if (!props.columnInfo)ld();
     },[]);
 
     const doAdd=(data,id) => {        

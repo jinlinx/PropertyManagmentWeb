@@ -29,7 +29,7 @@ const GenCrud = (props) => {
                         <thead>
                             <tr>
                                 {
-                                    displayFields.map((name,ind) => <th key={ind}>{columnMap[name].desc}</th>)
+                                    displayFields.map((name,ind) => <th key={ind}>{columnMap[name]?columnMap[name].desc:`****Column ${name} not mapped`}</th>)
                                 }
                             </tr>
                         </thead>

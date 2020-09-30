@@ -13,9 +13,10 @@ export function createHelper(table) {
             }
             return accModel();
         },
-        loadData: async fields => {
+        loadData: async (loadMapper) => {
+            if (!loadMapper) loadMapper = (x,y) => y;
             //fields: array of field names
-            return sqlGet(table,fields||accModelFields().map(f => f.field))
+            return sqlGet(table,loadMapper('fields',accModelFields().map(f => f.field)), loadMapper('joins'))
         },
         saveData: async (data,id) => {
             const submitData=accModelFields().reduce((acc,f) => {

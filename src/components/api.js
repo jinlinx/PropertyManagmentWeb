@@ -20,13 +20,15 @@ async function getModel(name) {
     return doGetOp(`${apiBase}/getModel?name=${name}`);
 }
 
-async function sqlGet(table, field, order) {
+async function sqlGet(table, field, joins, order) {
     // "table":"tenantInfo",
     // "field":["tenantID", "firstName"],
+    // joins:[{ table:{col:als}}]
     // "order":[{"name":"tenantID", "asc": true}, {"name":"firstName"}]
     return doPostOp(`${apiBase}/sql/get`, {
         table,
         field,
+        joins,
         order,
     })
 }
