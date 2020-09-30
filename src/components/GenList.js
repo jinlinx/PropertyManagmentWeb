@@ -21,12 +21,16 @@ function GenList(props) {
 
 
     useEffect(() => {
-        const ld=async () => {            
+        const ld=async () => {                        
             await helper.loadModel();
             setColumnInf(helper.getModelFields());
+            if(props.columnInfo) {
+                setColumnInf(props.columnInfo);
+            }
             reload();
         }
-        if (!props.columnInfo)ld();
+        
+        ld();        
     },[]);
 
     const doAdd=(data,id) => {        
