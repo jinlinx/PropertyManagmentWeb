@@ -1,8 +1,15 @@
 import React  from 'react';
 import GenList from './GenList';
+import moments from 'moments';
 
 function LeaseList() {  
     return <GenList table={'leaseInfo'}
+    fieldFormatter={
+        (val, fieldName) => {
+            //if (fieldName === 'startDate' || fieldName === 'endDate') return moments(val).format('YYYY-MM-DD');
+            return val;
+            }
+        }
     processForeignKey={
         (fk, datas) => {
             return datas.map(data => {

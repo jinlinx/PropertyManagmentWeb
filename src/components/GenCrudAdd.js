@@ -91,7 +91,7 @@ const GenCrudAdd = (props) => {
                     return <div>
                         <label>{c.desc}</label>
                         {
-                        foreignSel || <input className="u-full-width" type="text" value={fieldFormatter(data[c.field])} name={c.field} onChange={handleChange} />
+                        foreignSel || <input className="u-full-width" type="text" value={fieldFormatter(data[c.field],c.field)} name={c.field} onChange={handleChange} />
                         
                         }
                         
