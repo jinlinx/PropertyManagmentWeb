@@ -7,6 +7,7 @@ const GenCrudAdd = (props) => {
     const {columnInfo,doAdd,onCancel,
         editItem, //only available during edit
         onError,
+        fieldFormatter=x=>x,
     }
         =props;
     let id='';
@@ -90,7 +91,7 @@ const GenCrudAdd = (props) => {
                     return <div>
                         <label>{c.desc}</label>
                         {
-                        foreignSel || <input className="u-full-width" type="text" value={data[c.field]} name={c.field} onChange={handleChange} />
+                        foreignSel || <input className="u-full-width" type="text" value={fieldFormatter(data[c.field])} name={c.field} onChange={handleChange} />
                         
                         }
                         
