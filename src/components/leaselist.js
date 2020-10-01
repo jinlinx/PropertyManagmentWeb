@@ -1,12 +1,12 @@
 import React  from 'react';
 import GenList from './GenList';
-import moments from 'moments';
+import moment from 'moment';
 
 function LeaseList() {  
     return <GenList table={'leaseInfo'}
     fieldFormatter={
         (val, fieldName) => {
-            //if (fieldName === 'startDate' || fieldName === 'endDate') return moments(val).format('YYYY-MM-DD');
+            if (fieldName === 'startDate' || fieldName === 'endDate') return moment(val).format('YYYY-MM-DD');
             return val;
             }
         }

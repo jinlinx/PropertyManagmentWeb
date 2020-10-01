@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import { v1 } from 'uuid';
 import Select from 'react-dropdown-select';
 import {createHelper} from './datahelper';
+import get from 'lodash/get';
 const GenCrudAdd = (props) => {
 
     const {columnInfo,doAdd,onCancel,
@@ -73,8 +73,13 @@ const GenCrudAdd = (props) => {
                         
                         //{value:1,label:'opt1'},{value:2,label:'opt2'}
 
-                        foreignSel = <Select options={optsData[optKey]}
-                        values={['']}
+                        let selected={};
+                        const options=optsData[optKey];
+                        if(options) {
+                            selected=options.filter(o => o.value===get(data,c.field))[0]||{};
+                        }
+                        foreignSel=<Select options={options} searchBy={'name'}
+                            values={[selected]}
                             onChange={(value) => {
                                 console.log(value);
                                 if(value[0]) {
