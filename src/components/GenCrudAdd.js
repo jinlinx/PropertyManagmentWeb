@@ -74,7 +74,18 @@ const GenCrudAdd = (props) => {
 
                         foreignSel = <Select options={optsData[optKey]}
                         values={['']}
-                        onChange={(value) => console.log(value)}></Select>
+                            onChange={(value) => {
+                                console.log(value);
+                                if(value[0]) {
+                                    handleChange({
+                                        target: {
+                                            name: c.field,
+                                            value: value[0].value,
+                                        }
+                                    })
+                                }
+                            }
+                            }></Select>
                     }
                     return <div>
                         <label>{c.desc}</label>
