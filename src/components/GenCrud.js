@@ -71,7 +71,7 @@ const GenCrud = (props) => {
                                     )
                                 })
                             ) : (
-                                    <tr>
+                                    <tr key='a'>
                                         <td colSpan={displayFieldsStripped.length + 1}>No Data found</td>
                                     </tr>
                                 )

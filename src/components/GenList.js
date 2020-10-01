@@ -31,7 +31,7 @@ function GenList(props) {
         }
         
         ld();        
-    },[]);
+    },[props.columnInfo]);
 
     const doAdd=(data,id) => {        
         helper.saveData(data,id).then(() => {
@@ -52,7 +52,7 @@ function GenList(props) {
     }
     const displayFields=props.displayFields||helper.getModelFields().map(f => f.isId? null:f).filter(x => x);
     return <div>
-        <p class='subHeader'>{props.title}</p>
+        <p className='subHeader'>{props.title}</p>
         {
             (loading||!columnInf)? <p>Loading</p>:
                 <div>
