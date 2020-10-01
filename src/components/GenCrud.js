@@ -10,7 +10,7 @@ const GenCrud = (props) => {
 
     const [dspState,setDspState]=useState('dsp');
     const [editItem,setEditItem]=useState(null);
-    const columnMap = columnInfo.reduce((acc, col) => {
+    const columnMap = (displayFields||columnInfo).reduce((acc, col) => {
         acc[col.field] = col;
         return acc;
     }, {});
@@ -29,7 +29,7 @@ const GenCrud = (props) => {
                         <thead>
                             <tr>
                                 {
-                                    displayFields.map((name,ind) => <th key={ind}>{columnMap[name]?columnMap[name].desc:`****Column ${name} not mapped`}</th>)
+                                    displayFields.map((name,ind) => <th key={ind}>{columnMap[name.field]?columnMap[name.field].desc:`****Column ${JSON.stringify(name)} not mapped`}</th>)
                                 }
                             </tr>
                         </thead>
@@ -39,7 +39,7 @@ const GenCrud = (props) => {
                                     return (
                                         <tr key={ind}>
                                             {
-                                                displayFields.map((fn,find) => <td key={find}>{row[fn]}</td>)
+                                                displayFields.map((fn,find) => <td key={find}>{row[fn.field]}</td>)
                                             }
                                             <td>
                                                 {idCol && <button onClick={() => props.doDelete(idCol.field, row[idCol.field])}>Delete</button>}

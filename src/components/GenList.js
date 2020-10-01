@@ -50,7 +50,7 @@ function GenList(props) {
             reload();
         })
     }
-    const displayFields=props.displayFields||helper.getModelFields().map(f => f.isId? null:f.field).filter(x => x);
+    const displayFields=props.displayFields||helper.getModelFields().map(f => f.isId? null:f).filter(x => x);
     return <div>
         <p class='subHeader'>{props.title}</p>
         {
