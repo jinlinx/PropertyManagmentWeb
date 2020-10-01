@@ -1,14 +1,14 @@
 import React from 'react';
 import GenList from './GenList';
 import moment from 'moment';
+import {fmtDate} from './util';
 
 function PaymentList() {
     return <GenList table={'rentPaymentInfo'}
         fieldFormatter={
             (val,fieldName) => {
                 if(fieldName==='receivedDate') {
-                    if(!val) return '';
-                    return moment(val).format('YYYY-MM-DD');
+                    return fmtDate(val);
                 }
                 return val;
             }

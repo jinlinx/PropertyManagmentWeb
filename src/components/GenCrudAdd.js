@@ -7,7 +7,7 @@ const GenCrudAdd = (props) => {
     const {columnInfo,doAdd,onCancel,
         editItem, //only available during edit
         onError,
-        fieldFormatter=x=>x,
+        fieldFormatter,
     }
         =props;
     let id='';

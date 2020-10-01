@@ -5,6 +5,7 @@ const GenCrud = (props) => {
     const {
         columnInfo,
         displayFields,
+        fieldFormatter= x=>x,
         rows,
     } = props;
 
@@ -56,7 +57,7 @@ const GenCrud = (props) => {
                                     return (
                                         <tr key={ind}>
                                             {
-                                                displayFieldsStripped.map((fn,find) => <td key={find}>{row[fn]}</td>)
+                                                displayFieldsStripped.map((fn,find) => <td key={find}>{fieldFormatter(row[fn], fn)}</td>)
                                             }
                                             <td>
                                                 {idCol && <button onClick={() => props.doDelete(idCol.field, row[idCol.field])}>Delete</button>}
