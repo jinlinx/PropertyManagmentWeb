@@ -1,7 +1,7 @@
 //import { get } from 'superagent';
 
-//const apiBase = 'http://192.168.1.119:8081';
-const apiBase='http://localhost:8081';
+const apiBase = 'http://192.168.1.119:8081';
+//const apiBase='http://localhost:8081';
 const getUrl = sql => `${apiBase}/doQuery?sql=${sql}`;
 const request = require('superagent');
 const get = require('lodash/get');
