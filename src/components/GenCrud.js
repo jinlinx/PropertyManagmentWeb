@@ -9,11 +9,28 @@ const GenCrud = (props) => {
     } = props;
 
     const [dspState,setDspState]=useState('dsp');
-    const [editItem,setEditItem]=useState(null);
-    const columnMap = (displayFields||columnInfo).reduce((acc, col) => {
+    const [editItem, setEditItem] = useState(null);
+    const baseColumnMap = columnInfo.reduce((acc, col) => {
         acc[col.field] = col;
         return acc;
     }, {});
+    const columnMap = displayFields.reduce((acc, col) => {
+        let val = col;
+        let field = col;
+        if (typeof col === 'string') {
+            val = baseColumnMap[col] || displayFields[col] || {desc:`****Col ${col} not setup`};
+        } else {
+            field = col.field;
+        }
+        acc[field] = val;
+        return acc;
+    }, {});
+
+    const displayFieldsStripped = displayFields.map(f => {
+        if (typeof f === 'string') return f;
+        if (!f.field) return `*** Field ${f}.field is empty`;
+        return f.field;
+    });
 
     const idCol = columnInfo.filter(c => c.isId)[0];
 
@@ -29,7 +46,7 @@ const GenCrud = (props) => {
                         <thead>
                             <tr>
                                 {
-                                    displayFields.map((name,ind) => <th key={ind}>{columnMap[name.field]?columnMap[name.field].desc:`****Column ${JSON.stringify(name)} not mapped`}</th>)
+                                    displayFieldsStripped.map((name,ind) => <th key={ind}>{columnMap[name]?columnMap[name].desc:`****Column ${JSON.stringify(name)} not mapped`}</th>)
                                 }
                             </tr>
                         </thead>
@@ -39,7 +56,7 @@ const GenCrud = (props) => {
                                     return (
                                         <tr key={ind}>
                                             {
-                                                displayFields.map((fn,find) => <td key={find}>{row[fn.field]}</td>)
+                                                displayFieldsStripped.map((fn,find) => <td key={find}>{row[fn]}</td>)
                                             }
                                             <td>
                                                 {idCol && <button onClick={() => props.doDelete(idCol.field, row[idCol.field])}>Delete</button>}
@@ -54,7 +71,7 @@ const GenCrud = (props) => {
                                 })
                             ) : (
                                     <tr>
-                                        <td colSpan={displayFields.length + 1}>No Data found</td>
+                                        <td colSpan={displayFieldsStripped.length + 1}>No Data found</td>
                                     </tr>
                                 )
                             }
