@@ -2,7 +2,7 @@ import React , { useState } from 'react';
 import './App.css';
 import Propertylist from './components/propertylist';
 import Leaselist from './components/leaselist';
-import Maintaneselist from './components/maintaneselist';
+import WorkerList from './components/workerList';
 import Paymentlist from './components/paymentlist';
 import Reportlist from './components/reportlist';
 import Tenantlist from './components/tenantlist';
@@ -26,7 +26,7 @@ function App() {
     },
     {control: <OwnerList />,desc: 'Owners'},
     {control: <Paymentlist />,desc: 'Payments'},
-    {Control: <Maintaneselist />,desc: 'Maintance'},
+    {control: <WorkerList />,desc: 'Worker'},
     {control: <Reportlist />,desc: 'Reports'},
   ]  
   return (
