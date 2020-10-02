@@ -54,6 +54,9 @@ const GenCrudAdd = (props) => {
         <form>
             {
                 columnInfo.map(c => {
+                    if(!editItem) {
+                        if(c.isId) return null;
+                    }
                     let foreignSel = null;
                     if (c.foreignKey) {
                         const optKey = c.foreignKey.table;

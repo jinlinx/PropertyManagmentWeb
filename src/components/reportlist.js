@@ -1,5 +1,4 @@
 import React from 'react';
-import { getData } from './api';
 
 function ReportList() {
     return <div>

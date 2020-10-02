@@ -71,7 +71,7 @@ const GenCrud = (props) => {
                                     )
                                 })
                             ) : (
-                                    <tr>
+                                    <tr key='a'>
                                         <td colSpan={displayFieldsStripped.length + 1}>No Data found</td>
                                     </tr>
                                 )
@@ -85,11 +85,11 @@ const GenCrud = (props) => {
 
             {
                 dspState === 'addNew' &&
-                <GenCrudAdd {...props} onCancel={()=>setDspState('dsp')}></GenCrudAdd>
+                <GenCrudAdd {...props} fieldFormatter={fieldFormatter} onCancel={()=>setDspState('dsp')}></GenCrudAdd>
             }
             {
                 dspState==='edit' &&
-                <GenCrudAdd {...props} editItem={editItem} idCol={idCol} onCancel={() => setDspState('dsp')}></GenCrudAdd>
+                <GenCrudAdd {...props} fieldFormatter={fieldFormatter} editItem={editItem} idCol={idCol} onCancel={() => setDspState('dsp')}></GenCrudAdd>
             }
         </div>
     )

@@ -1,6 +1,5 @@
 import React  from 'react';
 import GenList from './GenList';
-import moment from 'moment';
 import {fmtDate} from './util';
 
 function LeaseList() {  
