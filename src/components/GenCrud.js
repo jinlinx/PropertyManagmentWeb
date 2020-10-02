@@ -89,7 +89,7 @@ const GenCrud = (props) => {
             }
             {
                 dspState==='edit' &&
-                <GenCrudAdd {...props} editItem={editItem} idCol={idCol} onCancel={() => setDspState('dsp')}></GenCrudAdd>
+                <GenCrudAdd {...props} fieldFormatter={fieldFormatter} editItem={editItem} idCol={idCol} onCancel={() => setDspState('dsp')}></GenCrudAdd>
             }
         </div>
     )
