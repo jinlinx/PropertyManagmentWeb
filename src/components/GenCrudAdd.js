@@ -7,7 +7,6 @@ const GenCrudAdd = (props) => {
     const {columnInfo,doAdd,onCancel,
         editItem, //only available during edit
         onError,
-        fieldFormatter,
         customSelData,
         customFields={},
     }
@@ -105,10 +104,11 @@ const GenCrudAdd = (props) => {
                     if ( custFieldType==='custom_select' ) {
                         foreignSel=createSelection( c.field, c.field );
                     }
+                    const fieldFormatter=c.dspFunc||(x => x);
                     return <div key={cind}>
                         <label>{c.desc}</label>
                         {
-                        foreignSel || <input className="u-full-width" type="text" value={fieldFormatter(data[c.field],c.field)} name={c.field} onChange={handleChange} />
+                            foreignSel||<input className="u-full-width" type="text" value={fieldFormatter(data[c.field])} name={c.field} onChange={handleChange} />
                         
                         }
                         
