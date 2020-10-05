@@ -3,6 +3,7 @@ import './App.css';
 import Propertylist from './components/propertylist';
 import Leaselist from './components/leaselist';
 import WorkerList from './components/workerList';
+import WorkerCompList from './components/workerCompList';
 import Paymentlist from './components/paymentlist';
 import Reportlist from './components/reportlist';
 import Tenantlist from './components/tenantlist';
@@ -26,7 +27,8 @@ function App() {
     },
     {control: <OwnerList />,desc: 'Owners'},
     {control: <Paymentlist />,desc: 'Payments'},
-    {control: <WorkerList />,desc: 'Worker'},
+    {control: <WorkerList />, desc: 'Worker'},
+    {control: <WorkerCompList />, desc: 'Worker Comp'},
     {control: <Reportlist />,desc: 'Reports'},
   ]  
   return (
