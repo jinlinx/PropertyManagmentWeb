@@ -11,12 +11,12 @@ function WorkerCompList() {
         customSelData={
             {
                 type: [
-                    {name: 'percent', label: 'By Percent'},
-                    {name: 'amount', label: 'Fixed Amount'},
+                    {value: 'percent', label: 'By Percent'},
+                    {value: 'amount', label: 'Fixed Amount'},
                 ],
                 schedule: [
-                    {name: 'monthly', label: 'At begining of month'},
-                    {name: 'weekly', label: 'Weekly'},
+                    {value: 'monthly', label: 'At begining of month'},
+                    {value: 'weekly', label: 'Weekly'},
                 ]
             }
         }
@@ -30,12 +30,21 @@ function WorkerCompList() {
         }
         processForeignKey={
             ( fk, datas ) => {
-                return datas.map( data => {
-                    return {
-                        value: data[ fk.field ],
-                        label: data[ 'comment' ],
-                    }
-                } )
+                if ( fk.table==='leaseInfo'&&fk.field==='leaseID' ) {
+                    return datas.map( data => {
+                        return {
+                            value: data[ fk.field ],
+                            label: data[ 'comment' ],
+                        }
+                    } );
+                } else if ( fk.table==='workerInfo'&&fk.field==='workerID' ) {
+                    return datas.map( data => {
+                        return {
+                            value: data[ fk.field ],
+                            label: data[ 'firstName' ]+' '+data[ 'lastName' ],
+                        }
+                    } );
+                }
             }
         }
         displayFields={
