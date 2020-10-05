@@ -74,6 +74,10 @@ const GenCrud = (props) => {
                                                             }
                                                         }
                                                     }
+                                                    const dspFunc=columnMap[ fn ].dspFunc;
+                                                    if ( dspFunc ) {
+                                                        dsp=dspFunc( fn, row );
+                                                    }
                                                     return <td key={find}>{fieldFormatter( dsp, fn )}</td>
                                                 } )
                                             }
