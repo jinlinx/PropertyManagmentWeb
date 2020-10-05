@@ -49,8 +49,10 @@ function WorkerCompList() {
         }
         displayFields={
             //actualy don't need to do this
-            [
+            [                
                 {field: 'id', desc: 'ID', },
+                {field: 'type', desc: 'Type', },
+                {field: 'schedule', desc: 'Schedule', },
                 {field: 'amount', desc: 'Amount', },
                 {field: 'leaseComment', desc: 'Lease', },
                 {field: 'workerFirstName', desc: 'Worker', },

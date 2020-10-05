@@ -7,6 +7,8 @@ const GenCrud = (props) => {
         displayFields,
         fieldFormatter= x=>x,
         rows,
+        customSelData,
+        customFields={},
     } = props;
 
     const [dspState,setDspState]=useState('dsp');
@@ -57,7 +59,23 @@ const GenCrud = (props) => {
                                     return (
                                         <tr key={ind}>
                                             {
-                                                displayFieldsStripped.map((fn,find) => <td key={find}>{fieldFormatter(row[fn], fn)}</td>)
+                                                displayFieldsStripped.map( ( fn, find ) => {
+                                                    const custFieldType=customFields[ fn ];
+                                                    let val=row[ fn ]
+                                                    let dsp=val;
+                                                    if ( custFieldType==='custom_select' ) {
+                                                        dsp=customSelData[ fn ];
+                                                        if ( !dsp||!dsp.filter ) dsp=`***** unmapped field ${fn}`;
+                                                        else {
+                                                            dsp=dsp.filter( d => d.value==val )[ 0 ];
+                                                            if ( !dsp ) dsp=`**** field ${fn} value ${val} not mapped`;
+                                                            else {
+                                                                dsp=dsp.label;
+                                                            }
+                                                        }
+                                                    }
+                                                    return <td key={find}>{fieldFormatter( dsp, fn )}</td>
+                                                } )
                                             }
                                             <td>
                                                 {idCol && <button onClick={() => props.doDelete(idCol.field, row[idCol.field])}>Delete</button>}
