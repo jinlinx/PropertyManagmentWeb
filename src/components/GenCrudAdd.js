@@ -8,6 +8,8 @@ const GenCrudAdd = (props) => {
         editItem, //only available during edit
         onError,
         fieldFormatter,
+        customSelData,
+        customFields={},
     }
         =props;
     let id='';
@@ -25,7 +27,7 @@ const GenCrudAdd = (props) => {
     const requiredFields = columnInfo.filter(c => c.required && !c.isId).map(c=>c.field);
 
     const [data, setData] = useState(initData);
-    const [optsData, setOptsData] = useState({});
+    const [ optsData, setOptsData ]=useState( customSelData||{} );
     const handleChange = e => {
         const {name, value} = e.target;
         setData({...data, [name]: value});
@@ -53,11 +55,32 @@ const GenCrudAdd = (props) => {
     return (
         <form>
             {
-                columnInfo.map(c => {
+                columnInfo.map( ( c, cind ) => {
                     if(!editItem) {
                         if(c.isId) return null;
-                    }
-                    let foreignSel = null;
+                    }                    
+
+                    const createSelection=( optName, colField ) => {
+                        let selected={};
+                        const options=optsData[ optName ];
+                        if ( options ) {
+                            selected=options.filter( o => o.value===get( data, colField ) )[ 0 ]||{};
+                        }
+                        return <Select options={options} searchBy={'name'}
+                            values={[ selected ]}
+                            onChange={( value ) => {
+                                if ( value[ 0 ] ) {
+                                    handleChange( {
+                                        target: {
+                                            name: colField,
+                                            value: value[ 0 ].value,
+                                        }
+                                    } )
+                                }
+                            }
+                            }></Select>
+                    };
+                    let foreignSel=null;
                     if (c.foreignKey) {
                         const optKey = c.foreignKey.table;
                         const lm = async () => {
@@ -75,28 +98,14 @@ const GenCrudAdd = (props) => {
                         lm();
                         
                         //{value:1,label:'opt1'},{value:2,label:'opt2'}
-
-                        let selected={};
-                        const options=optsData[optKey];
-                        if(options) {
-                            selected=options.filter(o => o.value===get(data,c.field))[0]||{};
-                        }
-                        foreignSel=<Select options={options} searchBy={'name'}
-                            values={[selected]}
-                            onChange={(value) => {
-                                console.log(value);
-                                if(value[0]) {
-                                    handleChange({
-                                        target: {
-                                            name: c.field,
-                                            value: value[0].value,
-                                        }
-                                    })
-                                }
-                            }
-                            }></Select>
+                        
+                        foreignSel=createSelection( optKey, c.field );
                     }
-                    return <div>
+                    const custFieldType=customFields[ c.field ];
+                    if ( custFieldType==='custom_select' ) {
+                        foreignSel=createSelection( c.field, c.field );
+                    }
+                    return <div key={cind}>
                         <label>{c.desc}</label>
                         {
                         foreignSel || <input className="u-full-width" type="text" value={fieldFormatter(data[c.field],c.field)} name={c.field} onChange={handleChange} />
