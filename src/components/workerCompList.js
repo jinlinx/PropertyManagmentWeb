@@ -55,8 +55,7 @@ function WorkerCompList() {
                 {field: 'schedule', desc: 'Schedule', },
                 {field: 'amount', desc: 'Amount', },
                 {field: 'leaseComment', desc: 'Lease', },
-                {field: 'workerFirstName', desc: 'Worker', },
-                {field: 'workerLastName', desc: 'Worker', },
+                {field: 'workerFirstName', desc: 'Worker', dspFunc: ( field, row ) => `${row[ 'workerFirstName' ]} ${row[ 'workerLastName' ]}`},
                 //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
             ]
         }
