@@ -44,7 +44,7 @@ function GenList(props) {
         });
     }
 
-    const doDelete=id => {
+    const doDelete=( field, id ) => {
         setLoading(true);
         helper.deleteData(id).then(() => {
             reload();
