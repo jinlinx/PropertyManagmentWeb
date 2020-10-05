@@ -20,14 +20,7 @@ function WorkerCompList() {
                 ]
             }
         }
-        fieldFormatter={
-            ( val, fieldName ) => {
-                if ( fieldName==='created'||fieldName==='modified' ) {
-                    return fmtDate( val );
-                }
-                return val;
-            }
-        }
+
         processForeignKey={
             ( fk, datas ) => {
                 if ( fk.table==='leaseInfo'&&fk.field==='leaseID' ) {
@@ -55,7 +48,7 @@ function WorkerCompList() {
                 {field: 'schedule', desc: 'Schedule', },
                 {field: 'amount', desc: 'Amount', },
                 {field: 'leaseComment', desc: 'Lease', },
-                {field: 'workerFirstName', desc: 'Worker', dspFunc: ( field, row ) => `${row[ 'workerFirstName' ]} ${row[ 'workerLastName' ]}`},
+                { field: 'workerFirstName', desc: 'Worker', dspFunc: (v, row) => `${v} ${row['workerLastName']}` },
                 //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
             ]
         }

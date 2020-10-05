@@ -4,12 +4,6 @@ import {fmtDate} from './util';
 
 function LeaseList() {  
     return <GenList table={'leaseInfo'}
-    fieldFormatter={
-        (val, fieldName) => {
-            if (fieldName === 'startDate' || fieldName === 'endDate') return fmtDate(val);
-            return val;
-            }
-        }
     processForeignKey={
         (fk, datas) => {
             return datas.map(data => {
@@ -24,8 +18,8 @@ displayFields={
         //actualy don't need to do this
         [
             { field: 'deposit', desc: 'Deposit',  },
-            { field: 'endDate', desc: 'End Date', },
-            { field: 'startDate', desc: 'Start Date',  },
+        { field: 'endDate', desc: 'End Date', dspFunc: fmtDate },
+        { field: 'startDate', desc: 'Start Date', dspFunc: fmtDate },
             { field: 'houseAddress', desc: 'House'},
             { field: 'comment', desc: 'Comment' },
             { field: 'monthlyRent', desc: 'Monthly Rent' },

@@ -1,17 +1,9 @@
 import React from 'react';
 import GenList from './GenList';
-import {fmtDate} from './util';
+import { fmtDate } from './util';
 
 function PaymentList() {
     return <GenList table={'rentPaymentInfo'}
-        fieldFormatter={
-            (val,fieldName) => {
-                if(fieldName==='receivedDate') {
-                    return fmtDate(val);
-                }
-                return val;
-            }
-        }
         processForeignKey={
             (fk,datas) => {
                 return datas.map(data => {
@@ -25,7 +17,9 @@ function PaymentList() {
         displayFields={
             //actualy don't need to do this
             [
-                {field: 'receivedDate',desc: 'Date Received',},
+                {
+                    field: 'receivedDate', desc: 'Date Received', dspFunc: fmtDate
+                },
                 {field: 'receivedAmount',desc: 'Received Amount',},
                 {field: 'paidBy',desc: 'Paid By',},
                 {field:'leaseComment', desc:'Lease'}

@@ -5,7 +5,6 @@ const GenCrud = (props) => {
     const {
         columnInfo,
         displayFields,
-        fieldFormatter= x=>x,
         rows,
         customSelData,
         customFields={},
@@ -76,9 +75,9 @@ const GenCrud = (props) => {
                                                     }
                                                     const dspFunc=columnMap[ fn ].dspFunc;
                                                     if ( dspFunc ) {
-                                                        dsp=dspFunc( fn, row );
+                                                        dsp=dspFunc(val, row);
                                                     }
-                                                    return <td key={find}>{fieldFormatter( dsp, fn )}</td>
+                                                    return <td key={find}>{dsp}</td>
                                                 } )
                                             }
                                             <td>
@@ -107,11 +106,11 @@ const GenCrud = (props) => {
 
             {
                 dspState === 'addNew' &&
-                <GenCrudAdd {...props} fieldFormatter={fieldFormatter} onCancel={()=>setDspState('dsp')}></GenCrudAdd>
+                <GenCrudAdd {...props} onCancel={() => setDspState('dsp')}></GenCrudAdd>
             }
             {
                 dspState==='edit' &&
-                <GenCrudAdd {...props} fieldFormatter={fieldFormatter} editItem={editItem} idCol={idCol} onCancel={() => setDspState('dsp')}></GenCrudAdd>
+                <GenCrudAdd {...props} editItem={editItem} idCol={idCol} onCancel={() => setDspState('dsp')}></GenCrudAdd>
             }
         </div>
     )
