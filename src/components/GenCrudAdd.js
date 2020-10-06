@@ -1,10 +1,11 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import Select from 'react-dropdown-select';
 import {createHelper} from './datahelper';
 import get from 'lodash/get';
-const GenCrudAdd = (props) => {
 
-    const {columnInfo,doAdd,onCancel,
+const GenCrudAdd=(props) => {
+
+    const { columnInfo, doAdd, onCancel,
         editItem, //only available during edit
         onError,
         customSelData,
@@ -12,32 +13,32 @@ const GenCrudAdd = (props) => {
     }
         =props;
     let id='';
-    const initData=columnInfo.reduce((acc,col) => {        
-        acc[col.field]='';        
-        if(editItem) {
+    const initData=columnInfo.reduce((acc, col) => {
+        acc[col.field]='';
+        if (editItem) {
             const val=editItem[col.field];
             acc[col.field]=val===0? 0:val||'';
-            if(col.isId) {
+            if (col.isId) {
                 id=val;
             }
         }
         return acc;
     }, {});
-    const requiredFields = columnInfo.filter(c => c.required && !c.isId).map(c=>c.field);
+    const requiredFields=columnInfo.filter(c => c.required&&!c.isId).map(c => c.field);
 
-    const [data, setData] = useState(initData);
-    const [ optsData, setOptsData ]=useState( customSelData||{} );
-    const handleChange = e => {
-        const {name, value} = e.target;
-        setData({...data, [name]: value});
+    const [data, setData]=useState(initData);
+    const [optsData, setOptsData]=useState(customSelData||{});
+    const handleChange=e => {
+        const { name, value }=e.target;
+        setData({ ...data, [name]: value });
     }
 
-    const handleSubmit = e => {
+    const handleSubmit=e => {
         e.preventDefault();
 
-        const missed = requiredFields.filter(r => !data[r]);
-        if (missed.length === 0) {
-           handleChange(e, doAdd(data,id));
+        const missed=requiredFields.filter(r => !data[r]);
+        if (missed.length===0) {
+            handleChange(e, doAdd(data, id));
         } else {
             onError({
                 message: `missing required fields ${missed.length}`,
@@ -48,9 +49,34 @@ const GenCrudAdd = (props) => {
         onCancel();
     }
 
-    const optsDataReqSent = {
+    const optsDataReqSent={
 
     }
+
+    useEffect(() => {
+        async function doLoads() {
+            let cur=optsData;;
+            for (let i=0; i<columnInfo.length; i++) {
+                const c=columnInfo[i];
+                if (c.foreignKey) {
+                    const optKey=c.foreignKey.table;
+
+                    if (!optsData[optKey]) {
+                        const helper=createHelper(optKey);
+                        await helper.loadModel();
+                        const optData=await helper.loadData();
+                        cur=Object.assign({}, cur, {
+                            [optKey]: props.processForeignKey(c.foreignKey, optData)
+                        });
+                    }
+                }
+            }
+
+            setOptsData(cur);
+            
+        }
+        doLoads();
+    }, []);
     return (
         <form>
             {
@@ -94,7 +120,7 @@ const GenCrudAdd = (props) => {
                                 });
                             }
                         }
-                        lm();
+                        //lm();
                         
                         //{value:1,label:'opt1'},{value:2,label:'opt2'}
                         
