@@ -2,7 +2,7 @@
 
 const apiBase = 'http://192.168.1.119:8081';
 //const apiBase='http://localhost:8081';
-const getUrl = sql => `${apiBase}/doQuery?sql=${sql}`;
+const getUrl=path => `${apiBase}/${path}`;
 const request = require('superagent');
 const get = require('lodash/get');
 

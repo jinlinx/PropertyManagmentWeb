@@ -1,6 +1,6 @@
 import React from 'react';
 import GenList from './GenList';
-import {fmtDate} from './util';
+import { getData } from './api';
 
 function WorkerCompList() {
     return <GenList table={'workerComp'}
@@ -75,4 +75,13 @@ function WorkerCompList() {
         title={'Worker Comp List'} />
 }
 
-export default WorkerCompList;
+function WorkerCompListTop() {
+    return <div>
+        <div><button onClick={() => getData('calc/calc')}>Calc</button>
+            <button onClick={() => getData('calc/settle')}>Settle</button>
+        </div>
+        <WorkerCompList />
+    </div>
+}
+
+export default WorkerCompListTop;
