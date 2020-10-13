@@ -69,8 +69,9 @@ const GenCrud = (props) => {
                 name: field,
                 shortDesc,
             };
-            sort.shortDesc = getShortDesc(sort.op);
+            
             sort.op = opToNext[fieldSort.op || ''];
+            sort.shortDesc = getShortDesc(sort.op);
             if (!fieldSortFound) {
                 set(pageProps, [table, 'sorts'], fieldSorts);
                 fieldSorts.push(sort);
