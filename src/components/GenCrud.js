@@ -73,8 +73,8 @@ const GenCrud = (props) => {
             sort.op = opToNext[fieldSort.op || ''];
             sort.shortDesc = getShortDesc(sort.op);
             if (!fieldSortFound) {
-                set(pageProps, [table, 'sorts'], fieldSorts);
                 fieldSorts.push(sort);
+                set(pageProps, [table, 'sorts'], fieldSorts.filter(s=>s.op));
             }
             setPageProps(Object.assign({}, pageProps, {reloadCount: (pageProps.reloadCount || 0)+1}));
         }
