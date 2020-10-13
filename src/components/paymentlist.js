@@ -2,8 +2,10 @@ import React from 'react';
 import GenList from './GenList';
 import { fmtDate } from './util';
 
-function PaymentList() {
-    return <GenList table={'rentPaymentInfo'}
+function PaymentList(props) {
+    return <GenList 
+    {...props}
+    table={'rentPaymentInfo'}    
         processForeignKey={
             (fk,datas) => {
                 return datas.map(data => {

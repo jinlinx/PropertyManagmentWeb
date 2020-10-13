@@ -2,8 +2,10 @@ import React from 'react';
 import GenList from './GenList';
 import { getData } from './api';
 
-function WorkerCompList() {
-    return <GenList table={'workerComp'}
+function WorkerCompList(props) {
+    return <GenList 
+    {...props}
+    table={'workerComp'}
         customFields={{
             type: 'custom_select',
             schedule: 'custom_select',

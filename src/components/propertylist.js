@@ -1,8 +1,10 @@
 import React from 'react';
 import GenList from './GenList';
 
-function HouseList() {   
+function HouseList(props) {   
+    //const {pageProps, setPageProps} = props.pageState;
     return <GenList table={'houseInfo'}
+    {...props}
         processForeignKey={
             (fk, datas) => {
                 return datas.map(data => {

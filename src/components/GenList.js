@@ -4,16 +4,17 @@ import {createHelper} from './datahelper';
 
 //props: table and displayFields [fieldNames]
 function GenList(props) {
-    const helper=createHelper(props.table);
+    const {table, columnInfo, loadMapper, pageState } = props;
+    const helper=createHelper(table);
     // [
     //     { field: 'tenantID', desc: 'Id', type: 'uuid', required: true, isId: true },
     //     { field: 'dadPhone', desc: 'Dad Phone', },
     // ];
     const [tenants,setTenants]=useState([]);
     const [loading,setLoading]=useState(true);
-    const [columnInf,setColumnInf]=useState(props.columnInfo || []);
+    const [columnInf,setColumnInf]=useState(columnInfo || []);
     const reload=() => {
-        helper.loadData(props.loadMapper).then(res => {
+        helper.loadData(loadMapper).then(res => {
             const {rows, total} = res;
             setTenants(rows);
             setLoading(false);
@@ -25,14 +26,14 @@ function GenList(props) {
         const ld=async () => {                        
             await helper.loadModel();
             setColumnInf(helper.getModelFields());
-            if(props.columnInfo) {
-                setColumnInf(props.columnInfo);
+            if(columnInfo) {
+                setColumnInf(columnInfo);
             }
             reload();
         }
         
         ld();        
-    },[props.columnInfo]);
+    },[columnInfo]);
 
     const doAdd=(data,id) => {        
         helper.saveData(data,id).then(() => {

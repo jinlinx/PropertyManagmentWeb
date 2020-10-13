@@ -14,22 +14,23 @@ import OwnerList from './components/ownerList';
 function App() {
 
   const [showPage, setShowPage] = useState(0);
+  const [pageProps, setPageProps] = useState({});
   const pages=[
     {
       control:
-        <Propertylist />,
+        <Propertylist  pageState={pageProps, setPageProps} />,
       desc: 'Houses'
     },
-    {control: <Leaselist />,desc: 'Leases'},
+    {control: <Leaselist pageState={pageProps, setPageProps}/>,desc: 'Leases'},
     {
-      control: <Tenantlist />,
+      control: <Tenantlist pageState={pageProps, setPageProps} />,
       desc: 'Tenants'
     },
-    {control: <OwnerList />,desc: 'Owners'},
-    {control: <Paymentlist />,desc: 'Payments'},
-    {control: <WorkerList />, desc: 'Worker'},
-    {control: <WorkerCompList />, desc: 'Worker Comp'},
-    {control: <Reportlist />,desc: 'Reports'},
+    {control: <OwnerList  pageState={pageProps, setPageProps}/>,desc: 'Owners'},
+    {control: <Paymentlist pageState={pageProps, setPageProps} />,desc: 'Payments'},
+    {control: <WorkerList pageState={pageProps, setPageProps} />, desc: 'Worker'},
+    {control: <WorkerCompList pageState={pageProps, setPageProps} />, desc: 'Worker Comp'},
+    {control: <Reportlist pageState={pageProps, setPageProps} />,desc: 'Reports'},
   ]  
   return (
     <div className="App" >
