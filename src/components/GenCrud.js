@@ -1,5 +1,8 @@
 import React, {useState} from 'react';
 import GenCrudAdd from './GenCrudAdd';
+import get from 'lodash/get';
+import set from 'lodash/set';
+import { getPageSorts } from './util';
 
 const GenCrud = (props) => {
     const {
@@ -7,11 +10,14 @@ const GenCrud = (props) => {
         displayFields,
         rows,
         customSelData,
-        customFields={},
+        customFields = {},
+        pageState,
+        table,
     } = props;
 
     const [dspState,setDspState]=useState('dsp');
     const [editItem, setEditItem] = useState(null);
+    const { pageProps, setPageProps } = pageState;
     const baseColumnMap = columnInfo.reduce((acc, col) => {
         acc[col.field] = col;
         return acc;
@@ -39,6 +45,40 @@ const GenCrud = (props) => {
     const addNew = () => {
         setDspState('addNew');
     }
+
+    const getFieldSort = field => {
+        const opToDesc = {
+            'asc': 'AS',
+            'desc': 'DS',
+        };
+        const opToNext = {
+            'asc': 'desc',
+            'desc': '',
+            '': 'asc',
+        }
+        const fieldFilter = get(pageProps, [table, field, 'filter']) || {};
+        const fieldSorts = getPageSorts(pageState, table); //get(pageProps, [table, 'sorts'], []);
+        const fieldSortFound = fieldSorts.filter(s => s.name === field)[0];
+        const fieldSort = fieldSortFound || {};
+        const fName = fieldFilter ? 'F' : 'N';
+        const getShortDesc = op=>opToDesc[op] || 'NS';
+        const shortDesc = getShortDesc(fieldSort.op);
+        const onSortClick = e => {
+            e.preventDefault();
+            const sort =fieldSortFound || {
+                name: field,
+                shortDesc,
+            };
+            sort.shortDesc = getShortDesc(sort.op);
+            sort.op = opToNext[fieldSort.op || ''];
+            if (!fieldSortFound) {
+                set(pageProps, [table, 'sorts'], fieldSorts);
+                fieldSorts.push(sort);
+            }
+            setPageProps(Object.assign({}, pageProps, {reloadCount: (pageProps.reloadCount || 0)+1}));
+        }
+        return <a href='' onClick={onSortClick}>{shortDesc}</a>;
+    };
     return (
         <div>
             {
@@ -48,7 +88,12 @@ const GenCrud = (props) => {
                         <thead>
                             <tr>
                                 {
-                                    displayFieldsStripped.map((name,ind) => <th key={ind}>{columnMap[name]?columnMap[name].desc:`****Column ${JSON.stringify(name)} not mapped`}</th>)
+                                    displayFieldsStripped.map((name, ind) => {
+                                        return <th key={ind}>
+                                            <div>{columnMap[name] ? columnMap[name].desc : `****Column ${JSON.stringify(name)} not mapped`}</div>
+                                            <div>{getFieldSort(name)}</div>
+                                        </th>
+                                    })
                                 }
                             </tr>
                         </thead>

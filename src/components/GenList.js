@@ -1,6 +1,7 @@
 import React,{useState,useEffect} from 'react';
 import GenCrud from './GenCrud';
-import {createHelper} from './datahelper';
+import { createHelper } from './datahelper';
+import { getPageSorts } from './util';
 
 //props: table and displayFields [fieldNames]
 function GenList(props) {
@@ -13,8 +14,13 @@ function GenList(props) {
     const [tenants,setTenants]=useState([]);
     const [loading,setLoading]=useState(true);
     const [columnInf,setColumnInf]=useState(columnInfo || []);
-    const reload=() => {
-        helper.loadData(loadMapper).then(res => {
+    const reload = () => {
+        const where = null;
+        const order = getPageSorts(pageState, table);
+        helper.loadData(loadMapper, {
+            where,
+            order,
+        }).then(res => {
             const {rows, total} = res;
             setTenants(rows);
             setLoading(false);
@@ -33,7 +39,7 @@ function GenList(props) {
         }
         
         ld();        
-    },[columnInfo]);
+    },[columnInfo, pageState.pageProps.reloadCount]);
 
     const doAdd=(data,id) => {        
         helper.saveData(data,id).then(() => {
@@ -59,6 +65,7 @@ function GenList(props) {
             (loading||!columnInf)? <p>Loading</p>:
                 <div>
                     <GenCrud
+                    reload = {reload}
                         {...props}
                         displayFields={displayFields}
                         columnInfo={

@@ -15,22 +15,23 @@ function App() {
 
   const [showPage, setShowPage] = useState(0);
   const [pageProps, setPageProps] = useState({});
+  const pageState = { pageProps, setPageProps };
   const pages=[
     {
       control:
-        <Propertylist  pageState={pageProps, setPageProps} />,
+        <Propertylist pageState={pageState} />,
       desc: 'Houses'
     },
-    {control: <Leaselist pageState={pageProps, setPageProps}/>,desc: 'Leases'},
+    { control: <Leaselist pageState={pageState}/>,desc: 'Leases'},
     {
-      control: <Tenantlist pageState={pageProps, setPageProps} />,
+      control: <Tenantlist pageState={pageState} />,
       desc: 'Tenants'
     },
-    {control: <OwnerList  pageState={pageProps, setPageProps}/>,desc: 'Owners'},
-    {control: <Paymentlist pageState={pageProps, setPageProps} />,desc: 'Payments'},
-    {control: <WorkerList pageState={pageProps, setPageProps} />, desc: 'Worker'},
-    {control: <WorkerCompList pageState={pageProps, setPageProps} />, desc: 'Worker Comp'},
-    {control: <Reportlist pageState={pageProps, setPageProps} />,desc: 'Reports'},
+    { control: <OwnerList pageState={pageState}/>,desc: 'Owners'},
+    { control: <Paymentlist pageState={pageState} />,desc: 'Payments'},
+    { control: <WorkerList pageState={pageState} />, desc: 'Worker'},
+    { control: <WorkerCompList pageState={pageState} />, desc: 'Worker Comp'},
+    { control: <Reportlist pageState={pageState} />,desc: 'Reports'},
   ]  
   return (
     <div className="App" >
