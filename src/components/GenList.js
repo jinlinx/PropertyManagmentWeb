@@ -14,7 +14,8 @@ function GenList(props) {
     const [columnInf,setColumnInf]=useState(props.columnInfo || []);
     const reload=() => {
         helper.loadData(props.loadMapper).then(res => {
-            setTenants(res);
+            const {rows, total} = res;
+            setTenants(rows);
             setLoading(false);
         });
     }

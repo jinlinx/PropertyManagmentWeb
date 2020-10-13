@@ -21,7 +21,7 @@ async function getModel(name) {
     return doGetOp(`${apiBase}/getModel?name=${name}`);
 }
 
-async function sqlGet(table, field, joins, order) {
+async function sqlGet({table, field, joins, where, order}) {
     // "table":"tenantInfo",
     // "field":["tenantID", "firstName"],
     // joins:[{ table:{col:als}}]
@@ -29,6 +29,7 @@ async function sqlGet(table, field, joins, order) {
     return doPostOp(`${apiBase}/sql/get`, {
         table,
         field,
+        where,
         joins,
         order,
     })

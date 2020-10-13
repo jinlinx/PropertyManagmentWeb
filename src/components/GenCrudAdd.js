@@ -64,7 +64,8 @@ const GenCrudAdd=(props) => {
                     if (!optsData[optKey]) {
                         const helper=createHelper(optKey);
                         await helper.loadModel();
-                        const optData=await helper.loadData();
+                        const optDataOrig=await helper.loadData();
+                        const optData = optDataOrig.rows;
                         cur=Object.assign({}, cur, {
                             [optKey]: props.processForeignKey(c.foreignKey, optData)
                         });

@@ -66,7 +66,7 @@ const GenCrud = (props) => {
                                                         dsp=customSelData[ fn ];
                                                         if ( !dsp||!dsp.filter ) dsp=`***** unmapped field ${fn}`;
                                                         else {
-                                                            dsp=dsp.filter( d => d.value==val )[ 0 ];
+                                                            dsp=dsp.filter( d => d.value===val )[ 0 ];
                                                             if ( !dsp ) dsp=`**** field ${fn} value ${val} not mapped`;
                                                             else {
                                                                 dsp=dsp.label;
