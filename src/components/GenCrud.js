@@ -130,7 +130,7 @@ const GenCrud = (props) => {
                                     e=>{
                                         e.preventDefault();
                                         setFilterVals([...filterVals,
-                                            {id: v1(), op:defaultFilter.value, val:''}
+                                            {id: v1(), table, op:defaultFilter.value, val:''}
                                         ])
                                     }
                                 } >Add</a></td>

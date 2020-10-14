@@ -16,8 +16,8 @@ export function createHelper(table) {
         loadData: async (loadMapper, opts = {}) => {
             if (!loadMapper) loadMapper = (x,y) => y;
             //fields: array of field names
-            const {where, order} = opts;
-            return sqlGet({table, fields: loadMapper('fields',accModelFields().map(f => f.field)), joins:loadMapper('joins'), where, order});
+            const {whereArray, order} = opts;
+            return sqlGet({table, fields: loadMapper('fields',accModelFields().map(f => f.field)), joins:loadMapper('joins'), whereArray, order});
         },
         saveData: async (data,id) => {
             const submitData=accModelFields().reduce((acc,f) => {

@@ -15,10 +15,10 @@ function GenList(props) {
     const [loading,setLoading]=useState(true);
     const [columnInf,setColumnInf]=useState(columnInfo || []);
     const reload = () => {
-        const where = getPageFilters(pageState, table);
+        const whereArray = getPageFilters(pageState, table);
         const order = getPageSorts(pageState, table);
         helper.loadData(loadMapper, {
-            where,
+            whereArray,
             order,
         }).then(res => {
             const {rows, total} = res;
