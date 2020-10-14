@@ -77,12 +77,12 @@ function WorkerCompList(props) {
         title={'Worker Comp List'} />
 }
 
-function WorkerCompListTop() {
+function WorkerCompListTop(props) {
     return <div>
         <div><button onClick={() => getData('calc/calc')}>Calc</button>
             <button onClick={() => getData('calc/settle')}>Settle</button>
         </div>
-        <WorkerCompList />
+        <WorkerCompList {...props} />
     </div>
 }
 
