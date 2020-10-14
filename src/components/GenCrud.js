@@ -4,6 +4,7 @@ import get from 'lodash/get';
 import set from 'lodash/set';
 import { getPageSorts } from './util';
 import Select from 'react-dropdown-select';
+import {v1} from 'uuid';
 const GenCrud = (props) => {
     const {
         columnInfo,
@@ -18,6 +19,7 @@ const GenCrud = (props) => {
     const [dspState,setDspState]=useState('dsp');
     const [editItem, setEditItem] = useState(null);
     const [showFilter, setShowFilter] = useState(false);
+    const [filterVals, setFilterVals] = useState([]);
     const { pageProps, setPageProps } = pageState;
     const baseColumnMap = columnInfo.reduce((acc, col) => {
         acc[col.field] = col;
@@ -84,9 +86,9 @@ const GenCrud = (props) => {
         e.preventDefault();
         setShowFilter(!showFilter);
     }
-    const filterOptions = [
-        {}
-    ]
+    
+    const filterOptions = ['=','!=','<','<=','>','>='].map(value=>({value, label: value}));
+    const defaultFilter = filterOptions.filter(x=>x.value === '=')[0];    
     return (
         <div>
             {
@@ -97,25 +99,50 @@ const GenCrud = (props) => {
                         {
                             showFilter && <table>
                                 {
-                                    columnInfo.map((c,ind) => {
-                                        return <th key={ind}>
-                                            <td>{columnMap[name] ? columnMap[name].desc : `****Column ${JSON.stringify(name)} not mapped`}</td>
-                                            <td><Select options={options} searchBy={'name'}
-                            values={[ selected ]}
-                            onChange={( value ) => {
-                                if ( value[ 0 ] ) {
-                                    handleChange( {
-                                        target: {
-                                            name: colField,
-                                            value: value[ 0 ].value,
-                                        }
-                                    } )
-                                }
+                                    filterVals.map((fv,ind) => {
+                                        return <tr key={ind}>
+                                            <td><Select options={displayFields.map(d=>{
+                                                return {
+                                                    value: d.field,
+                                                    label: d.desc,
+                                                }
+                                            })} 
+                            values={[fv]}
+                            onChange={val => { 
+                                fv.field = val[0].value;
+                                setFilterVals(filterVals);
                             }
                             }></Select></td>
-                                        </th>
+                                            <td><Select options={filterOptions} 
+                            values={[defaultFilter]}
+                            onChange={val => { 
+                                fv.op = val[0].value;
+                                setFilterVals(filterVals);
+                            }
+                            }></Select></td>
+                            <td><input name={fv.field} onChange={v=>{
+                                fv.val = v.target.value;                                
+                            }}></input></td>
+                                        </tr>
                                     })
                                 }
+                                <tr><td><a href="" onClick={
+                                    e=>{
+                                        e.preventDefault();
+                                        setFilterVals([...filterVals,
+                                            {id: v1(), op:defaultFilter.value, val:''}
+                                        ])
+                                    }
+                                } >Add</a></td>
+                                <td><a href="" onClick={
+                                    e=>{
+                                        e.preventDefault();                                        
+                                        //console.log(filterVals);
+                                        set(pageProps, [table, 'filters'], filterVals);
+                                        setPageProps(Object.assign({}, pageProps, {reloadCount: (pageProps.reloadCount || 0)+1}));
+                                    }
+                                } >Submit</a></td>
+                                </tr>
                             </table>
                         }
                     </div>

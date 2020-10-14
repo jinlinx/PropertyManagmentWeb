@@ -1,7 +1,7 @@
 import React,{useState,useEffect} from 'react';
 import GenCrud from './GenCrud';
 import { createHelper } from './datahelper';
-import { getPageSorts } from './util';
+import { getPageSorts, getPageFilters } from './util';
 
 //props: table and displayFields [fieldNames]
 function GenList(props) {
@@ -15,7 +15,7 @@ function GenList(props) {
     const [loading,setLoading]=useState(true);
     const [columnInf,setColumnInf]=useState(columnInfo || []);
     const reload = () => {
-        const where = null;
+        const where = getPageFilters(pageState, table);
         const order = getPageSorts(pageState, table);
         helper.loadData(loadMapper, {
             where,

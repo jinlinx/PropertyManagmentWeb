@@ -16,3 +16,11 @@ export function getPageSorts(pageState, table) {
     } = pageState;
     return get(pageProps, [table, 'sorts'], []);
 }
+
+
+export function getPageFilters(pageState, table) {
+    const { pageProps,
+        //setPageProps
+    } = pageState;
+    return get(pageProps, [table, 'filters'], []);
+}
