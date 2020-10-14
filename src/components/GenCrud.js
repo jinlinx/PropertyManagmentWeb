@@ -123,6 +123,10 @@ const GenCrud = (props) => {
                             <td><input name={fv.field} onChange={v=>{
                                 fv.val = v.target.value;                                
                             }}></input></td>
+                            <td><a href="" onClick={e=>{
+                                e.preventDefault();
+                                setFilterVals(filterVals.filter(f=>f.id !== fv.id));
+                            }}>Remove</a></td>
                                         </tr>
                                     })
                                 }
