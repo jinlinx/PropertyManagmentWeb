@@ -6,6 +6,11 @@ import { getPageSorts, getPageFilters } from './util';
 //props: table and displayFields [fieldNames]
 function GenList(props) {
     const {table, columnInfo, loadMapper, pageState } = props;
+    const [paggingInfo, setPaggingInfo] = useState({
+        PageSize: 10,        
+        pos: 0,
+        total: 0,
+    });
     const helper=createHelper(table);
     // [
     //     { field: 'tenantID', desc: 'Id', type: 'uuid', required: true, isId: true },
@@ -20,8 +25,11 @@ function GenList(props) {
         helper.loadData(loadMapper, {
             whereArray,
             order,
+            limit: paggingInfo.PageSize,
+            offset: paggingInfo.pos,
         }).then(res => {
             const {rows, total} = res;
+            setPaggingInfo({...paggingInfo, total,})
             setTenants(rows);
             setLoading(false);
         });
@@ -39,7 +47,7 @@ function GenList(props) {
         }
         
         ld();        
-    },[columnInfo, pageState.pageProps.reloadCount]);
+    },[columnInfo, pageState.pageProps.reloadCount, paggingInfo.pos, paggingInfo.total]);
 
     const doAdd=(data,id) => {        
         helper.saveData(data,id).then(() => {
@@ -65,6 +73,7 @@ function GenList(props) {
             (loading||!columnInf)? <p>Loading</p>:
                 <div>
                     <GenCrud
+                    paggingInfo={paggingInfo} setPaggingInfo={setPaggingInfo}
                     reload = {reload}
                         {...props}
                         displayFields={displayFields}

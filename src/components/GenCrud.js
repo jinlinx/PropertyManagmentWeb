@@ -14,6 +14,7 @@ const GenCrud = (props) => {
         customFields = {},
         pageState,
         table,
+        paggingInfo, setPaggingInfo,
     } = props;
 
     const [dspState,setDspState]=useState('dsp');
@@ -21,6 +22,40 @@ const GenCrud = (props) => {
     const [showFilter, setShowFilter] = useState(false);
     const [filterVals, setFilterVals] = useState([]);
     const { pageProps, setPageProps } = pageState;
+    const PageLookRangeMax = 3;    
+    const calcPage = ()=>{
+        let changed = false;
+        const lastPage = paggingInfo.total/paggingInfo.PageSize;
+        if (lastPage !== paggingInfo.lastPage) {
+            paggingInfo.lastPage= lastPage;
+            changed = true;
+        }
+        let frontPgs = PageLookRangeMax, rearPgs = PageLookRangeMax;
+        let front = paggingInfo.pos - frontPgs;
+        if (front < 0) rearPgs -= front;
+        let back = paggingInfo.lastPage - paggingInfo.pos - rearPgs;
+        if (back < 0) frontPgs -= back;
+
+        const needFront3dots = paggingInfo.pos > frontPgs;
+        const frontPageInds = [];
+        for (let i = frontPgs; i > 0; i--) {
+            let ind = paggingInfo.pos - i;
+            if (ind >= 0) frontPageInds.push(ind);
+        }
+        const rearPageInds = [];
+        for (let i= 1; i <= rearPgs; i++) {
+            let ind = paggingInfo.pos +i;
+            if (ind <= lastPage) rearPageInds.push(i)
+        }
+        const needRear3dots = (paggingInfo.pos + rearPgs < lastPage) ;
+        return {
+            needFront3dots,
+            needRear3dots,
+            frontPageInds,
+            rearPageInds,
+        }
+    };
+    const paggingCalced = calcPage();
     const baseColumnMap = columnInfo.reduce((acc, col) => {
         acc[col.field] = col;
         return acc;
@@ -88,12 +123,21 @@ const GenCrud = (props) => {
     }
     
     const filterOptions = ['=','!=','<','<=','>','>='].map(value=>({value, label: value}));
-    const defaultFilter = filterOptions.filter(x=>x.value === '=')[0];    
+    const defaultFilter = filterOptions.filter(x=>x.value === '=')[0];
+    const makePageButtons = inds=>inds.map(ind=><button onClick={e=>{e.preventDefault(); 
+        setPaggingInfo({...paggingInfo, pos: ind*paggingInfo.PageSize})
+         }}>{ind+1}</button>)
     return (
         <div>
             {
                 dspState === 'dsp' &&
                 <div>
+                    <div>
+                        {paggingCalced.needFront3dots?'...':''}
+                        {makePageButtons(paggingCalced.frontPageInds)}
+                         {makePageButtons(paggingCalced.rearPageInds)}
+                        {paggingCalced.needRear3dots?'...':''}
+                    </div>
                     <div>
                         <a href="" onClick={filterClick}>{showFilter ? 'Hide' : 'Filter'}</a>
                         {

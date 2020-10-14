@@ -21,7 +21,7 @@ async function getModel(name) {
     return doGetOp(`${apiBase}/getModel?name=${name}`);
 }
 
-async function sqlGet({table, field, joins, whereArray, order}) {
+async function sqlGet({table, field, joins, whereArray, order, limit, offset}) {
     // "table":"tenantInfo",
     // "field":["tenantID", "firstName"],
     // joins:[{ table:{col:als}}]
@@ -32,6 +32,8 @@ async function sqlGet({table, field, joins, whereArray, order}) {
         whereArray,
         joins,
         order,
+        limit,
+        offset,
     })
 }
 
