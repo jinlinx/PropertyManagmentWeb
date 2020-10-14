@@ -26,22 +26,7 @@ function HouseList(props) {
             {field: 'ownerName',desc: 'Owner',},
                 //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
             ]
-        }
-        loadMapper={
-            (type,fields) => {
-                if(type==='fields') {
-                    return fields;
-                }
-                if(type==='joins') {
-                    return {
-                        'ownerInfo': {
-                            ownerName: 'ownerName',
-                            shortName:'ownerShort',
-                        }
-                    }
-                }
-            }
-        }
+        }        
         title={'Property List'}
     /> 
 }
