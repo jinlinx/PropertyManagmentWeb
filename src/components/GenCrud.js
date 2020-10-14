@@ -3,7 +3,7 @@ import GenCrudAdd from './GenCrudAdd';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import { getPageSorts } from './util';
-
+import Select from 'react-dropdown-select';
 const GenCrud = (props) => {
     const {
         columnInfo,
@@ -17,6 +17,7 @@ const GenCrud = (props) => {
 
     const [dspState,setDspState]=useState('dsp');
     const [editItem, setEditItem] = useState(null);
+    const [showFilter, setShowFilter] = useState(false);
     const { pageProps, setPageProps } = pageState;
     const baseColumnMap = columnInfo.reduce((acc, col) => {
         acc[col.field] = col;
@@ -56,11 +57,10 @@ const GenCrud = (props) => {
             'desc': '',
             '': 'asc',
         }
-        const fieldFilter = get(pageProps, [table, field, 'filter']) || {};
+        //const fieldFilter = get(pageProps, [table, field, 'filter']) || {};
         const fieldSorts = getPageSorts(pageState, table); //get(pageProps, [table, 'sorts'], []);
         const fieldSortFound = fieldSorts.filter(s => s.name === field)[0];
         const fieldSort = fieldSortFound || {};
-        const fName = fieldFilter ? 'F' : 'N';
         const getShortDesc = op=>opToDesc[op] || 'NS';
         const shortDesc = getShortDesc(fieldSort.op);
         const onSortClick = e => {
@@ -80,11 +80,45 @@ const GenCrud = (props) => {
         }
         return <a href='' onClick={onSortClick}>{shortDesc}</a>;
     };
+    const filterClick = e => {
+        e.preventDefault();
+        setShowFilter(!showFilter);
+    }
+    const filterOptions = [
+        {}
+    ]
     return (
         <div>
             {
                 dspState === 'dsp' &&
                 <div>
+                    <div>
+                        <a href="" onClick={filterClick}>{showFilter ? 'Hide' : 'Filter'}</a>
+                        {
+                            showFilter && <table>
+                                {
+                                    columnInfo.map((c,ind) => {
+                                        return <th key={ind}>
+                                            <td>{columnMap[name] ? columnMap[name].desc : `****Column ${JSON.stringify(name)} not mapped`}</td>
+                                            <td><Select options={options} searchBy={'name'}
+                            values={[ selected ]}
+                            onChange={( value ) => {
+                                if ( value[ 0 ] ) {
+                                    handleChange( {
+                                        target: {
+                                            name: colField,
+                                            value: value[ 0 ].value,
+                                        }
+                                    } )
+                                }
+                            }
+                            }></Select></td>
+                                        </th>
+                                    })
+                                }
+                            </table>
+                        }
+                    </div>
                     < table >
                         <thead>
                             <tr>
