@@ -26,7 +26,7 @@ const GenCrud = (props) => {
     const calcPage = ()=>{
         let changed = false;
         const getLastPage = (total, pageSize) => {
-            const lst = total / pageSize;
+            const lst = parseInt(total / pageSize);
             if (lst * pageSize === total) return lst - 1;
             return lst;
         }
@@ -141,7 +141,7 @@ const GenCrud = (props) => {
                         {makePageButtons([0],'<<')}
                         {paggingCalced.needFront3dots?'...':''}
                         {makePageButtons(paggingCalced.frontPageInds)}
-                        {paggingInfo.pos}
+                        {paggingInfo.pos + 1}
                          {makePageButtons(paggingCalced.rearPageInds)}
                         {paggingCalced.needRear3dots ? '...' : ''}
                         {makePageButtons([paggingInfo.lastPage],'>>')}
