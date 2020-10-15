@@ -50,7 +50,7 @@ const GenCrud = (props) => {
         const rearPageInds = [];
         for (let i= 1; i <= rearPgs; i++) {
             let ind = paggingInfo.pos +i;
-            if (ind <= lastPage) rearPageInds.push(i)
+            if (ind <= lastPage) rearPageInds.push(ind)
         }
         const needRear3dots = (paggingInfo.pos + rearPgs < lastPage) ;
         return {
