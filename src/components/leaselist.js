@@ -6,16 +6,7 @@ function LeaseList(props) {
     return <GenList 
     {...props}
     table={'leaseInfo'}
-    processForeignKey={
-        (fk, datas) => {
-            return datas.map(data => {
-                return {
-                    value: data[fk.field],
-                    label: data['address'] + ' ' + data['ownerID'],
-            }
-        })
-    }
-}
+
 displayFields={
         //actualy don't need to do this
         [
@@ -28,21 +19,7 @@ displayFields={
             //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
         ]
     }
-    loadMapper={
-        (type,fields) => {
-            if(type==='fields') {
-                return fields;
-            }
-            if(type==='joins') {
-                return {
-                    'houseInfo': {
-                        address: 'houseAddress',
-                        ownerID: 'ownerID',
-                    }
-                }
-            }
-        }
-    }
+
         title={'Lease List'} /> 
 }
 

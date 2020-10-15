@@ -6,16 +6,6 @@ function PaymentList(props) {
     return <GenList 
     {...props}
     table={'rentPaymentInfo'}    
-        processForeignKey={
-            (fk,datas) => {
-                return datas.map(data => {
-                    return {
-                        value: data[fk.field],
-                        label: data['comment'],
-                    }
-                })
-            }
-        }
         displayFields={
             //actualy don't need to do this
             [
@@ -28,21 +18,7 @@ function PaymentList(props) {
                 //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
             ]
         }
-        loadMapper={
-            (type,fields) => {
-                if(type==='fields') {
-                    return fields;
-                }
-                if(type==='joins') {
-                    return {
-                        'leaseInfo': {
-                            houseID: 'houseID',
-                            comment: 'leaseComment',
-                        }
-                    }
-                }
-            }
-        }
+        
         title={'Payment List'} />
 }
 

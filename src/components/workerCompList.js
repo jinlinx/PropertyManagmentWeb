@@ -54,26 +54,7 @@ function WorkerCompList(props) {
                 //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
             ]
         }
-        loadMapper={
-            ( type, fields ) => {
-                if ( type==='fields' ) {
-                    return fields;
-                }
-                if ( type==='joins' ) {
-                    return {
-                        'leaseInfo': {
-                            leaseID: 'leaseID',
-                            comment: 'leaseComment',
-                        },
-                        workerInfo: {
-                            email: 'workerEmail',
-                            firstName: 'workerFirstName',
-                            lastName: 'workerLastName',
-                        }
-                    }
-                }
-            }
-        }
+
         title={'Worker Comp List'} />
 }
 
