@@ -25,7 +25,12 @@ const GenCrud = (props) => {
     const PageLookRangeMax = 3;    
     const calcPage = ()=>{
         let changed = false;
-        const lastPage = paggingInfo.total/paggingInfo.PageSize;
+        const getLastPage = (total, pageSize) => {
+            const lst = total / pageSize;
+            if (lst * pageSize === total) return lst - 1;
+            return lst;
+        }
+        const lastPage = getLastPage(paggingInfo.total,paggingInfo.PageSize);
         if (lastPage !== paggingInfo.lastPage) {
             paggingInfo.lastPage= lastPage;
             changed = true;
@@ -45,7 +50,7 @@ const GenCrud = (props) => {
         const rearPageInds = [];
         for (let i= 1; i <= rearPgs; i++) {
             let ind = paggingInfo.pos +i;
-            if (ind < lastPage) rearPageInds.push(i)
+            if (ind <= lastPage) rearPageInds.push(i)
         }
         const needRear3dots = (paggingInfo.pos + rearPgs < lastPage) ;
         return {
