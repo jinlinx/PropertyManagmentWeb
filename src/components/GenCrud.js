@@ -45,7 +45,7 @@ const GenCrud = (props) => {
         const rearPageInds = [];
         for (let i= 1; i <= rearPgs; i++) {
             let ind = paggingInfo.pos +i;
-            if (ind <= lastPage) rearPageInds.push(i)
+            if (ind < lastPage) rearPageInds.push(i)
         }
         const needRear3dots = (paggingInfo.pos + rearPgs < lastPage) ;
         return {
@@ -123,20 +123,23 @@ const GenCrud = (props) => {
     }
     
     const filterOptions = ['=','!=','<','<=','>','>='].map(value=>({value, label: value}));
-    const defaultFilter = filterOptions.filter(x=>x.value === '=')[0];
-    const makePageButtons = inds=>inds.map(ind=><button onClick={e=>{e.preventDefault(); 
-        setPaggingInfo({...paggingInfo, pos: ind*paggingInfo.PageSize})
-         }}>{ind+1}</button>)
+    const defaultFilter = filterOptions.filter(x => x.value === '=')[0];
+    const makePageButtons = (inds, desc)=>inds.map(ind=><button onClick={e=>{e.preventDefault(); 
+        setPaggingInfo({...paggingInfo, pos: ind})
+         }}>{desc || ind+1}</button>)
     return (
         <div>
             {
                 dspState === 'dsp' &&
                 <div>
                     <div>
+                        {makePageButtons([0],'<<')}
                         {paggingCalced.needFront3dots?'...':''}
                         {makePageButtons(paggingCalced.frontPageInds)}
+                        {paggingInfo.pos}
                          {makePageButtons(paggingCalced.rearPageInds)}
-                        {paggingCalced.needRear3dots?'...':''}
+                        {paggingCalced.needRear3dots ? '...' : ''}
+                        {makePageButtons([paggingInfo.lastPage],'>>')}
                     </div>
                     <div>
                         <a href="" onClick={filterClick}>{showFilter ? 'Hide' : 'Filter'}</a>

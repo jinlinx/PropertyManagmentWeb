@@ -26,7 +26,7 @@ function GenList(props) {
             whereArray,
             order,
             limit: paggingInfo.PageSize,
-            offset: paggingInfo.pos,
+            offset: paggingInfo.pos*paggingInfo.PageSize,
         }).then(res => {
             const {rows, total} = res;
             setPaggingInfo({...paggingInfo, total,})
