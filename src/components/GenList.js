@@ -25,7 +25,7 @@ function GenList(props) {
         helper.loadData(loadMapper, {
             whereArray,
             order,
-            limit: paggingInfo.PageSize,
+            rowCount: paggingInfo.PageSize,
             offset: paggingInfo.pos*paggingInfo.PageSize,
         }).then(res => {
             const {rows, total} = res;
