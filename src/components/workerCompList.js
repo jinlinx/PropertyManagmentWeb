@@ -49,8 +49,8 @@ function WorkerCompList(props) {
                 {field: 'type', desc: 'Type', },
                 {field: 'schedule', desc: 'Schedule', },
                 {field: 'amount', desc: 'Amount', },
-                {field: 'leaseComment', desc: 'Lease', },
-                { field: 'workerFirstName', desc: 'Worker', dspFunc: (v, row) => `${v} ${row['workerLastName']}` },
+                {field: 'comment', desc: 'Lease', },
+                { field: 'firstName', desc: 'Worker', dspFunc: (v, row) => `${v} ${row['lastName']}` },
                 //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
             ]
         }
