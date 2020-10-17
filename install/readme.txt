@@ -25,3 +25,9 @@ SSLStaplingCache "shmcb:logs/stapling-cache(150000)"
 
 
 sudo vi /etc/apache2/sites-available/default-ssl.conf
+
+sudo a2enmod ssl
+sudo a2enmod headers
+sudo a2ensite default-ssl
+sudo a2enconf ssl-params
+sudo apache2ctl configtest
