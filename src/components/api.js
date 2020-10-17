@@ -1,6 +1,6 @@
 //import { get } from 'superagent';
 
-const apiBase = 'http://192.168.1.119:8081';
+const apiBase = 'http://192.168.1.115:8081';
 //const apiBase='http://localhost:8081';
 const getUrl=path => `${apiBase}/${path}`;
 const request = require('superagent');
