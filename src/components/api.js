@@ -1,6 +1,6 @@
 //import { get } from 'superagent';
 
-const apiBase = 'http://192.168.1.115:8081';
+const apiBase = 'http://192.168.1.41:8081';
 //const apiBase='http://localhost:8081';
 const getUrl=path => `${apiBase}/${path}`;
 const request = require('superagent');
@@ -55,6 +55,14 @@ export function sqlDelete(table, id) {
     return doPostOp(`${apiBase}/sql/del`, {
         table,id,
     }) 
+}
+
+export function sqlGetTables() {
+    return doGetOp(`${apiBase}/sql/getTables`); 
+}
+
+export function sqlGetTableInfo(table) {
+    return doGetOp(`${apiBase}/sql/getTableInfo?table=${table}`); 
 }
 
 /*

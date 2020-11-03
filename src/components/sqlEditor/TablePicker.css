@@ -1,0 +1,20 @@
+.flex_container_col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex_container_row {
+  display: flex;
+  flex-direction: row;
+}
+
+div {
+    overflow: auto;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border: 0px solid #969696;
+  background: #d9dbda;
+  display: block;
+  margin: 10px;
+}
