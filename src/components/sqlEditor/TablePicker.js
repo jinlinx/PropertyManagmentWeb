@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { sqlGetTableInfo, sqlGetTables } from '../api';
 import styles from './TablePicker.css'
+import ColumnEditor from './columnEditor';
+
 function TablePicker() {
     const [tables, setTables] = useState([]);
     const [tableInfo, setTableInfo] = useState({});
@@ -33,26 +35,7 @@ function TablePicker() {
             </tr>
             <tr>                
                 <td>
-                    <div style={{textAlign:'top', float:'top', border:1, borderWidth:2}}>{selectedTable}</div>
-                    {
-                            tableInfo && tableInfo.fields && <table border="1">
-                                <tbody>
-                            <tr><td rowSpan="2">
-                                <div className={styles.flex_container_row}>
-                                {
-                                    //tableInfo.fields.map(f => <div>{f.fieldName}</div>)
-                                    tableInfo.fields.map((f,key) => <div key={key}><div style={{float:'left', display:'block'}}>{f.fieldName} {f.fieldType}</div></div>)
-                                }
-                                    <div style={{ overflow: 'hidden' }}>Name<input value={newColumnName} onChange={e => {
-                                        console.log(e.target.value);
-                                        setNewColumnName(e.target.value);
-                                    }}></input><button>Add</button></div>
-                                </div>
-                            </td></tr>
-                                    <tr><td></td><td></td></tr>
-                                </tbody>
-                        </table>
-                    }
+                        <ColumnEditor table={selectedTable}></ColumnEditor>                    
                 </td>
                 </tr>
             </tbody>
