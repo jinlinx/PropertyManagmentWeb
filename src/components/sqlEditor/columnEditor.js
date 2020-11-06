@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Form, DropdownButton, Dropdown, Button  } from 'react-bootstrap';
-import { sqlGetTableInfo } from '../api';
+import { sqlGetTableInfo, sqlFreeForm } from '../api';
 function ColumnPicker(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
     const { isNew, table } = props;    
@@ -51,8 +51,19 @@ function ColumnPicker(props) {
                         {                        
                             //tableInfo.fields.map(f => <div>{f.fieldName}</div>)
                         tableInfo.fields.map((f, key) => <tr key={key}><td style={{ textAlign: 'left' }}>{f.fieldName}</td><td style={{ textAlign: 'left' }}> {f.fieldType}</td>
-                            <td>{f.size}</td>
-                            <td><Button>Delete</Button></td>
+                            <td>{f.fieldSize || ''}</td>
+                            <td><Button onClick={() => {
+                                if (isNew) {
+                                    setTableInfo({
+                                        ...tableInfo,
+                                        fields: tableInfo.fields.filter(ff=>ff.fieldName !==f.fieldName)
+                                    })
+                                } else {
+                                    sqlFreeForm(`alter table ${table} drop column ${f.fieldName};`).then(() => { 
+                                        return getTableInfo();
+                                    });
+                                }
+                            }}>Delete</Button></td>
                         </tr>)
                         }
                         <tr><td>                        
@@ -64,11 +75,10 @@ function ColumnPicker(props) {
                                 }}/>
                             </td>                                
                                 <td>
-                            <DropdownButton title={newColInfo.selType} onChange={e => {
-                                console.log(e);
-                            }}>
+                            <DropdownButton title={newColInfo.selType} >
                                 <Dropdown.Item onSelect={() => setSelType('varchar')}>varchar</Dropdown.Item>
                                 <Dropdown.Item onSelect={() => setSelType('datetime')}>datetime</Dropdown.Item>
+                                <Dropdown.Item onSelect={() => setSelType('decimal')}>decimal</Dropdown.Item>
                             </DropdownButton>                                                                        
                                 </td>
                         <td>
@@ -78,13 +88,39 @@ function ColumnPicker(props) {
                                     if (isNaN(v)) return;
                                     setNewColInfo({
                                         ...newColInfo,
-                                        size: v,
+                                        fieldSize: v,
                                     })
                                 }
                             } />
                         </td>
                         <td>
-                            <Button>Add</Button>
+                            <Button onClick={() => {
+                                if (isNew) {
+                                    if (newColInfo.name) {                                        
+                                        setTableInfo({
+                                            ...tableInfo,
+                                            fields: tableInfo.fields.concat({
+                                                fieldName: newColInfo.name,
+                                                fieldType: newColInfo.selType,
+                                                size: newColInfo.size,
+                                            })
+                                        })
+                                    }
+                                } else {
+                                    if (newColInfo.name) {
+                                        let fieldType = newColInfo.selType;
+                                        if (fieldType === 'varchar') {
+                                            fieldType = `${fieldType}(${newColInfo.size})`;
+                                        }
+                                        if (fieldType === 'decimal') {
+                                            fieldType = `${fieldType}(${newColInfo.size},2)`;
+                                        }
+                                        sqlFreeForm(`alter table ${table} add column ${newColInfo.name} ${fieldType};`).then(() => {
+                                            return getTableInfo();
+                                        });
+                                    }
+                                }
+                            }}>Add</Button>
                         </td>
                         </tr>
                         
