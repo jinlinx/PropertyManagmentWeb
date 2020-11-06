@@ -9,7 +9,7 @@ import Reportlist from './components/reportlist';
 import Tenantlist from './components/tenantlist';
 import OwnerList from './components/ownerList';
 import TablePicker from './components/sqlEditor/TablePicker';
-
+import 'bootstrap/dist/css/bootstrap.min.css';
 //
 
 function App() {
