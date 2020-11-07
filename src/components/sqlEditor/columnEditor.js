@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Form, DropdownButton, Dropdown, Button  } from 'react-bootstrap';
+import { Table, Form, DropdownButton, Dropdown, Button, Spinner, Toast  } from 'react-bootstrap';
 import { sqlGetTableInfo, sqlFreeForm } from '../api';
+import { get } from 'lodash';
 function ColumnPicker(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
     const { isNew, table } = props;    
-    const [tableInfo, setTableInfo] = useState({});    
+    const [tableInfo, setTableInfo] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [addColumnError, setAddColumnError] = useState('');
     const [newColInfo, setNewColInfo] = useState({
         name: '',
         type: defaultColumnTypeVal,
@@ -19,7 +22,7 @@ function ColumnPicker(props) {
     }
     const getTableInfo = () => {
         if (table)
-            sqlGetTableInfo(table).then(res => {
+            return sqlGetTableInfo(table).then(res => {
                 setTableInfo({
                     constraints: res.constraints,
                     fields: res.fields.map(f => {
@@ -42,89 +45,119 @@ function ColumnPicker(props) {
             getTableInfo();
     }, [table]);    
     return <div>
-            {
-            tableInfo && tableInfo.fields && <Table striped bordered hover size="sm">
+        {
+            isLoading && <div style={{
+                height: '100%', width: '100%', position: 'absolute', top: 0, left: 0, opacity: 0.9,
+                'z-index': -1,
+                background: 'grey',
+            }}><Spinner
+            as="span"
+            animation="border"
+            size="sm"
+            role="status"
+            aria-hidden="true"
+        /></div>}
+        {            
+            <Table style={{ 'z-index': 8,}} striped bordered hover size="sm">
                 <thead>
                     <tr><td>Name</td><td>Type</td><td>Size</td><td>Action</td></tr>
                 </thead>
-                    <tbody>                                                
-                        {                        
+                    {tableInfo && tableInfo.fields && <tbody>
+                        {
                             //tableInfo.fields.map(f => <div>{f.fieldName}</div>)
-                        tableInfo.fields.map((f, key) => <tr key={key}><td style={{ textAlign: 'left' }}>{f.fieldName}</td><td style={{ textAlign: 'left' }}> {f.fieldType}</td>
-                            <td>{f.fieldSize || ''}</td>
-                            <td><Button onClick={() => {
-                                if (isNew) {
-                                    setTableInfo({
-                                        ...tableInfo,
-                                        fields: tableInfo.fields.filter(ff=>ff.fieldName !==f.fieldName)
-                                    })
-                                } else {
-                                    sqlFreeForm(`alter table ${table} drop column ${f.fieldName};`).then(() => { 
-                                        return getTableInfo();
-                                    });
-                                }
-                            }}>Delete</Button></td>
-                        </tr>)
-                        }
-                        <tr><td>                        
-                        <Form.Control as="input" value={newColInfo.name} onChange={e => {
-                                    setNewColInfo({
-                                        ...newColInfo,
-                                        name: e.target.value
-                                    });
-                                }}/>
-                            </td>                                
-                                <td>
-                            <DropdownButton title={newColInfo.selType} >
-                                <Dropdown.Item onSelect={() => setSelType('varchar')}>varchar</Dropdown.Item>
-                                <Dropdown.Item onSelect={() => setSelType('datetime')}>datetime</Dropdown.Item>
-                                <Dropdown.Item onSelect={() => setSelType('decimal')}>decimal</Dropdown.Item>
-                            </DropdownButton>                                                                        
-                                </td>
-                        <td>
-                            <Form.Control as="input" value={newColInfo.size} onChange={
-                                e => {
-                                    const v = parseInt(e.target.value);
-                                    if (isNaN(v)) return;
-                                    setNewColInfo({
-                                        ...newColInfo,
-                                        fieldSize: v,
-                                    })
-                                }
-                            } />
-                        </td>
-                        <td>
-                            <Button onClick={() => {
-                                if (isNew) {
-                                    if (newColInfo.name) {                                        
+                            tableInfo.fields.map((f, key) => <tr key={key}><td style={{ textAlign: 'left' }}>{f.fieldName}</td><td style={{ textAlign: 'left' }}> {f.fieldType}</td>
+                                <td>{f.fieldSize || ''}</td>
+                                <td><Button onClick={() => {
+                                    if (isNew) {
                                         setTableInfo({
                                             ...tableInfo,
-                                            fields: tableInfo.fields.concat({
-                                                fieldName: newColInfo.name,
-                                                fieldType: newColInfo.selType,
-                                                size: newColInfo.size,
-                                            })
+                                            fields: tableInfo.fields.filter(ff => ff.fieldName !== f.fieldName)
                                         })
-                                    }
-                                } else {
-                                    if (newColInfo.name) {
-                                        let fieldType = newColInfo.selType;
-                                        if (fieldType === 'varchar') {
-                                            fieldType = `${fieldType}(${newColInfo.size})`;
-                                        }
-                                        if (fieldType === 'decimal') {
-                                            fieldType = `${fieldType}(${newColInfo.size},2)`;
-                                        }
-                                        sqlFreeForm(`alter table ${table} add column ${newColInfo.name} ${fieldType};`).then(() => {
-                                            return getTableInfo();
+                                    } else {
+                                        setIsLoading(true);
+                                        sqlFreeForm(`alter table ${table} drop column ${f.fieldName};`).then(() => {
+                                            return getTableInfo().then(() => {
+                                                setIsLoading(false);
+                                            })
                                         });
                                     }
-                                }
-                            }}>Add</Button>
+                                }}>Delete</Button></td>
+                            </tr>)
+                        }
+                        <tr><td>
+                            <Form.Control as="input" value={newColInfo.name} onChange={e => {
+                                setNewColInfo({
+                                    ...newColInfo,
+                                    name: e.target.value
+                                });
+                        }} />
+                        <Toast onClose={() => setAddColumnError('')} show={!!addColumnError} delay={3000} autohide>
+                            <Toast.Header>
+                                <strong className="mr-auto">Error</strong>
+                                <small>.</small>
+                            </Toast.Header>
+                            <Toast.Body>{addColumnError}</Toast.Body>
+                        </Toast>
                         </td>
+                            <td>
+                                <DropdownButton title={newColInfo.selType} >
+                                    <Dropdown.Item onSelect={() => setSelType('varchar')}>varchar</Dropdown.Item>
+                                    <Dropdown.Item onSelect={() => setSelType('datetime')}>datetime</Dropdown.Item>
+                                    <Dropdown.Item onSelect={() => setSelType('decimal')}>decimal</Dropdown.Item>
+                                </DropdownButton>
+                            </td>
+                            <td>
+                                <Form.Control as="input" value={newColInfo.size} onChange={
+                                    e => {
+                                        const v = parseInt(e.target.value);
+                                        if (isNaN(v)) return;
+                                        setNewColInfo({
+                                            ...newColInfo,
+                                            fieldSize: v,
+                                        })
+                                    }
+                                } />
+                            </td>
+                            <td>
+                                <Button onClick={() => {
+                                    if (isNew) {
+                                        if (newColInfo.name) {
+                                            setTableInfo({
+                                                ...tableInfo,
+                                                fields: tableInfo.fields.concat({
+                                                    fieldName: newColInfo.name,
+                                                    fieldType: newColInfo.selType,
+                                                    size: newColInfo.size,
+                                                })
+                                            })
+                                        }
+                                    } else {
+                                        if (newColInfo.name) {
+                                            let fieldType = newColInfo.selType;
+                                            if (fieldType === 'varchar') {
+                                                fieldType = `${fieldType}(${newColInfo.size})`;
+                                            }
+                                            if (fieldType === 'decimal') {
+                                                fieldType = `${fieldType}(${newColInfo.size},2)`;
+                                            }
+                                            setIsLoading(true);
+                                            sqlFreeForm(`alter table ${table} add column ${newColInfo.name} ${fieldType};`).then(() => {
+                                                return getTableInfo().then(() => {
+                                                    setIsLoading(false);
+                                                })
+                                            }).catch(err => {
+                                                const message = get(err, 'response.body.message', err.message);
+                                                setAddColumnError(message);
+                                                setIsLoading(false);
+                                            });
+                                        }
+                                    }
+                                }}>Save</Button>
+                            </td>
                         </tr>
                         
                     </tbody>
+                    }
                 </Table>
             }
     </div>
