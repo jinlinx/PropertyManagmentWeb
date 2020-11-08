@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
 import GenCrudAdd from './GenCrudAdd';
-import get from 'lodash/get';
 import set from 'lodash/set';
 import { getPageSorts } from './util';
 import Select from 'react-dropdown-select';
-import {v1} from 'uuid';
+import { v1 } from 'uuid';
+import { Table, Button } from 'react-bootstrap';
 const GenCrud = (props) => {
     const {
         columnInfo,
@@ -129,9 +129,9 @@ const GenCrud = (props) => {
     
     const filterOptions = ['=','!=','<','<=','>','>='].map(value=>({value, label: value}));
     const defaultFilter = filterOptions.filter(x => x.value === '=')[0];
-    const makePageButtons = (inds, desc)=>inds.map(ind=><button onClick={e=>{e.preventDefault(); 
+    const makePageButtons = (inds, desc)=>inds.map(ind=><Button onClick={e=>{e.preventDefault(); 
         setPaggingInfo({...paggingInfo, pos: ind})
-         }}>{desc || ind+1}</button>)
+         }}>{desc || ind+1}</Button>)
     return (
         <div>
             {
@@ -202,7 +202,7 @@ const GenCrud = (props) => {
                             </table>
                         }
                     </div>
-                    < table >
+                    < Table striped bordered hover size="sm">
                         <thead>
                             <tr>
                                 {
@@ -244,11 +244,11 @@ const GenCrud = (props) => {
                                                 } )
                                             }
                                             <td>
-                                                {idCol && <button onClick={() => props.doDelete(idCol.field, row[idCol.field])}>Delete</button>}
-                                                {idCol&&<button onClick={() => {
+                                                {idCol && <Button onClick={() => props.doDelete(idCol.field, row[idCol.field])}>Delete</Button>}
+                                                {idCol&&<Button onClick={() => {
                                                     setEditItem(row);
                                                     setDspState('edit');
-                                                }}>Edit</button>
+                                                }}>Edit</Button>
                                                 }
                                             </td>
                                         </tr>
@@ -262,8 +262,8 @@ const GenCrud = (props) => {
                             }
                         
                         </tbody>
-                    </table>
-                    <button onClick={addNew}>Add</button>
+                    </Table>
+                    <Button onClick={addNew}>Add</Button>
                 </div>
             }
 
