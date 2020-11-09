@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Form, DropdownButton, Dropdown, Button, Spinner, Toast  } from 'react-bootstrap';
+import { Table, Form, DropdownButton, Dropdown, Button, Toast  } from 'react-bootstrap';
 import { sqlGetTableInfo, sqlFreeForm } from '../api';
 import { get } from 'lodash';
+import LoadingCover from './LoadingCover';
 function ColumnPicker(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
-    const { isNew, table } = props;    
+    const { table } = props;    
+    const isNew = table === null;
+    const needQuery = !!table;
     const [tableInfo, setTableInfo] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [addColumnError, setAddColumnError] = useState('');
@@ -41,24 +44,20 @@ function ColumnPicker(props) {
             });
     }
     useEffect(() => {
-        if (!isNew)
+        if (needQuery)
             getTableInfo();
+        else if (isNew) {
+            setTableInfo({
+                constraints: [],
+                fields: [],
+                indexes: [],
+            });
+        }
     }, [table]);    
     return <div>
-        {
-            isLoading && <div style={{
-                height: '100%', width: '100%', position: 'absolute', top: 0, left: 0, opacity: 0.9,
-                'z-index': -1,
-                background: 'grey',
-            }}><Spinner
-            as="span"
-            animation="border"
-            size="sm"
-            role="status"
-            aria-hidden="true"
-        /></div>}
+        <LoadingCover isLoading={isLoading}/>
         {            
-            <Table style={{ 'z-index': 8,}} striped bordered hover size="sm">
+            (isNew || table) && <Table style={{ 'z-index': 8,}} striped bordered hover size="sm">
                 <thead>
                     <tr><td>Name</td><td>Type</td><td>Size</td><td>Action</td></tr>
                 </thead>

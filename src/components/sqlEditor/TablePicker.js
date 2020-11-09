@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { sqlGetTableInfo, sqlGetTables } from '../api';
+import { Table, Form, DropdownButton, Dropdown, Button } from 'react-bootstrap';
+import { sqlGetTableInfo, sqlGetTables, sqlFreeForm } from '../api';
 import styles from './TablePicker.css'
 import ColumnEditor from './columnEditor';
+import LoadingCover from './LoadingCover';
 
 function TablePicker() {
     const [tables, setTables] = useState([]);
-    const [tableInfo, setTableInfo] = useState({});
     const [selectedTable, setSelectedTable] = useState('');
-    const [newColumnName, setNewColumnName] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const loadTables = () => {
         sqlGetTables().then(res => {
             setTables(res);
@@ -18,28 +19,43 @@ function TablePicker() {
     }, []);
     const selectTable = tableName => {
         setSelectedTable(tableName);
-        setTableInfo(null);
-        sqlGetTableInfo(tableName).then(setTableInfo);
     }
-    return <div className={styles.flex_container_col}>
-        <table border="1">
+    return <div>
+        <LoadingCover isLoading={isLoading}/>
+        <Table striped bordered hover size="sm">
             <tbody>
             <tr>
-                <td rowSpan="10">
-                    <div className={styles.flex_container_col}>
-                        {
-                            tables.map((name,key) => <div key={key} style={{ textAlign: 'left', fontWeight: name === selectedTable ? 'bold' : 'normal' }}><a onClick={() => selectTable(name)}>{name}</a></div>)
-                        }
-                    </div>
-                </td>
+                    <td>
+                        <Table striped bordered hover size="sm">
+                            <tbody>
+                                {
+                                    tables.map((name, key) => <tr key={key}>
+                                        <td><div style={{ textAlign: 'left', fontWeight: name === selectedTable ? 'bold' : 'normal' }}><a onClick={() => selectTable(name)}>{name}</a></div></td>
+                                        <td><Button onClick={() => {
+                                            setIsLoading(true);
+                                            sqlFreeForm(`drop table ${name}`).then(() => {
+                                                setIsLoading(false);
+                                            }).catch(err => {
+                                                setIsLoading(false);
+                                                console.log(err);
+                                            })
+                                        }}>Delete</Button></td>                                  
+                                    </tr>)
+                                }
+                                <tr><td><Button onClick={() => {
+                                    setSelectedTable(null);
+                                }}>Add</Button></td></tr>
+                            </tbody>
+                        </Table>
+                    </td>
+                    <td>
+                        <ColumnEditor table={selectedTable}></ColumnEditor>
+                    </td>
             </tr>
-            <tr>                
-                <td>
-                        <ColumnEditor table={selectedTable}></ColumnEditor>                    
-                </td>
+            <tr>                                
                 </tr>
             </tbody>
-        </table>
+        </Table>
             
     </div>
 }
