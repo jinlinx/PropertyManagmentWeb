@@ -3,7 +3,7 @@ import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup  } fro
 import { sqlGetTableInfo, sqlFreeForm } from '../api';
 import { get } from 'lodash';
 import LoadingCover from './LoadingCover';
-import { TextInputWithError, setErr, getVal } from './TextInputWithError';
+import { TextInputWithError, setErr, getVal, createStateContext } from './TextInputWithError';
 
 function ColumnPicker(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
@@ -11,17 +11,14 @@ function ColumnPicker(props) {
     const isNew = table === null;
     const needQuery = !!table;
     const [tableInfo, setTableInfo] = useState({});
-    const [isLoading, setIsLoading] = useState(false);
-    const [addColumnError, setAddColumnError] = useState('');
-    const [newTableName, setNewTableName] = useState('');
-    const [createTableErrors, setCreateTableErrors] = useState({
-        createTable: '',
-    })
+    const [isLoading, setIsLoading] = useState(false);    
 
     const stateGetSet = useState({
         values: {},
         errors: {},
-    })
+    });
+    const stateContext = createStateContext(stateGetSet);
+
     const [stateGetSetVal, setStateGetSetVal] = stateGetSet;
     const [newColInfo, setNewColInfo] = useState({
         name: '',
@@ -78,8 +75,7 @@ function ColumnPicker(props) {
                             //tableInfo.fields.map(f => <div>{f.fieldName}</div>)
                             tableInfo.fields.map((f, key) => <tr key={key}><td style={{ textAlign: 'left' }}>{f.fieldName}</td><td style={{ textAlign: 'left' }}> {f.fieldType}</td>
                                 <td>{f.fieldSize || ''}</td>
-                                <td><Button onClick={() => {
-                                    const newColName = getVal(stateGetSetVal, 'newColName');
+                                <td><Button onClick={() => {                                    
                                     if (isNew) {
                                         setTableInfo({
                                             ...tableInfo,
@@ -87,6 +83,7 @@ function ColumnPicker(props) {
                                         })
                                     } else {
                                         setIsLoading(true);
+                                        const newTableName = stateContext.getVal('newTableName'); //getVal(stateGetSetVal, 'newTableName');
                                         sqlFreeForm(`alter table ${table} drop column ${f.fieldName};`).then(() => {
                                             return getTableInfo(table || newTableName).then(() => {
                                                 setIsLoading(false);
@@ -120,7 +117,7 @@ function ColumnPicker(props) {
                             </td>
                             <td>
                             <Button onClick={() => {
-                                const newColName = getVal(stateGetSetVal, 'newColName');
+                                const newColName = stateContext.getVal('newColName'); //getVal(stateGetSetVal, 'newColName');
                                     if (isNew) {
                                         if (newColName) {
                                             setTableInfo({
@@ -144,12 +141,13 @@ function ColumnPicker(props) {
                                             setIsLoading(true);
                                             sqlFreeForm(`alter table ${table} add column ${newColName} ${fieldType};`).then(() => {
                                                 return getTableInfo(table).then(() => {                                                    
-                                                    setIsLoading(false);                                                    
+                                                    setIsLoading(false);
+                                                    stateContext.setErr('newColName', '');
                                                 });
                                             }).catch(err => {
                                                 const message = get(err, 'response.body.message', err.message);
-                                                setAddColumnError(message);
-                                                setStateGetSetVal(setErr(stateGetSetVal, 'newColName', message));
+                                                //setStateGetSetVal(setErr(stateGetSetVal, 'newColName', message));
+                                                stateContext.setErr('newColName', message);
                                                 setIsLoading(false);
                                             });
                                         }
@@ -172,22 +170,20 @@ function ColumnPicker(props) {
                                 }
                                 return `${f.fieldName} ${fieldType}`;
                             }).join(',');
-                                const newTableName = getVal(stateGetSetVal, 'newTableName');
-                            sqlFreeForm(`create table ${newTableName} (${colDefs})`).then(() => {
-                                return getTableInfo(newTableName).then(() => {
-                                    return loadTables(newTableName).then(() => {
-                                        setIsLoading(false);
-                                    });
-                                })
-                            }).catch(err => {
-                                setIsLoading(false);
-                                console.log(err);
-                                setCreateTableErrors({
-                                    ...createTableErrors,
-                                    createTable: get(err, 'response.body.message', err.message),
-                                })
-                                setStateGetSetVal(setErr(stateGetSetVal, 'newTableName', get(err, 'response.body.message', err.message)))                                
-                            });
+                                const newTableName = stateContext.getVal('newTableName'); //getVal(stateGetSetVal, 'newTableName');
+                                sqlFreeForm(`create table ${newTableName} (${colDefs})`).then(() => {
+                                    return getTableInfo(newTableName).then(() => {
+                                        return loadTables(newTableName).then(() => {
+                                            setIsLoading(false);
+                                        });
+                                    })
+                                }).catch(err => {
+                                    setIsLoading(false);
+                                    const message = get(err, 'response.body.message', err.message);
+                                    console.log(err);
+                                    //setStateGetSetVal(setErr(stateGetSetVal, 'newTableName', get(err, 'response.body.message', err.message)))                                
+                                    stateContext.setErr('newTableName',message)
+                                });
                         }}>Create</Button></td></tr>
                     }
                     </tbody>
