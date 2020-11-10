@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Form, DropdownButton, Dropdown, Button, Toast  } from 'react-bootstrap';
+import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup  } from 'react-bootstrap';
 import { sqlGetTableInfo, sqlFreeForm } from '../api';
 import { get } from 'lodash';
 import LoadingCover from './LoadingCover';
+import { TextInputWithError, setErr, getVal } from './TextInputWithError';
+
 function ColumnPicker(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
-    const { table } = props;    
+    const { table, loadTables } = props;    
     const isNew = table === null;
     const needQuery = !!table;
     const [tableInfo, setTableInfo] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [addColumnError, setAddColumnError] = useState('');
+    const [newTableName, setNewTableName] = useState('');
+    const [createTableErrors, setCreateTableErrors] = useState({
+        createTable: '',
+    })
+
+    const stateGetSet = useState({
+        values: {},
+        errors: {},
+    })
+    const [stateGetSetVal, setStateGetSetVal] = stateGetSet;
     const [newColInfo, setNewColInfo] = useState({
         name: '',
         type: defaultColumnTypeVal,
@@ -23,7 +35,7 @@ function ColumnPicker(props) {
             selType,
         });
     }
-    const getTableInfo = () => {
+    const getTableInfo = (table) => {
         if (table)
             return sqlGetTableInfo(table).then(res => {
                 setTableInfo({
@@ -45,7 +57,7 @@ function ColumnPicker(props) {
     }
     useEffect(() => {
         if (needQuery)
-            getTableInfo();
+            getTableInfo(table);
         else if (isNew) {
             setTableInfo({
                 constraints: [],
@@ -59,7 +71,7 @@ function ColumnPicker(props) {
         {            
             (isNew || table) && <Table style={{ 'z-index': 8,}} striped bordered hover size="sm">
                 <thead>
-                    <tr><td>Name</td><td>Type</td><td>Size</td><td>Action</td></tr>
+                    <tr><td>Name</td><td>Type</td><td>Size</td><td>Action</td></tr>                    
                 </thead>
                     {tableInfo && tableInfo.fields && <tbody>
                         {
@@ -67,6 +79,7 @@ function ColumnPicker(props) {
                             tableInfo.fields.map((f, key) => <tr key={key}><td style={{ textAlign: 'left' }}>{f.fieldName}</td><td style={{ textAlign: 'left' }}> {f.fieldType}</td>
                                 <td>{f.fieldSize || ''}</td>
                                 <td><Button onClick={() => {
+                                    const newColName = getVal(stateGetSetVal, 'newColName');
                                     if (isNew) {
                                         setTableInfo({
                                             ...tableInfo,
@@ -75,7 +88,7 @@ function ColumnPicker(props) {
                                     } else {
                                         setIsLoading(true);
                                         sqlFreeForm(`alter table ${table} drop column ${f.fieldName};`).then(() => {
-                                            return getTableInfo().then(() => {
+                                            return getTableInfo(table || newTableName).then(() => {
                                                 setIsLoading(false);
                                             })
                                         });
@@ -83,20 +96,8 @@ function ColumnPicker(props) {
                                 }}>Delete</Button></td>
                             </tr>)
                         }
-                        <tr><td>
-                            <Form.Control as="input" value={newColInfo.name} onChange={e => {
-                                setNewColInfo({
-                                    ...newColInfo,
-                                    name: e.target.value
-                                });
-                        }} />
-                        <Toast onClose={() => setAddColumnError('')} show={!!addColumnError} delay={3000} autohide>
-                            <Toast.Header>
-                                <strong className="mr-auto">Error</strong>
-                                <small>.</small>
-                            </Toast.Header>
-                            <Toast.Body>{addColumnError}</Toast.Body>
-                        </Toast>
+                    <tr><td>
+                        <TextInputWithError name='newColName' stateGetSet={stateGetSet} />
                         </td>
                             <td>
                                 <DropdownButton title={newColInfo.selType} >
@@ -118,20 +119,21 @@ function ColumnPicker(props) {
                                 } />
                             </td>
                             <td>
-                                <Button onClick={() => {
+                            <Button onClick={() => {
+                                const newColName = getVal(stateGetSetVal, 'newColName');
                                     if (isNew) {
-                                        if (newColInfo.name) {
+                                        if (newColName) {
                                             setTableInfo({
                                                 ...tableInfo,
                                                 fields: tableInfo.fields.concat({
-                                                    fieldName: newColInfo.name,
+                                                    fieldName: newColName,
                                                     fieldType: newColInfo.selType,
                                                     size: newColInfo.size,
                                                 })
                                             })
                                         }
                                     } else {
-                                        if (newColInfo.name) {
+                                        if (newColName) {
                                             let fieldType = newColInfo.selType;
                                             if (fieldType === 'varchar') {
                                                 fieldType = `${fieldType}(${newColInfo.size})`;
@@ -140,21 +142,54 @@ function ColumnPicker(props) {
                                                 fieldType = `${fieldType}(${newColInfo.size},2)`;
                                             }
                                             setIsLoading(true);
-                                            sqlFreeForm(`alter table ${table} add column ${newColInfo.name} ${fieldType};`).then(() => {
-                                                return getTableInfo().then(() => {
-                                                    setIsLoading(false);
-                                                })
+                                            sqlFreeForm(`alter table ${table} add column ${newColName} ${fieldType};`).then(() => {
+                                                return getTableInfo(table).then(() => {                                                    
+                                                    setIsLoading(false);                                                    
+                                                });
                                             }).catch(err => {
                                                 const message = get(err, 'response.body.message', err.message);
                                                 setAddColumnError(message);
+                                                setStateGetSetVal(setErr(stateGetSetVal, 'newColName', message));
                                                 setIsLoading(false);
                                             });
                                         }
                                     }
-                                }}>Save</Button>
+                                }}>Add</Button>
                             </td>
                         </tr>
-                        
+                    {
+                        isNew && <tr><td>
+                            <TextInputWithError name="newTableName" stateGetSet={ stateGetSet}/>
+
+                            <Button onClick={() => {
+                            const colDefs = tableInfo.fields.map(f => {
+                                let fieldType = f.fieldType;
+                                if (fieldType === 'varchar') {
+                                    fieldType = `${fieldType}(${f.size})`;
+                                }
+                                if (fieldType === 'decimal') {
+                                    fieldType = `${fieldType}(${f.size},2)`;
+                                }
+                                return `${f.fieldName} ${fieldType}`;
+                            }).join(',');
+                                const newTableName = getVal(stateGetSetVal, 'newTableName');
+                            sqlFreeForm(`create table ${newTableName} (${colDefs})`).then(() => {
+                                return getTableInfo(newTableName).then(() => {
+                                    return loadTables(newTableName).then(() => {
+                                        setIsLoading(false);
+                                    });
+                                })
+                            }).catch(err => {
+                                setIsLoading(false);
+                                console.log(err);
+                                setCreateTableErrors({
+                                    ...createTableErrors,
+                                    createTable: get(err, 'response.body.message', err.message),
+                                })
+                                setStateGetSetVal(setErr(stateGetSetVal, 'newTableName', get(err, 'response.body.message', err.message)))                                
+                            });
+                        }}>Create</Button></td></tr>
+                    }
                     </tbody>
                     }
                 </Table>

@@ -9,9 +9,12 @@ function TablePicker() {
     const [tables, setTables] = useState([]);
     const [selectedTable, setSelectedTable] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const loadTables = () => {
-        sqlGetTables().then(res => {
+    const loadTables = setTbl => {
+        return sqlGetTables().then(res => {
             setTables(res);
+            if (setTbl) {
+                setSelectedTable(setTbl);
+            }
         });
     }
     useEffect(() => {        
@@ -21,7 +24,7 @@ function TablePicker() {
         setSelectedTable(tableName);
     }
     return <div>
-        <LoadingCover isLoading={isLoading}/>
+        {isLoading && <LoadingCover isLoading={isLoading} />}
         <Table striped bordered hover size="sm">
             <tbody>
             <tr>
@@ -34,7 +37,9 @@ function TablePicker() {
                                         <td><Button onClick={() => {
                                             setIsLoading(true);
                                             sqlFreeForm(`drop table ${name}`).then(() => {
-                                                setIsLoading(false);
+                                                return loadTables().then(() => {
+                                                    setIsLoading(false);
+                                                });
                                             }).catch(err => {
                                                 setIsLoading(false);
                                                 console.log(err);
@@ -49,7 +54,7 @@ function TablePicker() {
                         </Table>
                     </td>
                     <td>
-                        <ColumnEditor table={selectedTable}></ColumnEditor>
+                        <ColumnEditor table={selectedTable} loadTables={loadTables}></ColumnEditor>
                     </td>
             </tr>
             <tr>                                
