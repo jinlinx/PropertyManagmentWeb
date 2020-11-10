@@ -52,6 +52,12 @@ function ColumnPicker(props) {
                     indexes: res.indexes,
                 });
             });
+        } else {
+            setTableInfo({
+                constraints: {},
+                fields: [],
+                indexes: {},
+            });
         }
     }
     useEffect(() => {
@@ -187,6 +193,20 @@ function ColumnPicker(props) {
                                     stateContext.setErr('newTableName',message)
                                 });
                         }}>Create</Button></td></tr>
+                    }
+                    {
+                        !isNew && <tr><td><Button onClick={() => {
+                            setIsLoading(true);
+                            sqlFreeForm(`drop table ${table}`).then(() => {
+                                return loadTables().then(() => {
+                                    setIsLoading(false);
+                                    getTableInfo();
+                                });
+                            }).catch(err => {
+                                setIsLoading(false);
+                                console.log(err);
+                            })
+                        }}>Delete</Button></td></tr>
                     }
                     </tbody>
                     }
