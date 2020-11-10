@@ -231,7 +231,7 @@ function ColumnEditor(props) {
                     <tr>                        
                         <td>
                             <TextInputWithError name='__createIndexName' stateGetSet={stateGetSet}></TextInputWithError>
-                            <DropdownButton title={ 'test'+curSelIndex ||'curSelIndex'} >
+                            <DropdownButton title={ curSelIndex } >
                                 {
                                     tableInfo.fields.map(f => {
                                         return <Dropdown.Item onSelect={() => {                                            
@@ -248,7 +248,8 @@ function ColumnEditor(props) {
                     </td><td><Button onClick={() => {    
                             const indexName = stateContext.getVal('__createIndexName');
                             const indexParts = stateContext.getVal('__createIndexParts');
-                            const indexPartsStr = indexParts.map(i => `${i.fieldName}`).join(',')
+                            const indexPartsStr = indexParts && indexParts.length ? indexParts.map(i => `${i.fieldName}`).join(',')
+                                : curSelIndex;
                             sqlFreeForm(`create index ${indexName} on ${table} (${indexPartsStr})`).then(() => getTableInfo(table))
                                 .catch(err => {
                                     console.log(err);
