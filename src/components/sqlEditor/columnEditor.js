@@ -39,9 +39,7 @@ function ColumnEditor(props) {
                 setTableInfo({
                     constraints: res.constraints,
                     fields: res.fields.map(f => {
-                        const r = f.fieldType.match(/([a-zA-Z]+)(\(([0-9]+){1,1}(,([0-9]+){1,1}){0,1}\)){0,1}/);
-                        console.log(f.fieldType)
-                        console.log(`${r[1]}  - ${r[3]} - ${r[5]}`);
+                        const r = f.fieldType.match(/([a-zA-Z]+)(\(([0-9]+){1,1}(,([0-9]+){1,1}){0,1}\)){0,1}/);                        
                         return {
                             ...f,
                             fieldType: r[1],
@@ -74,9 +72,7 @@ function ColumnEditor(props) {
 
     const indexParts = stateContext.getVal('__createIndexParts') || [];
     const curSelIndex = get(indexParts,'0.fieldName') || get(tableInfo, 'fields[0].fieldName','');
-
-    console.log('debugremove fields')
-    console.log(tableInfo.fields);
+    
     return <div>
         <LoadingCover isLoading={isLoading}/>
         {            
@@ -215,6 +211,23 @@ function ColumnEditor(props) {
                         }}>Delete</Button></td></tr>
                     }
                     <tr><td>Indexes</td></tr>
+                    {
+                        tableInfo.indexes.map(idx => {
+                            return <tr><td>{idx.indexName}</td><td> {idx.table}</td><td>{idx.columnName}</td>
+                                <td><Button onClick={() => {
+                                    setIsLoading(true);
+                                    sqlFreeForm(`alter table ${table} drop index ${idx.indexName}`).then(()=>getTableInfo(idx.table))
+                                        .then(() => {
+                                            setIsLoading(false);
+                                        })
+                                        .catch(err => {
+                                            setIsLoading(false);
+                                            console.log(err);
+                                        })
+                                }}>Delete</Button></td>
+                            </tr>
+                        })
+                    }
                     <tr>                        
                         <td>
                             <TextInputWithError name='__createIndexName' stateGetSet={stateGetSet}></TextInputWithError>
@@ -236,7 +249,7 @@ function ColumnEditor(props) {
                             const indexName = stateContext.getVal('__createIndexName');
                             const indexParts = stateContext.getVal('__createIndexParts');
                             const indexPartsStr = indexParts.map(i => `${i.fieldName}`).join(',')
-                            sqlFreeForm(`create index ${indexName} on ${table} (${indexPartsStr})`)
+                            sqlFreeForm(`create index ${indexName} on ${table} (${indexPartsStr})`).then(() => getTableInfo(table))
                                 .catch(err => {
                                     console.log(err);
                             })
