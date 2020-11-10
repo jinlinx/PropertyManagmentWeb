@@ -3,9 +3,9 @@ import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup  } fro
 import { sqlGetTableInfo, sqlFreeForm } from '../api';
 import { get } from 'lodash';
 import LoadingCover from './LoadingCover';
-import { TextInputWithError, setErr, getVal, createStateContext } from './TextInputWithError';
+import { TextInputWithError, createStateContext } from './TextInputWithError';
 
-function ColumnPicker(props) {
+function ColumnEditor(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
     const { table, loadTables, isLoading, setIsLoading} = props;    
     const isNew = table === null;
@@ -71,6 +71,12 @@ function ColumnPicker(props) {
             });
         }
     }, [table]);    
+
+    const indexParts = stateContext.getVal('__createIndexParts') || [];
+    const curSelIndex = get(indexParts,'0.fieldName') || get(tableInfo, 'fields[0].fieldName','');
+
+    console.log('debugremove fields')
+    console.log(tableInfo.fields);
     return <div>
         <LoadingCover isLoading={isLoading}/>
         {            
@@ -208,6 +214,33 @@ function ColumnPicker(props) {
                             })
                         }}>Delete</Button></td></tr>
                     }
+                    <tr><td>Indexes</td></tr>
+                    <tr>                        
+                        <td>
+                            <TextInputWithError name='__createIndexName' stateGetSet={stateGetSet}></TextInputWithError>
+                            <DropdownButton title={ 'test'+curSelIndex ||'curSelIndex'} >
+                                {
+                                    tableInfo.fields.map(f => {
+                                        return <Dropdown.Item onSelect={() => {                                            
+                                            stateContext.setVal('__createIndexParts', [{
+                                                fieldName: f.fieldName
+                                            }]);
+                                        }}>{f.fieldName}</Dropdown.Item>        
+                                    })
+                                }
+                                <Dropdown.Item onSelect={() => setSelType('varchar')}>varchar</Dropdown.Item>
+                                <Dropdown.Item onSelect={() => setSelType('datetime')}>datetime</Dropdown.Item>
+                                <Dropdown.Item onSelect={() => setSelType('decimal')}>decimal</Dropdown.Item>
+                            </DropdownButton>
+                    </td><td><Button onClick={() => {    
+                            const indexName = stateContext.getVal('__createIndexName');
+                            const indexParts = stateContext.getVal('__createIndexParts');
+                            const indexPartsStr = indexParts.map(i => `${i.fieldName}`).join(',')
+                            sqlFreeForm(`create index ${indexName} on ${table} (${indexPartsStr})`)
+                                .catch(err => {
+                                    console.log(err);
+                            })
+                    }}>Add Index</Button></td></tr>
                     </tbody>
                     }
                 </Table>
@@ -216,4 +249,4 @@ function ColumnPicker(props) {
 }
 
 
-export default ColumnPicker;
+export default ColumnEditor;
