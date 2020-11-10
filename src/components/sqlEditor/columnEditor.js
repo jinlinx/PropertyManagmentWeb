@@ -7,11 +7,11 @@ import { TextInputWithError, setErr, getVal, createStateContext } from './TextIn
 
 function ColumnPicker(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
-    const { table, loadTables } = props;    
+    const { table, loadTables, isLoading, setIsLoading} = props;    
     const isNew = table === null;
     const needQuery = !!table;
     const [tableInfo, setTableInfo] = useState({});
-    const [isLoading, setIsLoading] = useState(false);    
+    //const [isLoading, setIsLoading] = useState(false);    
 
     const stateGetSet = useState({
         values: {},
@@ -19,7 +19,6 @@ function ColumnPicker(props) {
     });
     const stateContext = createStateContext(stateGetSet);
 
-    const [stateGetSetVal, setStateGetSetVal] = stateGetSet;
     const [newColInfo, setNewColInfo] = useState({
         name: '',
         type: defaultColumnTypeVal,
@@ -33,24 +32,27 @@ function ColumnPicker(props) {
         });
     }
     const getTableInfo = (table) => {
-        if (table)
+        if (table) {
+            setIsLoading(true);
             return sqlGetTableInfo(table).then(res => {
+                setIsLoading(false);
                 setTableInfo({
                     constraints: res.constraints,
                     fields: res.fields.map(f => {
                         const r = f.fieldType.match(/([a-zA-Z]+)(\(([0-9]+){1,1}(,([0-9]+){1,1}){0,1}\)){0,1}/);
                         console.log(f.fieldType)
-                        console.log(`${r[1]}  - ${r[3]} - ${r[5]}`);                        
+                        console.log(`${r[1]}  - ${r[3]} - ${r[5]}`);
                         return {
                             ...f,
                             fieldType: r[1],
                             fieldSize: r[3],
-                            fieldMinSize: r[5], 
-                        }; 
+                            fieldMinSize: r[5],
+                        };
                     }),
                     indexes: res.indexes,
                 });
             });
+        }
     }
     useEffect(() => {
         if (needQuery)

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Form, DropdownButton, Dropdown, Button } from 'react-bootstrap';
-import { sqlGetTableInfo, sqlGetTables, sqlFreeForm } from '../api';
-import styles from './TablePicker.css'
+import { sqlGetTables, sqlFreeForm } from '../api';
 import ColumnEditor from './columnEditor';
 import LoadingCover from './LoadingCover';
 
@@ -54,7 +53,9 @@ function TablePicker() {
                         </Table>
                     </td>
                     <td>
-                        <ColumnEditor table={selectedTable} loadTables={loadTables}></ColumnEditor>
+                        <ColumnEditor table={selectedTable} loadTables={loadTables}
+                            isLoading={isLoading} setIsLoading={setIsLoading}
+                        ></ColumnEditor>
                     </td>
             </tr>
             <tr>                                
