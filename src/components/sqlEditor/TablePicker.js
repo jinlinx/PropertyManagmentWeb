@@ -3,6 +3,7 @@ import { Table, Form, DropdownButton, Dropdown, Button } from 'react-bootstrap';
 import { sqlGetTables, sqlFreeForm } from '../api';
 import ColumnEditor from './columnEditor';
 import LoadingCover from './LoadingCover';
+import { DataViewerAuto } from './DataViewer';
 
 function TablePicker() {
     const [tables, setTables] = useState([]);
@@ -54,9 +55,7 @@ function TablePicker() {
                             ></ColumnEditor>
                         }
                         {
-                            showData && <ColumnEditor table={selectedTable} loadTables={loadTables}
-                                isLoading={isLoading} setIsLoading={setIsLoading}
-                            ></ColumnEditor>
+                            showData && <DataViewerAuto table={selectedTable}></DataViewerAuto>
                         }
                     </td>
             </tr>
