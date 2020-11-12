@@ -56,6 +56,7 @@ export function DataViewer (props) {
             sqlFreeForm(`select count(1) cnt from ${table}`).then(cntres => {                
                 return sqlFreeForm(`select ${fields} from ${table} limit ${paggingInfo.pos}, ${paggingInfo.PageSize}`).then(res => {
                     setRows(res);
+                    setPaggingInfo({ ...paggingInfo, total: cntres[0].cnt })
                     setLoadState('init');
                 })
             })            
@@ -153,15 +154,17 @@ export function DataViewer (props) {
             {
                 dspState === 'dsp' &&
                 <div>
-                    <div>
-                        {makePageButtons([0], '<<')}
-                        {paggingCalced.needFront3dots ? '...' : ''}
-                        {makePageButtons(paggingCalced.frontPageInds)}
-                        {paggingInfo.pos + 1}
-                        {makePageButtons(paggingCalced.rearPageInds)}
-                        {paggingCalced.needRear3dots ? '...' : ''}
-                        {makePageButtons([paggingInfo.lastPage], '>>')}
-                    </div>
+                    {
+                        paggingInfo.lastPage >0 && <div>
+                            {makePageButtons([0], '<<')}
+                            {paggingCalced.needFront3dots ? '...' : ''}
+                            {makePageButtons(paggingCalced.frontPageInds)}
+                            {paggingInfo.pos + 1}
+                            {makePageButtons(paggingCalced.rearPageInds)}
+                            {paggingCalced.needRear3dots ? '...' : ''}
+                            {makePageButtons([paggingInfo.lastPage], '>>')}
+                        </div>
+                    }
                     <div>
                         <a href="" onClick={filterClick}>{showFilter ? 'Hide' : 'Filter'}</a>
                         {
