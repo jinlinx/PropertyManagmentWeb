@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup  } from 'react-bootstrap';
-import { sqlGetTableInfo, sqlFreeForm } from '../api';
+import { sqlGetTableInfo, sqlGetTables, sqlFreeForm } from '../api';
 import { get } from 'lodash';
 import LoadingCover from './LoadingCover';
 import { TextInputWithError, createStateContext } from './TextInputWithError';
+import apiUtil from './apiUtil';
 
 function ColumnEditor(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
@@ -11,6 +12,7 @@ function ColumnEditor(props) {
     const isNew = table === null;
     const needQuery = !!table;
     const [tableInfo, setTableInfo] = useState({});
+    const [allTableInfo, setAllTableInfo] = useState([]);
     //const [isLoading, setIsLoading] = useState(false);    
 
     const stateGetSet = useState({
@@ -32,6 +34,16 @@ function ColumnEditor(props) {
         });
     }
     const getTableInfo = (table) => {
+        if (!allTableInfo.length) {
+            setIsLoading(true);
+            sqlGetTables().then(res => {
+                setAllTableInfo(res.reduce((acc, n) => {
+                    acc[n] = {};
+                    return acc;
+                 }, {}));
+                setIsLoading(false);                
+            });
+        }
         if (table) {
             setIsLoading(true);
             return sqlGetTableInfo(table).then(res => {
@@ -73,6 +85,11 @@ function ColumnEditor(props) {
     const indexParts = stateContext.getVal('__createIndexParts') || [];
     const curSelIndex = get(indexParts,'0.fieldName') || get(tableInfo, 'fields[0].fieldName','');
     
+    const getStateContextLastAryData = (name, path, defVal) => {
+        const parts = stateContext.getVal('__createConstraintParts');
+        if (!parts) return defVal;
+        return get(parts, [parts.length - 1, path], defVal);
+    }
     return <div>
         <LoadingCover isLoading={isLoading}/>
         {            
@@ -299,7 +316,65 @@ function ColumnEditor(props) {
                                 .catch(err => {
                                     console.log(err);
                             })
-                    }}>Add Index</Button></td></tr>
+                        }}>Add Index</Button></td></tr>
+                    
+                    <tr><td>Constraints</td></tr>
+                    {
+                        tableInfo.constraints.map(idx => {
+                            return <tr><td>{idx.indexName}</td><td> {idx.table}</td><td>{idx.columnName}</td>
+                                <td><Button onClick={() => {
+                                    setIsLoading(true);
+                                    const dropIdx = idx.indexName === 'PRIMARY' ?
+                                        `alter table ${table} drop primary key;`
+                                        : `alter table ${table} drop index ${idx.indexName}`;
+                                    sqlFreeForm(dropIdx).then(() => getTableInfo(idx.table))
+                                        .then(() => {
+                                            setIsLoading(false);
+                                        })
+                                        .catch(err => {
+                                            setIsLoading(false);
+                                            console.log(err);
+                                        })
+                                }}>Delete</Button></td>
+                            </tr>
+                        })
+                    }
+                    <tr>
+                        <td>
+                            <TextInputWithError name='__createConstraintName' stateGetSet={stateGetSet}></TextInputWithError>
+                            <DropdownButton title={getStateContextLastAryData('__createConstraintParts','fieldName','')} >
+                                {
+                                    tableInfo.fields.map(f => {
+                                        return <Dropdown.Item onSelect={() => {
+                                            stateContext.setVal('__createConstraintParts', [{
+                                                fieldName: f.fieldName
+                                            }]);
+                                        }}>{f.fieldName}</Dropdown.Item>
+                                    })
+                                }                                
+                            </DropdownButton>
+
+                            <DropdownButton title={getStateContextLastAryData('__createConstraintParts','fieldName','')} >
+                                {
+                                    (allTableInfo[table] && allTableInfo[table].fields)?allTableInfo[table].fields.map(f => {
+                                        return <Dropdown.Item onSelect={() => {
+                                            stateContext.setVal('__createConstraintParts', [{
+                                                fieldName: f.fieldName
+                                            }]);
+                                        }}>{f.fieldName}</Dropdown.Item>
+                                    }) : <Dropdown.Item>Loading</Dropdown.Item>
+                                }
+                            </DropdownButton>
+                        </td><td><Button onClick={() => {
+                            const indexName = stateContext.getVal('__createIndexName');
+                            const indexParts = stateContext.getVal('__createIndexParts');
+                            const indexPartsStr = indexParts && indexParts.length ? indexParts.map(i => `${i.fieldName}`).join(',')
+                                : curSelIndex;
+                            sqlFreeForm(`create index ${indexName} on ${table} (${indexPartsStr})`).then(() => getTableInfo(table))
+                                .catch(err => {
+                                    console.log(err);
+                                })
+                        }}>Add Constraint</Button></td></tr>
                     </tbody>
                     }
                 </Table>
