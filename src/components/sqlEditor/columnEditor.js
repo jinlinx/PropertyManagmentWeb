@@ -16,7 +16,7 @@ function ColumnEditor(props) {
         tables: [],
         tableCols: {},
     });
-    const needQuery = !!table && !allTableInfo.tableCols[table];
+    
     const [curForeignKeyTable, setCurForeignKeyTable] = useState('');
     //const [isLoading, setIsLoading] = useState(false);    
 
@@ -71,7 +71,7 @@ function ColumnEditor(props) {
             })            
         } else {
             setTableInfo({
-                constraints: {},
+                constraints: {}, //columnName: "id", constraintName: "fk_test_2" ,refColumn: "tenantID" ,refTable: "tenantInfo"
                 fields: [],
                 indexes: {},
             });
@@ -334,8 +334,8 @@ function ColumnEditor(props) {
                     
                     <tr><td>Constraints</td></tr>
                     {
-                        tableInfo.constraints.map(idx => {
-                            return <tr><td>{idx.indexName}</td><td> {idx.table}</td><td>{idx.columnName}</td>
+                        tableInfo.constraints.filter(c=>c.constraintName !== 'PRIMARY').map(idx => {
+                            return <tr><td>{idx.constraintName}</td><td> {idx.refTable}</td><td>{idx.refColumn}</td>
                                 <td><Button onClick={() => {
                                     setIsLoading(true);
                                     const dropIdx = idx.indexName === 'PRIMARY' ?
