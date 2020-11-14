@@ -8,14 +8,15 @@ import { apiGetTableInfo} from './apiUtil';
 
 function ColumnEditor(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
-    const { table, loadTables, isLoading, setIsLoading} = props;    
-    const isNew = table === null;
-    const needQuery = !!table;
+    const { table, loadTables, isLoading, setIsLoading } = props;    
+    console.log(`ColumnEditor table => ${table}`);
+    const isNew = table === null;    
     const [tableInfo, setTableInfo] = useState({});
     const [allTableInfo, setAllTableInfo] = useState({
         tables: [],
         tableCols: {},
     });
+    const needQuery = !!table && !allTableInfo.tableCols[table];
     const [curForeignKeyTable, setCurForeignKeyTable] = useState('');
     //const [isLoading, setIsLoading] = useState(false);    
 
@@ -47,6 +48,15 @@ function ColumnEditor(props) {
                     ...allTableInfo.tableCols,
                     [table]: tinf,
                 }
+            }            
+            if (!allTableInfo.tables.length) {
+                return sqlGetTables().then(res => {
+                    setAllTableInfo({
+                        ...newAllTableInfo,
+                        tables: res,
+                    });
+                    return tinf;
+                });
             }
             setAllTableInfo(newAllTableInfo);
             return tinf;
@@ -67,23 +77,17 @@ function ColumnEditor(props) {
             });
         }
     }
-    useEffect(() => {
-        if (!allTableInfo.tables.length) {
-            setIsLoading(true);
-            sqlGetTables().then(res => {
-                setAllTableInfo({
-                    ...allTableInfo,
-                    tables: res,
-                });
-                setIsLoading(false);
-            });
-        }
+    useEffect(() => {        
         if (curForeignKeyTable && !allTableInfo.tableCols[curForeignKeyTable]) {
             getTableInfoAndPopulateForeignKeyTable(curForeignKeyTable);
         }
-        if (needQuery)
-            getTableInfo(table);
-        else if (isNew) {
+        if (!!table) {
+            const existing = allTableInfo.tableCols[table];
+            if (existing) {
+                setTableInfo(existing);
+            }else
+                getTableInfo(table);
+        }else if (isNew) {
             setTableInfo({
                 constraints: [],
                 fields: [],
@@ -384,11 +388,13 @@ function ColumnEditor(props) {
                                 }
                             </DropdownButton>
                         </td><td><Button onClick={() => {
-                            const indexName = stateContext.getVal('__createIndexName');
-                            const indexParts = stateContext.getVal('__createIndexParts');
-                            const indexPartsStr = indexParts && indexParts.length ? indexParts.map(i => `${i.fieldName}`).join(',')
-                                : curSelIndex;
-                            sqlFreeForm(`create index ${indexName} on ${table} (${indexPartsStr})`).then(() => getTableInfo(table))
+                            const constraintName = stateContext.getVal('__createConstraintName');
+                            const refTblCols = stateContext.getVal('__createConstraintRefTablesCols');
+                            const createConstraintSql = `ALTER TABLE ${table}
+ADD CONSTRAINT ${constraintName}
+FOREIGN KEY (${stateContext.getVal('__createConstraintIndexParts').map(r => r.fieldName).join(',')}) REFERENCES 
+${curForeignKeyTable}(${refTblCols.map(r=>r.fieldName).join(',')});`;
+                            sqlFreeForm(createConstraintSql).then(() => getTableInfo(table))
                                 .catch(err => {
                                     console.log(err);
                                 })
