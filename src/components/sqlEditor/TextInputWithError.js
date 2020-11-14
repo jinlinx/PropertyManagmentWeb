@@ -49,17 +49,16 @@ export function createStateContext([state, setState]) {
 }
 
 export function TextInputWithError(props) {
-    const { name, stateGetSet } = props;
-    const [value, changeFunc] = stateGetSet;
-    const errorText = getErr(value, name, '');
+    const { name, stateContext } = props;    
+    const errorText = stateContext.getErr(name, '');
     return <InputGroup>
         <Form.Control
             type="text"
             placeholder={name}
             name={name}
-            value={getVal(value,name,'')}
+            value={stateContext.getVal(name,'')}
             onChange={e => {                                
-                changeFunc(setVal(value, name, e.target.value))
+                stateContext.setVal(name, e.target.value)
             }}
             isInvalid={!!errorText}
         />

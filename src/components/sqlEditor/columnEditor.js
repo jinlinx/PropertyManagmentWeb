@@ -19,11 +19,10 @@ function ColumnEditor(props) {
     const [curForeignKeyTable, setCurForeignKeyTable] = useState('');
     //const [isLoading, setIsLoading] = useState(false);    
 
-    const stateGetSet = useState({
+    const stateContext = createStateContext(useState({
         values: {},
         errors: {},
-    });
-    const stateContext = createStateContext(stateGetSet);
+    }));
 
     const [newColInfo, setNewColInfo] = useState({
         name: '',
@@ -38,9 +37,9 @@ function ColumnEditor(props) {
         });
     }
 
-    const getTableInfoAndPopulateForeignKeyTable = async table => {
+    const getTableInfoAndPopulateForeignKeyTable = async (table, force=false) => {
         const existing = allTableInfo.tableCols[table];
-        if (existing) return existing;
+        if (existing && !force) return existing;
         return await apiGetTableInfo(table).then(tinf => {
             const newAllTableInfo = {
                 ...allTableInfo,
@@ -56,7 +55,7 @@ function ColumnEditor(props) {
     const getTableInfo = (table) => {        
         if (table) {
             setIsLoading(true);
-            return getTableInfoAndPopulateForeignKeyTable(table).then(tinf => {
+            return getTableInfoAndPopulateForeignKeyTable(table, true).then(tinf => {
                 setIsLoading(false);
                 setTableInfo(tinf);
             })            
@@ -132,7 +131,7 @@ function ColumnEditor(props) {
                             </tr>)
                         }
                     <tr><td>
-                        <TextInputWithError name='newColName' stateGetSet={stateGetSet} />
+                        <TextInputWithError name='newColName' stateContext={stateContext} />
                         </td>
                             <td>
                                 <DropdownButton title={newColInfo.selType} >
@@ -195,7 +194,7 @@ function ColumnEditor(props) {
                         </tr>
                     {
                         isNew && <tr><td>
-                            <TextInputWithError name="newTableName" stateGetSet={ stateGetSet}/>
+                            <TextInputWithError name="newTableName" stateContext={ stateContext}/>
 
                             <Button onClick={() => {
                             const colDefs = tableInfo.fields.map(f => {
@@ -258,7 +257,7 @@ function ColumnEditor(props) {
                     }
                     <tr>
                         <td>
-                            <TextInputWithError name='__createPrimaryKeyName' stateGetSet={stateGetSet}></TextInputWithError>
+                            <TextInputWithError name='__createPrimaryKeyName' stateContext={stateContext}></TextInputWithError>
                             <DropdownButton title={curSelIndex} >
                                 {
                                     tableInfo.fields.map(f => {
@@ -303,7 +302,7 @@ function ColumnEditor(props) {
                     }
                     <tr>                        
                         <td>
-                            <TextInputWithError name='__createIndexName' stateGetSet={stateGetSet}></TextInputWithError>
+                            <TextInputWithError name='__createIndexName' stateContext={stateContext}></TextInputWithError>
                             <DropdownButton title={ curSelIndex } >
                                 {
                                     tableInfo.fields.map(f => {
@@ -352,7 +351,7 @@ function ColumnEditor(props) {
                     }
                     <tr>
                         <td>
-                            <TextInputWithError name='__createConstraintName' stateGetSet={stateGetSet}></TextInputWithError>
+                            <TextInputWithError name='__createConstraintName' stateContext={stateContext}></TextInputWithError>
                             <DropdownButton title={getStateContextLastAryData('__createConstraintIndexParts','fieldName','')} >
                                 {
                                     tableInfo.fields.map(f => {
