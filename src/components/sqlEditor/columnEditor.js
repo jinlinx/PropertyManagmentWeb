@@ -4,7 +4,8 @@ import { sqlGetTableInfo, sqlGetTables, sqlFreeForm } from '../api';
 import { get } from 'lodash';
 import LoadingCover from './LoadingCover';
 import { TextInputWithError, createStateContext } from './TextInputWithError';
-import { apiGetTableInfo} from './apiUtil';
+import { apiGetTableInfo } from './apiUtil';
+import { MultiDropdown } from './MultiBarDropdown';
 
 function ColumnEditor(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
@@ -355,18 +356,16 @@ function ColumnEditor(props) {
                     }
                     <tr>
                         <td>
-                            <TextInputWithError name='__createConstraintName' stateContext={stateContext}></TextInputWithError>
-                            <DropdownButton title={getStateContextLastAryData('__createConstraintIndexParts','fieldName','')} >
-                                {
-                                    tableInfo.fields.map(f => {
-                                        return <Dropdown.Item onSelect={() => {
-                                            stateContext.setVal('__createConstraintIndexParts', [{
-                                                fieldName: f.fieldName
-                                            }]);
-                                        }}>{f.fieldName}</Dropdown.Item>
-                                    })
-                                }                                
-                            </DropdownButton>
+                            Name:<TextInputWithError name='__createConstraintName' stateContext={stateContext}></TextInputWithError>
+                            <MultiDropdown
+                                name='constraintIdParts'
+                                selectedItems={stateContext.getVal('__createConstraintIndexParts') || []}
+                                setSelectedItems={items => {
+                                    stateContext.setVal('__createConstraintIndexParts', items);
+                                }}
+                                options={tableInfo.fields }
+                                itemToName={x => x.fieldName}
+                            />
                             <DropdownButton title={curForeignKeyTable} >
                                 {
                                     (allTableInfo.tables.length) ? allTableInfo.tables.map(curTbl => {
@@ -376,17 +375,17 @@ function ColumnEditor(props) {
                                     }) : <Dropdown.Item>Loading</Dropdown.Item>
                                 }
                             </DropdownButton>
-                            <DropdownButton title={getStateContextLastAryData('__createConstraintRefTablesCols','fieldName','')} >
-                                {
-                                    (allTableInfo.tableCols[curForeignKeyTable]) ? allTableInfo.tableCols[curForeignKeyTable].fields.map(f => {
-                                        return <Dropdown.Item onSelect={() => {
-                                            stateContext.setVal('__createConstraintRefTablesCols', [{
-                                                fieldName: f.fieldName
-                                            }]);
-                                        }}>{f.fieldName}</Dropdown.Item>
-                                    }) : <Dropdown.Item>Loading</Dropdown.Item>
+                            <MultiDropdown
+                                selectedItems={stateContext.getVal('__createConstraintRefTablesCols') || []}
+                                setSelectedItems={items => {
+                                    stateContext.setVal('__createConstraintRefTablesCols', items);
+                                }}
+                                options={
+                                    allTableInfo.tableCols[curForeignKeyTable] ? allTableInfo.tableCols[curForeignKeyTable].fields
+                                        : [{ fieldName: 'Loading' }]                                
                                 }
-                            </DropdownButton>
+                                itemToName={x => x.fieldName}
+                            />                            
                         </td><td><Button onClick={() => {
                             const constraintName = stateContext.getVal('__createConstraintName');
                             const refTblCols = stateContext.getVal('__createConstraintRefTablesCols');
