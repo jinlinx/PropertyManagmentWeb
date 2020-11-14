@@ -4,7 +4,7 @@ import { sqlGetTableInfo, sqlGetTables, sqlFreeForm } from '../api';
 import { get } from 'lodash';
 import LoadingCover from './LoadingCover';
 import { TextInputWithError, createStateContext } from './TextInputWithError';
-import apiUtil from './apiUtil';
+import { apiGetTableInfo} from './apiUtil';
 
 function ColumnEditor(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
@@ -12,7 +12,11 @@ function ColumnEditor(props) {
     const isNew = table === null;
     const needQuery = !!table;
     const [tableInfo, setTableInfo] = useState({});
-    const [allTableInfo, setAllTableInfo] = useState([]);
+    const [allTableInfo, setAllTableInfo] = useState({
+        tables: [],
+        tableCols: {},
+    });
+    const [curForeignKeyTable, setCurForeignKeyTable] = useState('');
     //const [isLoading, setIsLoading] = useState(false);    
 
     const stateGetSet = useState({
@@ -33,35 +37,29 @@ function ColumnEditor(props) {
             selType,
         });
     }
-    const getTableInfo = (table) => {
-        if (!allTableInfo.length) {
-            setIsLoading(true);
-            sqlGetTables().then(res => {
-                setAllTableInfo(res.reduce((acc, n) => {
-                    acc[n] = {};
-                    return acc;
-                 }, {}));
-                setIsLoading(false);                
-            });
-        }
+
+    const getTableInfoAndPopulateForeignKeyTable = async table => {
+        const existing = allTableInfo.tableCols[table];
+        if (existing) return existing;
+        return await apiGetTableInfo(table).then(tinf => {
+            const newAllTableInfo = {
+                ...allTableInfo,
+                tableCols: {
+                    ...allTableInfo.tableCols,
+                    [table]: tinf,
+                }
+            }
+            setAllTableInfo(newAllTableInfo);
+            return tinf;
+        })            
+    }
+    const getTableInfo = (table) => {        
         if (table) {
             setIsLoading(true);
-            return sqlGetTableInfo(table).then(res => {
+            return getTableInfoAndPopulateForeignKeyTable(table).then(tinf => {
                 setIsLoading(false);
-                setTableInfo({
-                    constraints: res.constraints,
-                    fields: res.fields.map(f => {
-                        const r = f.fieldType.match(/([a-zA-Z]+)(\(([0-9]+){1,1}(,([0-9]+){1,1}){0,1}\)){0,1}/);                        
-                        return {
-                            ...f,
-                            fieldType: r[1],
-                            fieldSize: r[3],
-                            fieldMinSize: r[5],
-                        };
-                    }),
-                    indexes: res.indexes,
-                });
-            });
+                setTableInfo(tinf);
+            })            
         } else {
             setTableInfo({
                 constraints: {},
@@ -71,6 +69,19 @@ function ColumnEditor(props) {
         }
     }
     useEffect(() => {
+        if (!allTableInfo.tables.length) {
+            setIsLoading(true);
+            sqlGetTables().then(res => {
+                setAllTableInfo({
+                    ...allTableInfo,
+                    tables: res,
+                });
+                setIsLoading(false);
+            });
+        }
+        if (curForeignKeyTable && !allTableInfo.tableCols[curForeignKeyTable]) {
+            getTableInfoAndPopulateForeignKeyTable(curForeignKeyTable);
+        }
         if (needQuery)
             getTableInfo(table);
         else if (isNew) {
@@ -80,13 +91,13 @@ function ColumnEditor(props) {
                 indexes: [],
             });
         }
-    }, [table]);    
+    }, [table, curForeignKeyTable]);    
 
     const indexParts = stateContext.getVal('__createIndexParts') || [];
     const curSelIndex = get(indexParts,'0.fieldName') || get(tableInfo, 'fields[0].fieldName','');
     
     const getStateContextLastAryData = (name, path, defVal) => {
-        const parts = stateContext.getVal('__createConstraintParts');
+        const parts = stateContext.getVal(name);
         if (!parts) return defVal;
         return get(parts, [parts.length - 1, path], defVal);
     }
@@ -342,23 +353,31 @@ function ColumnEditor(props) {
                     <tr>
                         <td>
                             <TextInputWithError name='__createConstraintName' stateGetSet={stateGetSet}></TextInputWithError>
-                            <DropdownButton title={getStateContextLastAryData('__createConstraintParts','fieldName','')} >
+                            <DropdownButton title={getStateContextLastAryData('__createConstraintIndexParts','fieldName','')} >
                                 {
                                     tableInfo.fields.map(f => {
                                         return <Dropdown.Item onSelect={() => {
-                                            stateContext.setVal('__createConstraintParts', [{
+                                            stateContext.setVal('__createConstraintIndexParts', [{
                                                 fieldName: f.fieldName
                                             }]);
                                         }}>{f.fieldName}</Dropdown.Item>
                                     })
                                 }                                
                             </DropdownButton>
-
-                            <DropdownButton title={getStateContextLastAryData('__createConstraintParts','fieldName','')} >
+                            <DropdownButton title={curForeignKeyTable} >
                                 {
-                                    (allTableInfo[table] && allTableInfo[table].fields)?allTableInfo[table].fields.map(f => {
+                                    (allTableInfo.tables.length) ? allTableInfo.tables.map(curTbl => {
                                         return <Dropdown.Item onSelect={() => {
-                                            stateContext.setVal('__createConstraintParts', [{
+                                            setCurForeignKeyTable(curTbl)
+                                        }}>{curTbl}</Dropdown.Item>
+                                    }) : <Dropdown.Item>Loading</Dropdown.Item>
+                                }
+                            </DropdownButton>
+                            <DropdownButton title={getStateContextLastAryData('__createConstraintRefTablesCols','fieldName','')} >
+                                {
+                                    (allTableInfo.tableCols[curForeignKeyTable]) ? allTableInfo.tableCols[curForeignKeyTable].fields.map(f => {
+                                        return <Dropdown.Item onSelect={() => {
+                                            stateContext.setVal('__createConstraintRefTablesCols', [{
                                                 fieldName: f.fieldName
                                             }]);
                                         }}>{f.fieldName}</Dropdown.Item>
