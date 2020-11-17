@@ -308,6 +308,15 @@ function ColumnEditor(props) {
                     <tr>                        
                         <td>
                             <TextInputWithError name='__createIndexName' stateContext={stateContext}></TextInputWithError>
+                            <MultiDropdown
+                                name='CreateIndexMultiDropdown'
+                                selectedItems={stateContext.getVal('__createIndexParts') || []}
+                                setSelectedItems={items => {
+                                    stateContext.setVal('__createIndexParts', items);
+                                }}
+                                options={tableInfo.fields.map(f=>f.fieldName)}
+                                itemToName={x => x}
+                            />
                             <DropdownButton title={ curSelIndex } >
                                 {
                                     tableInfo.fields.map(f => {
@@ -318,14 +327,11 @@ function ColumnEditor(props) {
                                         }}>{f.fieldName}</Dropdown.Item>        
                                     })
                                 }
-                                <Dropdown.Item onSelect={() => setSelType('varchar')}>varchar</Dropdown.Item>
-                                <Dropdown.Item onSelect={() => setSelType('datetime')}>datetime</Dropdown.Item>
-                                <Dropdown.Item onSelect={() => setSelType('decimal')}>decimal</Dropdown.Item>
                             </DropdownButton>
                     </td><td><Button onClick={() => {    
                             const indexName = stateContext.getVal('__createIndexName');
                             const indexParts = stateContext.getVal('__createIndexParts');
-                            const indexPartsStr = indexParts && indexParts.length ? indexParts.map(i => `${i.fieldName}`).join(',')
+                            const indexPartsStr = indexParts && indexParts.length ? indexParts.map(i => `${i}`).join(',')
                                 : curSelIndex;
                             sqlFreeForm(`create index ${indexName} on ${table} (${indexPartsStr})`).then(() => getTableInfo(table))
                                 .catch(err => {
