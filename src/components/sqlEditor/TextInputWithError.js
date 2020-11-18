@@ -40,10 +40,17 @@ export function getErr(state, name, defVal) {
 }
 
 export function createStateContext([state, setState]) {
+    let curState = state;
     return {
-        setVal: (name, val) => setState(setVal(state, name, val)),
+        setVal: (name, val) => {
+            curState = setVal(curState, name, val);
+            setState(curState);
+        },
         getVal: (name, defVal) => getVal(state, name, defVal),
-        setErr: (name, err) => setState(setErr(state, name, err)),
+        setErr: (name, err) => {
+            curState = setErr(curState, name, err);
+            setState(curState);
+        },
         getErr: (name, defVal)=>getErr(state, name, defVal),
     }
 }

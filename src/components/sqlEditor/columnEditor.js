@@ -42,7 +42,16 @@ function ColumnEditor(props) {
     const getTableInfoAndPopulateForeignKeyTable = async (table, force=false) => {
         const existing = allTableInfo.tableCols[table];
         if (existing && !force) return existing;
-        return await apiGetTableInfo(table).then(tinf => {
+        return await apiGetTableInfo(table).then(otinf => {
+            const tinf = {
+                ...otinf,
+                indexes: otinf.indexes.map(f => {
+                    return {
+                        ...f,
+                        isPrimaryKey: f.indexName === 'PRIMARY'
+                   } 
+                }),
+            }
             const newAllTableInfo = {
                 ...allTableInfo,
                 tableCols: {
@@ -100,11 +109,11 @@ function ColumnEditor(props) {
     const indexParts = stateContext.getVal('__createIndexParts') || [];
     const curSelIndex = get(indexParts,'0.fieldName') || get(tableInfo, 'fields[0].fieldName','');
     
-    const getStateContextLastAryData = (name, path, defVal) => {
-        const parts = stateContext.getVal(name);
-        if (!parts) return defVal;
-        return get(parts, [parts.length - 1, path], defVal);
-    }
+    const hasPrimaryKey = !!(get(tableInfo,'indexes',[])).filter(i => i.isPrimaryKey).length;
+    const indexPartsMap = indexParts.reduce((acc, i) => {
+        acc[i] = true;
+        return acc;
+    }, {}); 
     return <div>
         <LoadingCover isLoading={isLoading}/>
         {            
@@ -242,13 +251,32 @@ function ColumnEditor(props) {
                             })
                         }}>Delete</Button></td></tr>
                     }
-                    <tr><td>Primary Key</td></tr>
+                    <tr><td>{hasPrimaryKey?'Indexes':'Primary Key'}</td></tr>
                     {
-                        tableInfo.indexes.map(idx => {
-                            return <tr><td>{idx.indexName}</td><td> {idx.table}</td><td>{idx.columnName}</td>
+                        tableInfo.indexes.reduce((acc, idx) => {
+                            let cmb = acc.dict[idx.indexName];
+                            if (!cmb) {
+                                cmb = {
+                                    ...idx,
+                                    columnNames: idx.columnName,
+                                };
+                                acc.dict[idx.indexName] = cmb;
+                                acc.combined.push(cmb);
+                            } else {
+                                cmb.columnNames = cmb.columnNames + ',' + idx.columnName;
+                            }
+                            return acc;
+                        }, {
+                                dict: {},
+                            combined:[],
+                        }).combined.map(idx => {
+                            return <tr><td>{idx.indexName}</td><td> {idx.table}</td><td>{idx.columnNames}</td>
                                 <td><Button onClick={() => {
                                     setIsLoading(true);
-                                    sqlFreeForm(`alter table ${table} drop index ${idx.indexName}`).then(() => getTableInfo(idx.table))
+                                    sqlFreeForm(
+                                        idx.isPrimaryKey?`alter table ${table} drop primary key`:
+                                        `alter table ${table} drop index ${idx.indexName}`)
+                                        .then(() => getTableInfo(idx.table))
                                         .then(() => {
                                             setIsLoading(false);
                                         })
@@ -262,82 +290,30 @@ function ColumnEditor(props) {
                     }
                     <tr>
                         <td>
-                            <TextInputWithError name='__createPrimaryKeyName' stateContext={stateContext}></TextInputWithError>
-                            <DropdownButton title={curSelIndex} >
-                                {
-                                    tableInfo.fields.map(f => {
-                                        return <Dropdown.Item onSelect={() => {
-                                            stateContext.setVal('__createPrimarykeyParts', [{
-                                                fieldName: f.fieldName
-                                            }]);
-                                        }}>{f.fieldName}</Dropdown.Item>
-                                    })
-                                }                                
-                            </DropdownButton>
-                        </td><td><Button onClick={() => {
-                            const pkName = stateContext.getVal('__createPrimaryKeyName') || `PK_${table}`;
-                            const indexParts = stateContext.getVal('__createPrimarykeyParts');
-                            const indexPartsStr = indexParts && indexParts.length ? indexParts.map(i => `${i.fieldName}`).join(',')
-                                : curSelIndex;
-                            sqlFreeForm(`alter table ${table} add constraint ${pkName} primary key (${indexPartsStr})`).then(() => getTableInfo(table))
-                                .catch(err => {
-                                    console.log(err);
-                                })
-                        }}>Add Primary Key</Button></td></tr>
-                    <tr><td>Indexes</td></tr>
-                    {
-                        tableInfo.indexes.map(idx => {
-                            return <tr><td>{idx.indexName}</td><td> {idx.table}</td><td>{idx.columnName}</td>
-                                <td><Button onClick={() => {
-                                    setIsLoading(true);
-                                    const dropIdx = idx.indexName === 'PRIMARY' ?
-                                        `alter table ${table} drop primary key;`
-                                        : `alter table ${table} drop index ${idx.indexName}`;
-                                    sqlFreeForm(dropIdx).then(()=>getTableInfo(idx.table))
-                                        .then(() => {
-                                            setIsLoading(false);
-                                        })
-                                        .catch(err => {
-                                            setIsLoading(false);
-                                            console.log(err);
-                                        })
-                                }}>Delete</Button></td>
-                            </tr>
-                        })
-                    }
-                    <tr>                        
-                        <td>
                             <TextInputWithError name='__createIndexName' stateContext={stateContext}></TextInputWithError>
                             <MultiDropdown
                                 name='CreateIndexMultiDropdown'
-                                selectedItems={stateContext.getVal('__createIndexParts') || []}
-                                setSelectedItems={items => {
+                                selectedItems={indexParts}
+                                setSelectedItems={items => {                                    
+                                    stateContext.setVal('__createIndexName', `${hasPrimaryKey ? 'IDX' : 'PK'}_${table}_${items.join('_')}`);
                                     stateContext.setVal('__createIndexParts', items);
                                 }}
-                                options={tableInfo.fields.map(f=>f.fieldName)}
+                                options={tableInfo.fields.map(f => f.fieldName).filter(f => !indexPartsMap[f])}
                                 itemToName={x => x}
-                            />
-                            <DropdownButton title={ curSelIndex } >
-                                {
-                                    tableInfo.fields.map(f => {
-                                        return <Dropdown.Item onSelect={() => {                                            
-                                            stateContext.setVal('__createIndexParts', [{
-                                                fieldName: f.fieldName
-                                            }]);
-                                        }}>{f.fieldName}</Dropdown.Item>        
-                                    })
-                                }
-                            </DropdownButton>
-                    </td><td><Button onClick={() => {    
+                            />                            
+                        </td><td><Button onClick={() => {
                             const indexName = stateContext.getVal('__createIndexName');
                             const indexParts = stateContext.getVal('__createIndexParts');
                             const indexPartsStr = indexParts && indexParts.length ? indexParts.map(i => `${i}`).join(',')
                                 : curSelIndex;
-                            sqlFreeForm(`create index ${indexName} on ${table} (${indexPartsStr})`).then(() => getTableInfo(table))
+                            const createSql = hasPrimaryKey ? `create index ${indexName} on ${table} (${indexPartsStr})` :
+                                `alter table ${table} add constraint ${indexName} primary key (${indexPartsStr})`;
+                            sqlFreeForm(createSql).then(() => getTableInfo(table))
                                 .catch(err => {
                                     console.log(err);
-                            })
+                                })
                         }}>Add Index</Button></td></tr>
+                    
                     
                     <tr><td>Constraints</td></tr>
                     {
