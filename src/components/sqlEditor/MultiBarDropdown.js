@@ -17,7 +17,7 @@ export function MultiDropdown(props) {
 
         <Dropdown.Menu>
             {
-                options.map(opt => <Dropdown.Item href="#/action-1" onSelect={() => {
+                options.map((opt,keyId) => <Dropdown.Item key={keyId} onSelect={() => {
                     setSelectedItems(selectedItems.concat(opt));
                 }}>{itemToName(opt)}</Dropdown.Item>)
             }            

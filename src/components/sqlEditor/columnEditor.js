@@ -116,7 +116,7 @@ function ColumnEditor(props) {
     return <div>
         <LoadingCover isLoading={isLoading}/>
         {            
-            (isNew || table) && <Table style={{ 'z-index': 8,}} striped bordered hover size="sm">
+            (isNew || table) && <Table striped bordered hover size="sm">
                 <thead>
                     <tr><td>Name</td><td>Type</td><td>Size</td><td>Action</td></tr>                    
                 </thead>
@@ -268,8 +268,8 @@ function ColumnEditor(props) {
                         }, {
                                 dict: {},
                             combined:[],
-                        }).combined.map(idx => {
-                            return <tr><td>{idx.indexName}</td><td> {idx.table}</td><td>{idx.columnNames}</td>
+                        }).combined.map((idx,keyId) => {
+                            return <tr key={keyId}><td>{idx.indexName}</td><td> {idx.table}</td><td>{idx.columnNames}</td>
                                 <td><Button onClick={() => {
                                     setIsLoading(true);
                                     sqlFreeForm(
@@ -316,8 +316,8 @@ function ColumnEditor(props) {
                     
                     <tr><td>Constraints</td></tr>
                     {
-                        tableInfo.constraints.filter(c=>c.constraintName !== 'PRIMARY').map(idx => {
-                            return <tr><td>{idx.constraintName}</td><td> {idx.refTable}</td><td>{idx.refColumn}</td>
+                        tableInfo.constraints.filter(c=>c.constraintName !== 'PRIMARY').map((idx,keyId) => {
+                            return <tr key={keyId}><td>{idx.constraintName}</td><td> {idx.refTable}</td><td>{idx.refColumn}</td>
                                 <td><Button onClick={() => {
                                     setIsLoading(true);
                                     const dropIdx = `alter table ${table} drop constraint ${idx.constraintName}`;
@@ -347,8 +347,8 @@ function ColumnEditor(props) {
                             />
                             <DropdownButton title={curForeignKeyTable} >
                                 {
-                                    (allTableInfo.tables.length) ? allTableInfo.tables.map(curTbl => {
-                                        return <Dropdown.Item onSelect={() => {
+                                    (allTableInfo.tables.length) ? allTableInfo.tables.map((curTbl, keyId) => {
+                                        return <Dropdown.Item key={keyId} onSelect={() => {
                                             setCurForeignKeyTable(curTbl)
                                         }}>{curTbl}</Dropdown.Item>
                                     }) : <Dropdown.Item>Loading</Dropdown.Item>
