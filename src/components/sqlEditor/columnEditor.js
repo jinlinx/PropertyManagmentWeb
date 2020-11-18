@@ -6,7 +6,7 @@ import LoadingCover from './LoadingCover';
 import { TextInputWithError, createStateContext } from './TextInputWithError';
 import { apiGetTableInfo } from './apiUtil';
 import { MultiDropdown } from './MultiBarDropdown';
-
+import { ConstraintsEditor } from './constraints';
 function ColumnEditor(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
     const { table, loadTables, isLoading, setIsLoading } = props;    
@@ -339,71 +339,20 @@ function ColumnEditor(props) {
                                     console.log(err);
                                 })
                         }}>Add Index</Button></td></tr>
-                    
-                    
-                    <tr><td>Constraints</td></tr>
+                                                        
                     {
-                        tableInfo.constraints.filter(c=>c.constraintName !== 'PRIMARY').map((idx,keyId) => {
-                            return <tr key={keyId}><td>{idx.constraintName}</td><td> {idx.refTable}</td><td>{idx.refColumn}</td>
-                                <td><Button onClick={() => {
-                                    setIsLoading(true);
-                                    const dropIdx = `alter table ${table} drop constraint ${idx.constraintName}`;
-                                    sqlFreeForm(dropIdx).then(() => getTableInfo(table))
-                                        .then(() => {
-                                            setIsLoading(false);
-                                        })
-                                        .catch(err => {
-                                            setIsLoading(false);
-                                            console.log(err);
-                                        })
-                                }}>Delete</Button></td>
-                            </tr>
-                        })
+                        !isNew && <ConstraintsEditor context={
+                            {
+                                stateContext,
+                                tableInfo,
+                                allTableInfo,
+                                curForeignKeyTable,
+                                setCurForeignKeyTable,
+                                table,
+                                getTableInfo,
+                            }
+                        }></ConstraintsEditor>
                     }
-                    <tr>
-                        <td>
-                            Name:<TextInputWithError name='__createConstraintName' stateContext={stateContext}></TextInputWithError>
-                            <MultiDropdown
-                                name='constraintIdParts'
-                                selectedItems={stateContext.getVal('__createConstraintIndexParts') || []}
-                                setSelectedItems={items => {
-                                    stateContext.setVal('__createConstraintIndexParts', items);
-                                }}
-                                options={tableInfo.fields }
-                                itemToName={x => x.fieldName}
-                            />
-                            <DropdownButton title={curForeignKeyTable} >
-                                {
-                                    (allTableInfo.tables.length) ? allTableInfo.tables.map((curTbl, keyId) => {
-                                        return <Dropdown.Item key={keyId} onSelect={() => {
-                                            setCurForeignKeyTable(curTbl)
-                                        }}>{curTbl}</Dropdown.Item>
-                                    }) : <Dropdown.Item>Loading</Dropdown.Item>
-                                }
-                            </DropdownButton>
-                            <MultiDropdown
-                                selectedItems={stateContext.getVal('__createConstraintRefTablesCols') || []}
-                                setSelectedItems={items => {
-                                    stateContext.setVal('__createConstraintRefTablesCols', items);
-                                }}
-                                options={
-                                    allTableInfo.tableCols[curForeignKeyTable] ? allTableInfo.tableCols[curForeignKeyTable].fields
-                                        : [{ fieldName: 'Loading' }]                                
-                                }
-                                itemToName={x => x.fieldName}
-                            />                            
-                        </td><td><Button onClick={() => {
-                            const constraintName = stateContext.getVal('__createConstraintName');
-                            const refTblCols = stateContext.getVal('__createConstraintRefTablesCols');
-                            const createConstraintSql = `ALTER TABLE ${table}
-ADD CONSTRAINT ${constraintName}
-FOREIGN KEY (${stateContext.getVal('__createConstraintIndexParts').map(r => r.fieldName).join(',')}) REFERENCES 
-${curForeignKeyTable}(${refTblCols.map(r=>r.fieldName).join(',')});`;
-                            sqlFreeForm(createConstraintSql).then(() => getTableInfo(table))
-                                .catch(err => {
-                                    console.log(err);
-                                })
-                        }}>Add Constraint</Button></td></tr>
                     </tbody>
                     }
                 </Table>
