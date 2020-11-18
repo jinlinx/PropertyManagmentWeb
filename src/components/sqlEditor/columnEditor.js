@@ -29,12 +29,13 @@ function ColumnEditor(props) {
         name: '',
         type: defaultColumnTypeVal,
         selType: 'varchar',
-        size: 100,
+        fieldSize: 100,
     });
     const setSelType = selType => {
         setNewColInfo({
             ...newColInfo,
             selType,
+            fieldSize: getTypeDefaultSize(selType),
         });
     }
 
@@ -113,6 +114,24 @@ function ColumnEditor(props) {
         acc[i] = true;
         return acc;
     }, {}); 
+
+    const getTypeSizeFields = fieldType => {
+        if (fieldType === 'varchar') {
+            return 1;
+        }
+        if (fieldType === 'decimal') {
+            return 2;
+        }
+        return 0;
+    }
+    const getTypeDefaultSize = fieldType => {
+        if (fieldType === 'varchar') {
+            return 100;
+        }
+        if (fieldType === 'decimal') {
+            return 12;
+        }
+    }
     return <div>
         <LoadingCover isLoading={isLoading}/>
         {            
@@ -148,22 +167,29 @@ function ColumnEditor(props) {
                         </td>
                             <td>
                                 <DropdownButton title={newColInfo.selType} >
-                                    <Dropdown.Item onSelect={() => setSelType('varchar')}>varchar</Dropdown.Item>
-                                    <Dropdown.Item onSelect={() => setSelType('datetime')}>datetime</Dropdown.Item>
-                                    <Dropdown.Item onSelect={() => setSelType('decimal')}>decimal</Dropdown.Item>
+                                <Dropdown.Item onSelect={() => setSelType('varchar')}>varchar</Dropdown.Item>
+                                <Dropdown.Item onSelect={() => setSelType('datetime')}>datetime</Dropdown.Item>
+                                <Dropdown.Item onSelect={() => setSelType('date')}>date</Dropdown.Item>
+                                <Dropdown.Item onSelect={() => setSelType('decimal')}>decimal</Dropdown.Item>
+                                <Dropdown.Item onSelect={() => setSelType('INT')}>INT</Dropdown.Item>
+                                <Dropdown.Item onSelect={() => setSelType('BIGINT')}>BIGINT</Dropdown.Item>
+                                <Dropdown.Item onSelect={() => setSelType('FLOAT')}>FLOAT</Dropdown.Item>
+                                <Dropdown.Item onSelect={() => setSelType('SMALLINT')}>SMALLINT</Dropdown.Item>
+                                <Dropdown.Item onSelect={() => setSelType('TINYINT')}>TINYINT</Dropdown.Item>
                                 </DropdownButton>
                             </td>
                             <td>
-                                <Form.Control as="input" value={newColInfo.size} onChange={
-                                    e => {
-                                        const v = parseInt(e.target.value);
-                                        if (isNaN(v)) return;
-                                        setNewColInfo({
-                                            ...newColInfo,
-                                            fieldSize: v,
-                                        })
-                                    }
-                                } />
+                            {getTypeSizeFields(newColInfo.selType) > 0 && <Form.Control as="input" value={newColInfo.fieldSize} onChange={
+                                e => {
+                                    const v = parseInt(e.target.value);
+                                    if (isNaN(v)) return;
+                                    setNewColInfo({
+                                        ...newColInfo,
+                                        fieldSize: v,
+                                    })
+                                }
+                            } />
+                            }
                             </td>
                             <td>
                             <Button onClick={() => {
@@ -175,18 +201,19 @@ function ColumnEditor(props) {
                                                 fields: tableInfo.fields.concat({
                                                     fieldName: newColName,
                                                     fieldType: newColInfo.selType,
-                                                    size: newColInfo.size,
+                                                    size: newColInfo.fieldSize,
                                                 })
                                             })
                                         }
                                     } else {
                                         if (newColName) {
                                             let fieldType = newColInfo.selType;
-                                            if (fieldType === 'varchar') {
-                                                fieldType = `${fieldType}(${newColInfo.size})`;
+                                            const sizeFieldLen = getTypeSizeFields(fieldType);
+                                            if (sizeFieldLen === 1) {
+                                                fieldType = `${fieldType}(${newColInfo.fieldSize})`;
                                             }
-                                            if (fieldType === 'decimal') {
-                                                fieldType = `${fieldType}(${newColInfo.size},2)`;
+                                            if (sizeFieldLen === 2) {
+                                                fieldType = `${fieldType}(${newColInfo.fieldSize},2)`;
                                             }
                                             setIsLoading(true);
                                             sqlFreeForm(`alter table ${table} add column ${newColName} ${fieldType};`).then(() => {
