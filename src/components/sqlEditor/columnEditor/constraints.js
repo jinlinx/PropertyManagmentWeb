@@ -1,8 +1,8 @@
 import React from 'react';
 import { DropdownButton, Dropdown, Button,  } from 'react-bootstrap';
-import { sqlFreeForm } from '../api';
-import { TextInputWithError, createStateContext } from './TextInputWithError';
-import { MultiDropdown } from './MultiBarDropdown';
+import { sqlFreeForm } from '../../api';
+import { TextInputWithError, createStateContext } from '../TextInputWithError';
+import { MultiDropdown } from '../MultiBarDropdown';
 export function ConstraintsEditor(props) {
     const {
         stateContext,

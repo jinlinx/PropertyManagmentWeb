@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Form, DropdownButton, Dropdown, Button } from 'react-bootstrap';
 import { sqlGetTables, sqlFreeForm } from '../api';
-import ColumnEditor from './columnEditor';
+import ColumnEditor from './columnEditor/columnEditor';
 import LoadingCover from './LoadingCover';
 import { DataViewerAuto } from './DataViewer';
 
