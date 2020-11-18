@@ -81,9 +81,9 @@ function ColumnEditor(props) {
             })            
         } else {
             setTableInfo({
-                constraints: {}, //columnName: "id", constraintName: "fk_test_2" ,refColumn: "tenantID" ,refTable: "tenantInfo"
+                constraints: [], //columnName: "id", constraintName: "fk_test_2" ,refColumn: "tenantID" ,refTable: "tenantInfo"
                 fields: [],
-                indexes: {},
+                indexes: [],
             });
         }
     }
@@ -321,9 +321,7 @@ function ColumnEditor(props) {
                             return <tr><td>{idx.constraintName}</td><td> {idx.refTable}</td><td>{idx.refColumn}</td>
                                 <td><Button onClick={() => {
                                     setIsLoading(true);
-                                    const dropIdx = idx.indexName === 'PRIMARY' ?
-                                        `alter table ${table} drop primary key;`
-                                        : `alter table ${table} drop index ${idx.indexName}`;
+                                    const dropIdx = `alter table ${table} drop constraint ${idx.constraintName}`;
                                     sqlFreeForm(dropIdx).then(() => getTableInfo(idx.table))
                                         .then(() => {
                                             setIsLoading(false);
