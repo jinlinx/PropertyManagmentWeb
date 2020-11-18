@@ -10,7 +10,6 @@ import { MultiDropdown } from './MultiBarDropdown';
 function ColumnEditor(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
     const { table, loadTables, isLoading, setIsLoading } = props;    
-    console.log(`ColumnEditor table => ${table}`);
     const isNew = table === null;    
     const [tableInfo, setTableInfo] = useState({});
     const [allTableInfo, setAllTableInfo] = useState({
@@ -322,7 +321,7 @@ function ColumnEditor(props) {
                                 <td><Button onClick={() => {
                                     setIsLoading(true);
                                     const dropIdx = `alter table ${table} drop constraint ${idx.constraintName}`;
-                                    sqlFreeForm(dropIdx).then(() => getTableInfo(idx.table))
+                                    sqlFreeForm(dropIdx).then(() => getTableInfo(table))
                                         .then(() => {
                                             setIsLoading(false);
                                         })

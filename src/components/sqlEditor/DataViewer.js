@@ -145,7 +145,7 @@ export function DataViewer (props) {
 
     const filterOptions = ['=', '!=', '<', '<=', '>', '>='].map(value => ({ value, label: value }));
     const defaultFilter = filterOptions.filter(x => x.value === '=')[0];
-    const makePageButtons = (inds, desc) => inds.map(ind => <Button onClick={e => {
+    const makePageButtons = (inds, desc) => inds.map((ind,keyId) => <Button key={keyId} onClick={e => {
         e.preventDefault();
         setPaggingInfo({ ...paggingInfo, pos: ind })
     }}>{desc || ind + 1}</Button>)

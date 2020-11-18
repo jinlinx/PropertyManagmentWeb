@@ -129,7 +129,7 @@ const GenCrud = (props) => {
     
     const filterOptions = ['=','!=','<','<=','>','>='].map(value=>({value, label: value}));
     const defaultFilter = filterOptions.filter(x => x.value === '=')[0];
-    const makePageButtons = (inds, desc)=>inds.map(ind=><Button onClick={e=>{e.preventDefault(); 
+    const makePageButtons = (inds, desc)=>inds.map((ind,keyId)=><Button key={keyId} onClick={e=>{e.preventDefault(); 
         setPaggingInfo({...paggingInfo, pos: ind})
          }}>{desc || ind+1}</Button>)
     return (
