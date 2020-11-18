@@ -7,6 +7,7 @@ import { TextInputWithError, createStateContext } from '../TextInputWithError';
 import { apiGetTableInfo } from '../apiUtil';
 import { MultiDropdown } from '../MultiBarDropdown';
 import { ConstraintsEditor } from './constraints';
+import { IndexEditor } from './indexEditor';
 function ColumnEditor(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
     const { table, loadTables, isLoading, setIsLoading } = props;    
@@ -104,16 +105,7 @@ function ColumnEditor(props) {
                 indexes: [],
             });
         }
-    }, [table, curForeignKeyTable]);    
-
-    const indexParts = stateContext.getVal('__createIndexParts') || [];
-    const curSelIndex = get(indexParts,'0.fieldName') || get(tableInfo, 'fields[0].fieldName','');
-    
-    const hasPrimaryKey = !!(get(tableInfo,'indexes',[])).filter(i => i.isPrimaryKey).length;
-    const indexPartsMap = indexParts.reduce((acc, i) => {
-        acc[i] = true;
-        return acc;
-    }, {}); 
+    }, [table, curForeignKeyTable]);        
 
     const getTypeSizeFields = fieldType => {
         if (fieldType === 'varchar') {
@@ -132,6 +124,14 @@ function ColumnEditor(props) {
             return 12;
         }
     }
+
+    const hasPrimaryKey = !!(get(tableInfo, 'indexes', [])).filter(i => i.isPrimaryKey).length;
+    const indexParts = stateContext.getVal('__createIndexParts') || [];
+    const curSelIndex = get(indexParts, '0.fieldName') || get(tableInfo, 'fields[0].fieldName', '');    
+    const indexPartsMap = indexParts.reduce((acc, i) => {
+        acc[i] = true;
+        return acc;
+    }, {}); 
     return <div>
         <LoadingCover isLoading={isLoading}/>
         {            
@@ -276,6 +276,17 @@ function ColumnEditor(props) {
                                 console.log(err);
                             })
                         }}>Delete</Button></td></tr>
+                    }
+                    {
+                        <IndexEditor context={ 
+                            {
+                                stateContext,
+                                tableInfo,
+                                table,
+                                getTableInfo,
+                                setIsLoading,
+                            }
+                        }/>
                     }
                     <tr><td>{hasPrimaryKey?'Indexes':'Primary Key'}</td></tr>
                     {
