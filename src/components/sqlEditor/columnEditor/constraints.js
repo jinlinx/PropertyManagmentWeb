@@ -1,5 +1,6 @@
 import React from 'react';
-import { DropdownButton, Dropdown, Button,  } from 'react-bootstrap';
+import { DropdownButton, Dropdown, Button, } from 'react-bootstrap';
+import { getApiError } from '../../util';
 import { sqlFreeForm } from '../../api';
 import { TextInputWithError, createStateContext } from '../TextInputWithError';
 import { MultiDropdown } from '../MultiBarDropdown';
@@ -73,6 +74,7 @@ ${curForeignKeyTable}(${refTblCols.join(',')});`;
             sqlFreeForm(createConstraintSql).then(() => getTableInfo(table))
                 .catch(err => {
                     console.log(err);
+                    stateContext.setErr('__createConstraintName', getApiError(err));
                 })
         }}>Add Constraint</Button></td></tr>
 }

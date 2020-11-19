@@ -24,3 +24,7 @@ export function getPageFilters(pageState, table) {
     } = pageState;
     return get(pageProps, [table, 'filters'], []);
 }
+
+export function getApiError(err) {
+    return get(err, 'response.body.message') || err.message;
+}

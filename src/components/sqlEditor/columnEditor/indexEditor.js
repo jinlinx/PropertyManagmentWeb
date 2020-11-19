@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, } from 'react-bootstrap';
 import { get } from 'lodash';
 import { sqlFreeForm } from '../../api';
+import { getApiError } from '../../util';
 import { TextInputWithError } from '../TextInputWithError';
 import { MultiDropdown } from '../MultiBarDropdown';
 export function IndexEditor(props) {
@@ -81,6 +82,7 @@ export function IndexEditor(props) {
             sqlFreeForm(createSql).then(() => getTableInfo(table))
                 .catch(err => {
                     console.log(err);
+                    stateContext.setErr('__createIndexName', getApiError(err));
                 })
             }}>Add Index</Button></td></tr>
         </>
