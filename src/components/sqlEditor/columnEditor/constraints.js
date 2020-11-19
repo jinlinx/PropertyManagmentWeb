@@ -13,23 +13,39 @@ export function ConstraintsEditor(props) {
         table,
         getTableInfo,
     } = props.context;
+    const selectedConstraintCols = stateContext.getVal('__createConstraintColParts') || [];
+    const refTblCols = stateContext.getVal('__createConstraintRefTablesCols') || [];
+    const setConstraintName = check => {
+        const existing = {
+            selectedConstraintCols,
+            refTblCols,
+            curForeignKeyTable,
+        }
+        const dc = name => check[name] || existing[name] || [];
+        stateContext.setVal('__createConstraintName', `FK_${table}_${dc('selectedConstraintCols').join('_')}_${check.curForeignKeyTable || existing.curForeignKeyTable}_${dc('refTblCols').join('_')}`)
+    };
     return <tr>
         <td>
             Name:<TextInputWithError name='__createConstraintName' stateContext={stateContext}></TextInputWithError>
             <MultiDropdown
                 name='constraintIdParts'
-                selectedItems={stateContext.getVal('__createConstraintIndexParts') || []}
+                selectedItems={selectedConstraintCols}
                 setSelectedItems={items => {
-                    stateContext.setVal('__createConstraintIndexParts', items);
+                    stateContext.setVal('__createConstraintColParts', items);
+                    setConstraintName({
+                        selectedConstraintCols: items,
+                    });
                 }}
-                options={tableInfo.fields}
-                itemToName={x => x.fieldName}
+                options={tableInfo.fields.map(f => f.fieldName).filter(n => !selectedConstraintCols.includes(n))}
             />
             <DropdownButton title={curForeignKeyTable} >
                 {
                     (allTableInfo.tables.length) ? allTableInfo.tables.map((curTbl, keyId) => {
                         return <Dropdown.Item key={keyId} onSelect={() => {
-                            setCurForeignKeyTable(curTbl)
+                            setCurForeignKeyTable(curTbl);
+                            setConstraintName({
+                                curForeignKeyTable: curTbl,
+                            });
                         }}>{curTbl}</Dropdown.Item>
                     }) : <Dropdown.Item>Loading</Dropdown.Item>
                 }
@@ -38,20 +54,22 @@ export function ConstraintsEditor(props) {
                 selectedItems={stateContext.getVal('__createConstraintRefTablesCols') || []}
                 setSelectedItems={items => {
                     stateContext.setVal('__createConstraintRefTablesCols', items);
+                    setConstraintName({
+                        refTblCols: items,
+                    });
                 }}
                 options={
-                    allTableInfo.tableCols[curForeignKeyTable] ? allTableInfo.tableCols[curForeignKeyTable].fields
-                        : [{ fieldName: 'Loading' }]
+                    allTableInfo.tableCols[curForeignKeyTable] ?
+                        allTableInfo.tableCols[curForeignKeyTable].fields.map(f => f.fieldName).filter(n => !refTblCols.includes(n))
+                        : []
                 }
-                itemToName={x => x.fieldName}
             />
         </td><td><Button onClick={() => {
-            const constraintName = stateContext.getVal('__createConstraintName');
-            const refTblCols = stateContext.getVal('__createConstraintRefTablesCols');
+            const constraintName = stateContext.getVal('__createConstraintName');            
             const createConstraintSql = `ALTER TABLE ${table}
 ADD CONSTRAINT ${constraintName}
-FOREIGN KEY (${stateContext.getVal('__createConstraintIndexParts').map(r => r.fieldName).join(',')}) REFERENCES 
-${curForeignKeyTable}(${refTblCols.map(r => r.fieldName).join(',')});`;
+FOREIGN KEY (${selectedConstraintCols.join(',')}) REFERENCES 
+${curForeignKeyTable}(${refTblCols.join(',')});`;
             sqlFreeForm(createConstraintSql).then(() => getTableInfo(table))
                 .catch(err => {
                     console.log(err);
