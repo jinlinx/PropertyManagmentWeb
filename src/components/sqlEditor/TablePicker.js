@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Form, DropdownButton, Dropdown, Button } from 'react-bootstrap';
+import { Table, Form, DropdownButton, Dropdown, Button, ButtonGroup } from 'react-bootstrap';
 import { sqlGetTables, sqlFreeForm } from '../api';
 import ColumnEditor from './columnEditor/columnEditor';
 import LoadingCover from './LoadingCover';
@@ -26,6 +26,11 @@ function TablePicker() {
     }
     return <div>
         {isLoading && <LoadingCover isLoading={isLoading} />}
+        <ButtonGroup>
+            <Button onClick={() => {
+                setShowData(!showData);
+            }}>{showData?'Data':'Schema'}</Button>
+        </ButtonGroup>
         <Table striped bordered hover size="sm">
             <tbody>
             <tr>
@@ -36,10 +41,7 @@ function TablePicker() {
                                     tables.map((name, key) => <tr key={key}>
                                         <td>
                                             <div style={{ textAlign: 'left', fontWeight: name === selectedTable ? 'bold' : 'normal' }}><a onClick={() => selectTable(name)}>{name}</a></div>
-                                        </td>
-                                        <td><Button onClick={() => {
-                                            setShowData(!showData);
-                                        }}>{showData?'Data':'Schema'}</Button></td>
+                                        </td>                                        
                                     </tr>)
                                 }
                                 <tr><td><Button onClick={() => {
