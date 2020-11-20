@@ -3,9 +3,10 @@ import set from 'lodash/set';
 import { v1 } from 'uuid';
 import { Table, Form, DropdownButton, Dropdown, Button } from 'react-bootstrap';
 import Select from 'react-dropdown-select';
-import { sqlGetTables, sqlFreeForm, sqlGetTableInfo } from '../api';
-import { getPageSorts } from '../util';
+import { sqlGetTables, sqlFreeForm, sqlGetTableInfo } from '../../api';
+import { getPageSorts } from '../../util';
 
+import { DataGrid } from './dataGrid';
 export function DataViewerAuto(props) {
     const [columnTableInfo, setTableColumnInfo] = useState({});
     const [paggingInfo, setPaggingInfo] = useState({
@@ -33,7 +34,6 @@ export function DataViewer (props) {
     } = props.params;
 
     const [loadState, setLoadState] = useState('init');
-    const [dspState, setDspState] = useState('dsp');
     const [editItem, setEditItem] = useState(null);
     const [showFilter, setShowFilter] = useState(false);
     const [filterVals, setFilterVals] = useState([]);
@@ -151,8 +151,7 @@ export function DataViewer (props) {
     }}>{desc || ind + 1}</Button>)
     return (
         <div>
-            {
-                dspState === 'dsp' &&
+            {                
                 <div>
                     {
                         paggingInfo.lastPage >0 && <div>
@@ -221,53 +220,15 @@ export function DataViewer (props) {
                             </table>
                         }
                     </div>
-                    < Table striped bordered hover size="sm">
-                        <thead>
-                            <tr>
-                                {
-                                    columnInfo.fields.map((f, ind) => {
-                                        const name = f.fieldName;
-                                        return <th key={ind}>
-                                            <div>{name}</div>
-                                            <div>{getFieldSort(name)}</div>
-                                        </th>
-                                    })
-                                }
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {rows.length > 0 ? (
-                                rows.map((row, ind) => {
-                                    return (
-                                        <tr key={ind}>
-                                            {
-                                                columnInfo.fields.map((f, find) => {                                                    
-                                                    const fn = f.fieldName;
-                                                    let val = row[fn]
-                                                    let dsp = val;
-                                                    return <td key={find}>{dsp}</td>
-                                                })
-                                            }
-                                            <td>
-                                                {<Button onClick={() => props.doDelete()}>Delete</Button>}
-                                                {<Button onClick={() => {
-                                                    setEditItem(row);
-                                                    setDspState('edit');
-                                                }}>Edit</Button>
-                                                }
-                                            </td>
-                                        </tr>
-                                    )
-                                })
-                            ) : (
-                                    <tr key='a'>
-                                        <td>No Data found</td>
-                                    </tr>
-                                )
-                            }
-
-                        </tbody>
-                    </Table>
+                    <DataGrid context={ 
+                        {
+                            columnInfo,
+                            rows,
+                            setEditItem,
+                            getFieldSort,
+                            doDelete: props.doDelete,
+                        }
+                    }/>                    
                     <Button onClick={()=>{}}>Add</Button>
                 </div>
             }            

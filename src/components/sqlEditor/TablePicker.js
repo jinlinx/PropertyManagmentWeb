@@ -3,7 +3,7 @@ import { Table, Form, DropdownButton, Dropdown, Button, ButtonGroup } from 'reac
 import { sqlGetTables, sqlFreeForm } from '../api';
 import ColumnEditor from './columnEditor/columnEditor';
 import LoadingCover from './LoadingCover';
-import { DataViewerAuto } from './DataViewer';
+import { DataViewerAuto } from './dataView/DataViewer';
 
 function TablePicker() {
     const [tables, setTables] = useState([]);
