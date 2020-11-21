@@ -1,14 +1,17 @@
-import React from 'react';
-import { Table, Button } from 'react-bootstrap';
+import React, {useState} from 'react';
+import { Table, Button, Form } from 'react-bootstrap';
 
 export function DataGrid(props) {
     const {
         columnInfo,
-        rows,
-        setEditItem,
+        rows,        
         getFieldSort,
         doDelete,
     } = props.context;
+    const [editItemData, setEditItemData] = useState({
+        id: null,
+        data: {},
+    });
     return < Table striped bordered hover size="sm">
         <thead>
             <tr>
@@ -27,6 +30,7 @@ export function DataGrid(props) {
             {rows.length > 0 ? (
                 rows.map((row, ind) => {
                     const curId = ind;
+                    const isEdit = curId === editItemData.id;
                     return (
                         <tr key={ind}>
                             {
@@ -34,13 +38,26 @@ export function DataGrid(props) {
                                     const fn = f.fieldName;
                                     let val = row[fn]
                                     let dsp = val;
+                                    if (isEdit) {
+                                        return <td key={find}> <Form.Control as="input" value={editItemData.data[fn]} onChange={
+                                            e => {
+                                                editItemData.data[fn] = e.target.value;
+                                                setEditItemData({
+                                                    ...editItemData,                                                    
+                                                })
+                                            }
+                                        } /></td>    
+                                    }
                                     return <td key={find}>{dsp}</td>
                                 })
                             }
                             <td>
                                 {<Button onClick={() => doDelete()}>Delete</Button>}
                                 {<Button onClick={() => {
-                                    setEditItem(curId)
+                                    setEditItemData({
+                                        id: curId,
+                                        data: {...row},
+                                    });
                                 }}>Edit</Button>
                                 }
                             </td>

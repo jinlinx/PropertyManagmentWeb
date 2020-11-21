@@ -33,8 +33,7 @@ export function DataViewer (props) {
         table,
     } = props.params;
 
-    const [loadState, setLoadState] = useState('init');
-    const [editItem, setEditItem] = useState(null);
+    const [loadState, setLoadState] = useState('init');    
     const [showFilter, setShowFilter] = useState(false);
     const [filterVals, setFilterVals] = useState([]);
     function loadColumnInfo() {
@@ -223,8 +222,7 @@ export function DataViewer (props) {
                     <DataGrid context={ 
                         {
                             columnInfo,
-                            rows,
-                            setEditItem,
+                            rows,                            
                             getFieldSort,
                             doDelete: props.doDelete,
                         }
