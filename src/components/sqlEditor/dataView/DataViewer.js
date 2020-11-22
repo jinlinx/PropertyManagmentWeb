@@ -221,6 +221,7 @@ export function DataViewer (props) {
                     </div>
                     <DataGrid context={ 
                         {
+                            table,
                             columnInfo,
                             rows,                            
                             getFieldSort,
