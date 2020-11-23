@@ -19,7 +19,16 @@ displayFields={
             //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
         ]
     }
-
+        processForeignKey={
+            (fk, datas) => {
+                return datas.map(data => {
+                    return {
+                        value: data[fk.field],
+                        label: data['address']
+                    }
+                })
+            }
+        }
         title={'Lease List'} /> 
 }
 
