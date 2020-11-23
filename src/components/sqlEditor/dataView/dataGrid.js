@@ -27,6 +27,7 @@ export function DataGrid(props) {
         rows,        
         getFieldSort,
         doDelete,
+        loadData,
     } = props.context;
     const emptyEditData = {
         id: null,
@@ -84,33 +85,23 @@ export function DataGrid(props) {
                                         if (!changedCols.length) {
                                             resetEditItemData();
                                         } else {
-                                            const updateSet = changedCols.map(c => `${c}='${editItemData.data[c].replace(/'/g, "''")}'`).join(',');
+                                            const fieldNameToType = columnInfo.fields.reduce((acc, f) => {
+                                                return acc;
+                                            }, {});
+                                            const updateSet = changedCols.map(c => `${c}=${toSqlVal(fieldNameToType[c],editItemData.data[c])}`).join(',');
                                             const whereFieldsPK = columnInfo.indexes.filter(i => i.indexName === 'PRIMARY').map(i => i.columnName).map(name => {
                                                 return columnInfo.fields.find(f => f.fieldName === name);
                                             });
                                             const where = (whereFieldsPK.length ?whereFieldsPK:columnInfo.fields).map(f => {
                                                 const fname = f.fieldName;
-                                                let val = row[fname];
-                                                if (f.fieldType === 'date' || f.fieldType === 'datetime') {
-                                                    if (!val) val = 'null';
-                                                    else {                                                        
-                                                        const fmtStr = f.fieldType === 'date' ? 'YYYY-MM-DD' : 'YYYY-MM-DD HH:mm:ss';
-                                                        val = `'${moment(val).format(fmtStr)}'`;
-                                                    }
-                                                }else
-                                                if (val !== 0) {
-                                                    if (val === '') val = "''";
-                                                    else if (!val) val = 'null';
-                                                    else {
-                                                        val = `'${val}'`;
-                                                    }
-                                                }
+                                                let val = toSqlVal(fieldNameToType[fname],row[fname]);                                                
                                                 return `${fname}=${val}`;
                                             }).join(' and ');
                                             const updateSql = `update ${table} set ${updateSet} where ${where}`;
                                             console.log('updateSql '+ updateSql);
                                             sqlFreeForm(updateSql).then(() => {
                                                 resetEditItemData();
+                                                return loadData();
                                             }).catch(err => {
                                                 console.log(err);
                                             })

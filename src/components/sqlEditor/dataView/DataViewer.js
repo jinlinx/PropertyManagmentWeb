@@ -47,18 +47,21 @@ export function DataViewer (props) {
 
     const columnInfo = columnTableInfo[table];
 
+    const loadData = () => {
+        const fields = columnInfo.fields.map(t => t.fieldName).join(',');
+        sqlFreeForm(`select count(1) cnt from ${table}`).then(cntres => {
+            return sqlFreeForm(`select ${fields} from ${table} limit ${paggingInfo.pos}, ${paggingInfo.PageSize}`).then(res => {
+                setRows(res);
+                setPaggingInfo({ ...paggingInfo, total: cntres[0].cnt })
+                setLoadState('init');
+            })
+        })
+    }
     useEffect(() => {
         if (!columnInfo) {
             loadColumnInfo().then(()=>setLoadState('columnLoaded'));
         } else  {
-            const fields = columnInfo.fields.map(t => t.fieldName).join(',');
-            sqlFreeForm(`select count(1) cnt from ${table}`).then(cntres => {                
-                return sqlFreeForm(`select ${fields} from ${table} limit ${paggingInfo.pos}, ${paggingInfo.PageSize}`).then(res => {
-                    setRows(res);
-                    setPaggingInfo({ ...paggingInfo, total: cntres[0].cnt })
-                    setLoadState('init');
-                })
-            })            
+            loadData();
         }
     }, [table, loadState, paggingInfo.pos]);
     if (!rows || !columnInfo || !columnInfo.fields)
@@ -226,6 +229,7 @@ export function DataViewer (props) {
                             rows,                            
                             getFieldSort,
                             doDelete: props.doDelete,
+                            loadData,
                         }
                     }/>                    
                     <Button onClick={()=>{}}>Add</Button>
