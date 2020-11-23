@@ -231,8 +231,7 @@ export function DataViewer (props) {
                             doDelete: props.doDelete,
                             loadData,
                         }
-                    }/>                    
-                    <Button onClick={()=>{}}>Add</Button>
+                    }/>
                 </div>
             }            
         </div>

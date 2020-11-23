@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import { Table, Button, Form } from 'react-bootstrap';
 import { sqlFreeForm } from '../../api';
+import {v1} from 'uuid';
 import moment from 'moment';
 
 export function toSqlVal(fieldType, val) {
@@ -34,7 +35,15 @@ export function DataGrid(props) {
         data: {},
     };
     const [editItemData, setEditItemData] = useState(emptyEditData);
+    const [newItemData, setNewItemData] = useState(null);
     const resetEditItemData = () => setEditItemData(emptyEditData);
+    const whereFieldsPK = columnInfo.indexes.filter(i => i.indexName === 'PRIMARY').map(i => i.columnName).map(name => {
+        return columnInfo.fields.find(f => f.fieldName === name);
+    });
+    const pkFieldsMap = whereFieldsPK.reduce((acc, w) => {
+        acc[w.fieldName] = w;
+        return acc;
+    }, {});
     return < Table striped bordered hover size="sm">
         <thead>
             <tr>
@@ -88,10 +97,7 @@ export function DataGrid(props) {
                                             const fieldNameToType = columnInfo.fields.reduce((acc, f) => {
                                                 return acc;
                                             }, {});
-                                            const updateSet = changedCols.map(c => `${c}=${toSqlVal(fieldNameToType[c],editItemData.data[c])}`).join(',');
-                                            const whereFieldsPK = columnInfo.indexes.filter(i => i.indexName === 'PRIMARY').map(i => i.columnName).map(name => {
-                                                return columnInfo.fields.find(f => f.fieldName === name);
-                                            });
+                                            const updateSet = changedCols.map(c => `${c}=${toSqlVal(fieldNameToType[c],editItemData.data[c])}`).join(',');                                            
                                             const where = (whereFieldsPK.length ?whereFieldsPK:columnInfo.fields).map(f => {
                                                 const fname = f.fieldName;
                                                 let val = toSqlVal(fieldNameToType[fname],row[fname]);                                                
@@ -125,6 +131,45 @@ export function DataGrid(props) {
                 )
             }
 
+            <tr>{
+                newItemData && columnInfo.fields.map((f, find) => {
+                    const fn = f.fieldName;                    
+                    return <td key={find}> <Form.Control as="input" value={newItemData[fn]} onChange={
+                        e => {
+                            setNewItemData({
+                                ...newItemData,
+                                [fn]: e.target.value,
+                            })
+                        }
+                    } /></td>
+                })
+            }
+            <td><Button onClick={() => {
+                    if (!newItemData) {
+                        setNewItemData(columnInfo.fields.reduce((acc, f) => {
+                            acc[f] = '';
+                            if (pkFieldsMap[f.fieldName]) {
+                                acc[f] = v1();
+                            }
+                            return acc;
+                        }, {}));
+                    } else {
+                        const columns = columnInfo.fields.map(f => `${f.fieldName}`).join(',');
+                        const values = columnInfo.fields.map(f => `${toSqlVal(f.fieldType, newItemData[f.fieldName])}`).join(',');
+                        const insertSql = `insert into ${table} (${columns}) values (${values})`;
+                        sqlFreeForm(insertSql).then(() => {
+                            setNewItemData(null);
+                            loadData();
+                        }).catch(err => {
+                            console.log(err.message);
+                        })
+                    }
+                }}>{newItemData ? 'Save' : 'Add'}</Button>
+                    <Button onClick={() => {
+                        setNewItemData(null);
+                }}>Cancel</Button>
+                </td>
+            </tr>
         </tbody>
     </Table>
 }
