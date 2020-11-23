@@ -27,7 +27,6 @@ export function DataGrid(props) {
         columnInfo,
         rows,        
         getFieldSort,
-        doDelete,
         loadData,
     } = props.context;
     const emptyEditData = {
@@ -44,6 +43,14 @@ export function DataGrid(props) {
         acc[w.fieldName] = w;
         return acc;
     }, {});
+    const getWhereByRow = row => {
+        const where = (whereFieldsPK.length ? whereFieldsPK : columnInfo.fields).map(f => {
+            const fname = f.fieldName;
+            let val = toSqlVal(f.fieldType, row[fname]);
+            return `${fname}=${val}`;
+        }).join(' and ');
+        return where;
+    }
     return < Table striped bordered hover size="sm">
         <thead>
             <tr>
@@ -75,8 +82,8 @@ export function DataGrid(props) {
                                             e => {
                                                 editItemData.data[fn] = e.target.value;
                                                 setEditItemData({
-                                                    ...editItemData,                                                    
-                                                })
+                                                    ...editItemData,
+                                                });
                                             }
                                         } /></td>    
                                     }
@@ -84,25 +91,25 @@ export function DataGrid(props) {
                                 })
                             }
                             <td>
-                                {<Button onClick={() => doDelete()}>Delete</Button>}
+                                {<Button onClick={() => {
+                                    const whereSql = getWhereByRow(row);
+                                    sqlFreeForm(`delete from ${table} where ${whereSql}`).then(() => {
+                                        loadData();
+                                    }).catch(err => {
+                                        console.log(err.message);
+                                    })
+                                }}>Delete</Button>}
                                 {<Button onClick={() => {
                                     if (isEdit) {
                                         const changedCols = columnInfo.fields.map(f => {
                                             const fname = f.fieldName;
-                                            if (editItemData.data[fname] !== row[fname]) return fname;
+                                            if (editItemData.data[fname] !== row[fname]) return f;
                                         }).filter(x => x);
                                         if (!changedCols.length) {
                                             resetEditItemData();
                                         } else {
-                                            const fieldNameToType = columnInfo.fields.reduce((acc, f) => {
-                                                return acc;
-                                            }, {});
-                                            const updateSet = changedCols.map(c => `${c}=${toSqlVal(fieldNameToType[c],editItemData.data[c])}`).join(',');                                            
-                                            const where = (whereFieldsPK.length ?whereFieldsPK:columnInfo.fields).map(f => {
-                                                const fname = f.fieldName;
-                                                let val = toSqlVal(fieldNameToType[fname],row[fname]);                                                
-                                                return `${fname}=${val}`;
-                                            }).join(' and ');
+                                            const updateSet = changedCols.map(f => `${f.fieldName}=${toSqlVal(f.fieldType,editItemData.data[f.fieldName])}`).join(',');                                            
+                                            const where = getWhereByRow(row);
                                             const updateSql = `update ${table} set ${updateSet} where ${where}`;
                                             console.log('updateSql '+ updateSql);
                                             sqlFreeForm(updateSql).then(() => {
@@ -149,7 +156,7 @@ export function DataGrid(props) {
                         setNewItemData(columnInfo.fields.reduce((acc, f) => {
                             acc[f] = '';
                             if (pkFieldsMap[f.fieldName]) {
-                                acc[f] = v1();
+                                acc[f.fieldName] = v1();
                             }
                             return acc;
                         }, {}));
