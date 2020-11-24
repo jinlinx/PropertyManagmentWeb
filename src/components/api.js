@@ -14,15 +14,15 @@ function doPostOp(url, data) {
     return request.post(url).send(data).then(r => get(r, 'body'));
 }
  
-export async function getData(sql) {
+async function getData(sql) {
     return doGetOp(getUrl(sql));
 }
 
-export async function getModel(name) {
+async function getModel(name) {
     return doGetOp(`${apiBase}/getModel?name=${name}`);
 }
 
-export async function sqlGet({table, field, joins, whereArray, order, rowCount, offset}) {
+async function sqlGet({table, field, joins, whereArray, order, rowCount, offset}) {
     // "table":"tenantInfo",
     // "field":["tenantID", "firstName"],
     // joins:[{ table:{col:als}}]
@@ -38,7 +38,7 @@ export async function sqlGet({table, field, joins, whereArray, order, rowCount, 
     })
 }
 
-export async function sqlAdd(table, fields, create) {
+async function sqlAdd(table, fields, create) {
 //     "table":"tenantInfo",
 //     "fields":{"tenantID":"289a8120-01fd-11eb-8993-ab1bf8206feb", "firstName":"gang", "lastName":"testlong"},
 //    "create":true
@@ -51,32 +51,35 @@ export async function sqlAdd(table, fields, create) {
 }
 
 
-export function sqlDelete(table, id) {
+function sqlDelete(table, id) {
     return doPostOp(`${apiBase}/sql/del`, {
         table,id,
     }) 
 }
 
-export function sqlGetTables() {
+function sqlGetTables() {
     return doGetOp(`${apiBase}/sql/getTables`); 
 }
 
-export function sqlGetTableInfo(table) {
+function sqlGetTableInfo(table) {
     return doGetOp(`${apiBase}/sql/getTableInfo?table=${table}`); 
 }
 
-export function sqlFreeForm(sql) {
+function sqlFreeForm(sql, parms) {
     return doPostOp(`${apiBase}/sql/freeFormSql`, {
-        sql
+        sql,
+        parms,
     });
 }
 
-/*
+
 module.exports = {
     getData,
     getModel,
     sqlGet,
     sqlAdd,
     sqlDelete,
+    sqlGetTables,
+    sqlGetTableInfo,
+    sqlFreeForm,
 }
-*/

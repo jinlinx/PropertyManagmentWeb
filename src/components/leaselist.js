@@ -1,9 +1,10 @@
 import React  from 'react';
 import GenList from './GenList';
 import {fmtDate} from './util';
-
+import { Button } from 'react-bootstrap';
+const { parseCsv } = require('./utils');
 function LeaseList(props) {  
-    return <GenList 
+    return <div><GenList 
     {...props}
     table={'leaseInfo'}
 
@@ -29,7 +30,18 @@ displayFields={
                 })
             }
         }
-        title={'Lease List'} /> 
+        title={'Lease List'} />
+        <input type='file' onChange={e => {
+            const file = e.target.files[0];
+            console.log(file);
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                // Use reader.result
+                console.log(parseCsv(reader.result.toString()));
+            }
+            reader.readAsText(file);
+        }}></input>        
+        </div>
 }
 
 export default LeaseList;
