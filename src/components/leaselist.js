@@ -1,9 +1,10 @@
 import React  from 'react';
 import GenList from './GenList';
 import {fmtDate} from './util';
-
+import { Button } from 'react-bootstrap';
+const { parseCsv } = require('./utils');
 function LeaseList(props) {  
-    return <GenList 
+    return <div><GenList 
     {...props}
     table={'leaseInfo'}
 
@@ -19,8 +20,28 @@ displayFields={
             //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
         ]
     }
-
-        title={'Lease List'} /> 
+        processForeignKey={
+            (fk, datas) => {
+                return datas.map(data => {
+                    return {
+                        value: data[fk.field],
+                        label: data['address']
+                    }
+                })
+            }
+        }
+        title={'Lease List'} />
+        <input type='file' onChange={e => {
+            const file = e.target.files[0];
+            console.log(file);
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                // Use reader.result
+                console.log(parseCsv(reader.result.toString()));
+            }
+            reader.readAsText(file);
+        }}></input>        
+        </div>
 }
 
 export default LeaseList;

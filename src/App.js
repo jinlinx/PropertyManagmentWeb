@@ -8,7 +8,8 @@ import Paymentlist from './components/paymentlist';
 import Reportlist from './components/reportlist';
 import Tenantlist from './components/tenantlist';
 import OwnerList from './components/ownerList';
-
+import TablePicker from './components/sqlEditor/TablePicker';
+import 'bootstrap/dist/css/bootstrap.min.css';
 //
 
 function App() {
@@ -31,8 +32,15 @@ function App() {
     { control: <Paymentlist pageState={pageState} />,desc: 'Payments'},
     { control: <WorkerList pageState={pageState} />, desc: 'Worker'},
     { control: <WorkerCompList pageState={pageState} />, desc: 'Worker Comp'},
-    { control: <Reportlist pageState={pageState} />,desc: 'Reports'},
+    { control: <Reportlist pageState={pageState} />, desc: 'Reports' },
+    { control: <TablePicker pageState={pageState} />, desc: 'TableEditor' },
   ]  
+
+  const doPageRange = (from, end) => pages.slice(from, end).map((page, who) => {
+    return <td className='topButtonTbl' key={who + 10}><button className='blueButton' onClick={() => {
+      setShowPage(who+from);
+    }}>{page.desc}</button></td>
+  })
   return (
     <div className="App" >
       
@@ -47,13 +55,14 @@ function App() {
             </tr>
           <tr>
             {
-              pages.map((page,who) => {
-                return <td className='topButtonTbl' key={who+10}><button className='blueButton' onClick={() => {
-                  setShowPage(who);
-                }}>{page.desc}</button></td>
-              })
+              doPageRange(0,5)
             }            
-        </tr>
+          </tr>
+          <tr>
+            {
+              doPageRange(5, 10)
+            }
+          </tr>
           </tbody>
           </table>
       <main>

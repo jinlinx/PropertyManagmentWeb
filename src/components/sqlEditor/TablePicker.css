@@ -1,0 +1,10 @@
+.flex_container_col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex_container_row {
+  display: flex;
+  flex-direction: row;
+}
+

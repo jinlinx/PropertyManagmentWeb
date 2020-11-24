@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-dropdown-select';
-import {createHelper} from './datahelper';
+import { createHelper } from './datahelper';
+import {  Button, Form } from 'react-bootstrap';
 import get from 'lodash/get';
 
 const GenCrudAdd=(props) => {
@@ -135,14 +136,13 @@ const GenCrudAdd=(props) => {
                     return <div key={cind}>
                         <label>{c.desc}</label>
                         {
-                            foreignSel||<input className="u-full-width" type="text" value={fieldFormatter(data[c.field])} name={c.field} onChange={handleChange} />
-                        
+                            foreignSel ||< Form.Control as="input" value={fieldFormatter(data[c.field])} name={c.field} onChange={handleChange} />                        
                         }
                         
                     </div>
                 })
             }
-            <button className="button-primary" type="submit" onClick={handleSubmit} >Add</button>
+            <Button className="button-primary" type="submit" onClick={handleSubmit} >Add</Button>
         </form>
     )
 }
