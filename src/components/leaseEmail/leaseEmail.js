@@ -19,13 +19,7 @@ export default function LeaseEmail() {
     useEffect(() => {
         loadLeases();
     }, []);
-    useEffect(() => {
-        sqlFreeForm(`select t.tenantID, t.firstName, t.lastName, t.email, t.phone
-        from leaseTeantsInfo lt inner join tenantInfo t on lt.tenantID=t.tenantID
-        where lt.leaseID=?
-        order by t.firstName`, [selectedLease.leaseID]).then(res => {
-            setTenants(res);
-        });
+    const loadLeaseEmail = () => {
         sqlFreeForm(`select email
         from leaseEmail where leaseID=?
         order by email`, [selectedLease.leaseID]).then(res => {
@@ -34,11 +28,27 @@ export default function LeaseEmail() {
                 dbEmail: r.email,
             })));
         });
+    }
+    useEffect(() => {
+        sqlFreeForm(`select t.tenantID, t.firstName, t.lastName, t.email, t.phone
+        from leaseTeantsInfo lt inner join tenantInfo t on lt.tenantID=t.tenantID
+        where lt.leaseID=?
+        order by t.firstName`, [selectedLease.leaseID]).then(res => {
+            setTenants(res);
+        });
+        loadLeaseEmail();
     }, [selectedLease.address]);
     const selectedEmailMap = selectedEmails.reduce((acc, email) => {
         acc[email.email.toLowerCase()] = true;
         return acc;
     }, {});
+    const addEmail = email => {
+        sqlFreeForm(`insert into leaseEmail(leaseID,email) values(?,?)`, [selectedLease.leaseID, email])
+            .then(loadLeaseEmail);
+    }
+    const deleteEmail = email => {
+        sqlFreeForm(`delete from leaseEmail where leaseID=? and email=?`, [selectedLease.leaseID, email]).then(loadLeaseEmail);
+    }
     return <div>
         <DropdownButton title={selectedLease.address} >
             {
@@ -48,7 +58,10 @@ export default function LeaseEmail() {
             }
         </DropdownButton>
         <EmailTemplate leaseID={selectedLease.leaseID} context={{
-            selectedEmails, setSelectedEmails
+            selectedEmails, setSelectedEmails,
+            loadLeaseEmail,
+            addEmail,
+            deleteEmail,
         }} />
         <Table>
             <tbody>
@@ -62,12 +75,12 @@ export default function LeaseEmail() {
                                 if (e.target.checked) {
                                     const eml = l.email.toLowerCase();
                                     if (!selectedEmailMap[eml]) {
-                                        setSelectedEmails([...selectedEmails, eml]);
-                                        sqlFreeForm(`insert into leaseEmail(leaseID,email) values(?,?)`, [selectedLease.leaseID, l.email]);
+                                        //setSelectedEmails([...selectedEmails, eml]);
+                                        addEmail(l.email);
                                     }
                                 } else {
-                                    setSelectedEmails(selectedEmails.filter(e => e.toLowerCase() !== l.email.toLowerCase()));
-                                    sqlFreeForm(`delete from leaseEmail where leaseID=? and email=?`, [selectedLease.leaseID, l.email]);
+                                    //setSelectedEmails(selectedEmails.filter(e => e.toLowerCase() !== l.email.toLowerCase()));
+                                    deleteEmail(l.email);
                                 }
                             }} />
                             }
