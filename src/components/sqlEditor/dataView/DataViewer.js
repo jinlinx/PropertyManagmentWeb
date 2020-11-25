@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import set from 'lodash/set';
 import { v1 } from 'uuid';
 import { Table, Form, DropdownButton, Dropdown, Button } from 'react-bootstrap';
+import { sqlGetTables, sqlFreeForm, sqlGetTableInfo } from '../../api';
 import Select from 'react-dropdown-select';
 import { getPageSorts } from '../../util';
 
 import { DataGrid } from './dataGrid';
 
-const { sqlGetTables, sqlFreeForm, sqlGetTableInfo } = require('../../api');
 export function DataViewerAuto(props) {
     const [columnTableInfo, setTableColumnInfo] = useState({});
     const [paggingInfo, setPaggingInfo] = useState({

@@ -1,5 +1,5 @@
 
-const { sqlGetTableInfo } = require('../api');
+import { sqlGetTableInfo } from '../api';
 export function apiGetTableInfo(name) {
     return sqlGetTableInfo(name).then(res => {
         return ({

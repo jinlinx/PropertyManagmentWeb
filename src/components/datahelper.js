@@ -1,6 +1,6 @@
+import { getModel, sqlGet, sqlAdd, sqlDelete } from './api';
 import get from 'lodash/get';
 import mod from './models';
-const { getModel, sqlGet, sqlAdd, sqlDelete } = require('./api');
 
 export function createHelper(table) {
     const accModel=() => mod.models[table];
