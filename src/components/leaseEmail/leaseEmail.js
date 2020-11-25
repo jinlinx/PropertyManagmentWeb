@@ -1,0 +1,80 @@
+import React, { useState, useEffect } from 'react';
+import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup, Tab } from 'react-bootstrap';
+import EmailTemplate from './emailTemplate';
+const { sqlFreeForm } = require('../api');
+export default function LeaseEmail() {
+    const [leases, setLeases] = useState([]);
+    const [selectedEmails, setSelectedEmails] = useState([]);
+    const [tenants, setTenants] = useState([]);
+    const [selectedLease, setSelectedLease] = useState({});    
+    const loadLeases = () => {
+        sqlFreeForm(`select h.houseID, h.address, h.state, h.city, h.zip,
+        l.leaseID, l.endDate, l.comment
+        from houseInfo h inner join leaseInfo l on h.houseID=l.houseID
+        where l.endDate > now()
+        order by l.endDate desc`).then(res => {
+            setLeases(res);
+        })
+    }
+    useEffect(() => {
+        loadLeases();
+    }, []);
+    useEffect(() => {
+        sqlFreeForm(`select t.tenantID, t.firstName, t.lastName, t.email, t.phone
+        from leaseTeantsInfo lt inner join tenantInfo t on lt.tenantID=t.tenantID
+        where lt.leaseID=?
+        order by t.firstName`, [selectedLease.leaseID]).then(res => {
+            setTenants(res);
+        });
+        sqlFreeForm(`select email
+        from leaseEmail where leaseID=?
+        order by email`, [selectedLease.leaseID]).then(res => {
+            setSelectedEmails(res.map(r => ({
+                ...r,
+                dbEmail: r.email,
+            })));
+        });
+    }, [selectedLease.address]);
+    const selectedEmailMap = selectedEmails.reduce((acc, email) => {
+        acc[email.email.toLowerCase()] = true;
+        return acc;
+    }, {});
+    return <div>
+        <DropdownButton title={selectedLease.address} >
+            {
+                leases.map((l,ind) => {
+                    return <Dropdown.Item key={ind} onSelect={() => setSelectedLease(l)}>{ l.address }</Dropdown.Item>            
+                })
+            }
+        </DropdownButton>
+        <EmailTemplate leaseID={selectedLease.leaseID} context={{
+            selectedEmails, setSelectedEmails
+        }} />
+        <Table>
+            <tbody>
+                <tr><td></td><td>firstName</td><td>Last Name</td><td>Email</td><td>Phone</td></tr>
+                {
+                    tenants.map((l,ind) => {
+                        return <tr key={ind}><td>
+                            {l.email && <InputGroup.Checkbox aria-label="Select for email" enabled={!!l.email} checked={selectedEmailMap[l.email.toLowerCase()]} onChange={e => {
+
+                                console.log('val=' + e.target.checked);
+                                if (e.target.checked) {
+                                    const eml = l.email.toLowerCase();
+                                    if (!selectedEmailMap[eml]) {
+                                        setSelectedEmails([...selectedEmails, eml]);
+                                        sqlFreeForm(`insert into leaseEmail(leaseID,email) values(?,?)`, [selectedLease.leaseID, l.email]);
+                                    }
+                                } else {
+                                    setSelectedEmails(selectedEmails.filter(e => e.toLowerCase() !== l.email.toLowerCase()));
+                                    sqlFreeForm(`delete from leaseEmail where leaseID=? and email=?`, [selectedLease.leaseID, l.email]);
+                                }
+                            }} />
+                            }
+                        </td><td>{l.firstName}</td><td>{l.lastName}</td><td>{l.email}</td><td>{l.phone}</td></tr>
+                    })
+                }
+            </tbody>
+        </Table>
+    </div>
+}

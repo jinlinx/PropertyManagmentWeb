@@ -3,8 +3,12 @@ import GenList from './GenList';
 import {fmtDate} from './util';
 import { Button } from 'react-bootstrap';
 const { parseCsv } = require('./utils');
+import LeaseEmail from './leaseEmail/leaseEmail';
 function LeaseList(props) {  
-    return <div><GenList 
+    return <div>
+        <LeaseEmail/>
+        
+        <GenList 
     {...props}
     table={'leaseInfo'}
 
