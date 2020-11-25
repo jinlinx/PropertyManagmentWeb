@@ -31,3 +31,5 @@ sudo a2enmod headers
 sudo a2ensite default-ssl
 sudo a2enconf ssl-params
 sudo apache2ctl configtest
+
+apache in /var/www/html
