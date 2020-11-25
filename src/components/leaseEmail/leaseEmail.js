@@ -20,7 +20,7 @@ export default function LeaseEmail() {
         loadLeases();
     }, []);
     const loadLeaseEmail = () => {
-        sqlFreeForm(`select email
+        return sqlFreeForm(`select email
         from leaseEmail where leaseID=?
         order by email`, [selectedLease.leaseID]).then(res => {
             setSelectedEmails(res.map(r => ({
@@ -43,14 +43,17 @@ export default function LeaseEmail() {
         return acc;
     }, {});
     const addEmail = email => {
-        sqlFreeForm(`insert into leaseEmail(leaseID,email) values(?,?)`, [selectedLease.leaseID, email])
+        return sqlFreeForm(`insert into leaseEmail(leaseID,email) values(?,?)`, [selectedLease.leaseID, email])
             .then(loadLeaseEmail);
     }
     const deleteEmail = email => {
-        sqlFreeForm(`delete from leaseEmail where leaseID=? and email=?`, [selectedLease.leaseID, email]).then(loadLeaseEmail);
+        return sqlFreeForm(`delete from leaseEmail where leaseID=? and email=?`, [selectedLease.leaseID, email]).then(loadLeaseEmail);
+    }
+    const updateEmail = (ent) => {
+        return sqlFreeForm(`update leaseEmail set email=? where leaseID=? and email=?`, [ent.email, selectedLease.leaseID, ent.dbEmail]).then(loadLeaseEmail);
     }
     return <div>
-        <DropdownButton title={selectedLease.address} >
+        <DropdownButton title={selectedLease.address || ''} >
             {
                 leases.map((l,ind) => {
                     return <Dropdown.Item key={ind} onSelect={() => setSelectedLease(l)}>{ l.address }</Dropdown.Item>            
@@ -62,6 +65,7 @@ export default function LeaseEmail() {
             loadLeaseEmail,
             addEmail,
             deleteEmail,
+            updateEmail,
         }} />
         <Table>
             <tbody>
@@ -69,7 +73,7 @@ export default function LeaseEmail() {
                 {
                     tenants.map((l,ind) => {
                         return <tr key={ind}><td>
-                            {l.email && <InputGroup.Checkbox aria-label="Select for email" enabled={!!l.email} checked={selectedEmailMap[l.email.toLowerCase()]} onChange={e => {
+                            {l.email && <InputGroup.Checkbox aria-label="Select for email" checked={selectedEmailMap[l.email.toLowerCase()] || false} onChange={e => {
 
                                 console.log('val=' + e.target.checked);
                                 if (e.target.checked) {
