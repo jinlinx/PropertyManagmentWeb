@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup, Tab } from 'react-bootstrap';
-const { sqlFreeForm } = require('../api');
+const { sqlFreeForm, sendEmail } = require('../api');
 export default function EmailTemplate(props) {
     const { leaseID,
         context
@@ -89,7 +89,15 @@ export default function EmailTemplate(props) {
                 }} />
             </Form.Group>
             <Form.Group controlId="saveSubmit">
-                <Button variant="primary" type="button">
+                <Button variant="primary" type="button" onClick={() => {
+                    const to = selectedEmails.map(r => r.email);
+                    console.log(to);
+                    const { subject, data: text } = template;
+                    console.log(`${subject} ${text}`);
+                    sendEmail({ from: '"GGBot" <jinlinx@gmail.com>', to, subject, text }).then(r => {
+                        console.log(r);
+                    })
+                }}>
                     Send email
             </Button>
                 <Form.Text className="text-muted">
