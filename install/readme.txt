@@ -33,3 +33,4 @@ sudo a2enconf ssl-params
 sudo apache2ctl configtest
 
 apache in /var/www/html
+scp build\* pi@192.168.1.41:/var/www/html
