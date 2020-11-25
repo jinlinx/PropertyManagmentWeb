@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup  } from 'react-bootstrap';
-import { sqlGetTableInfo, sqlGetTables, sqlFreeForm } from '../../api';
 import { get } from 'lodash';
 import LoadingCover from '../LoadingCover';
 import { TextInputWithError, createStateContext } from '../TextInputWithError';
 import { apiGetTableInfo } from '../apiUtil';
-import { MultiDropdown } from '../MultiBarDropdown';
 import { ConstraintsEditor } from './constraints';
 import { IndexEditor } from './indexEditor';
+const { sqlGetTableInfo, sqlGetTables, sqlFreeForm } = require('../../api');
 function ColumnEditor(props) {
     const defaultColumnTypeVal = { label: 'varchar', value: 'varchar' };
     const { table, loadTables, isLoading, setIsLoading } = props;    

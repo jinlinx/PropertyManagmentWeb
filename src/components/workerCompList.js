@@ -1,6 +1,7 @@
 import React from 'react';
 import GenList from './GenList';
-import { getData } from './api';
+//import { getData } from './api';
+const { getData } = require('./api');
 
 function WorkerCompList(props) {
     return <GenList 

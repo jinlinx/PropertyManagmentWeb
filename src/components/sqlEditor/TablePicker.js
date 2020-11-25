@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Form, DropdownButton, Dropdown, Button, ButtonGroup } from 'react-bootstrap';
-import { sqlGetTables, sqlFreeForm } from '../api';
 import ColumnEditor from './columnEditor/columnEditor';
 import LoadingCover from './LoadingCover';
 import { DataViewerAuto } from './dataView/DataViewer';
+const { sqlGetTables, sqlFreeForm } = require('../api');
 
 function TablePicker() {
     const [tables, setTables] = useState([]);

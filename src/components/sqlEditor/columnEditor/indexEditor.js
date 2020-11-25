@@ -1,10 +1,10 @@
 import React from 'react';
 import { Button, } from 'react-bootstrap';
 import { get } from 'lodash';
-import { sqlFreeForm } from '../../api';
 import { getApiError } from '../../util';
 import { TextInputWithError } from '../TextInputWithError';
 import { MultiDropdown } from '../MultiBarDropdown';
+const { sqlFreeForm } = require('../../api');
 export function IndexEditor(props) {
     const {
         stateContext,

@@ -1,9 +1,9 @@
 import React from 'react';
 import { DropdownButton, Dropdown, Button, } from 'react-bootstrap';
 import { getApiError } from '../../util';
-import { sqlFreeForm } from '../../api';
 import { TextInputWithError, createStateContext } from '../TextInputWithError';
 import { MultiDropdown } from '../MultiBarDropdown';
+const { sqlFreeForm } = require('../../api');
 export function ConstraintsEditor(props) {
     const {
         stateContext,

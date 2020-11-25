@@ -3,10 +3,11 @@ import set from 'lodash/set';
 import { v1 } from 'uuid';
 import { Table, Form, DropdownButton, Dropdown, Button } from 'react-bootstrap';
 import Select from 'react-dropdown-select';
-import { sqlGetTables, sqlFreeForm, sqlGetTableInfo } from '../../api';
 import { getPageSorts } from '../../util';
 
 import { DataGrid } from './dataGrid';
+
+const { sqlGetTables, sqlFreeForm, sqlGetTableInfo } = require('../../api');
 export function DataViewerAuto(props) {
     const [columnTableInfo, setTableColumnInfo] = useState({});
     const [paggingInfo, setPaggingInfo] = useState({
