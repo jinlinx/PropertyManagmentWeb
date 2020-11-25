@@ -72,6 +72,15 @@ function sqlFreeForm(sql, parms) {
     });
 }
 
+function sendEmail({ from, to, subject, text }) {
+    return doPostOp(`${apiBase}/util/sendMail`, {
+        from,
+        to,
+        subject,
+        text,
+    });
+}
+
 
 module.exports = {
     getData,
@@ -82,4 +91,5 @@ module.exports = {
     sqlGetTables,
     sqlGetTableInfo,
     sqlFreeForm,
+    sendEmail,
 }
