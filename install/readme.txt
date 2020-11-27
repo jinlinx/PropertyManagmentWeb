@@ -31,3 +31,6 @@ sudo a2enmod headers
 sudo a2ensite default-ssl
 sudo a2enconf ssl-params
 sudo apache2ctl configtest
+
+apache in /var/www/html
+scp -r build\* pi@192.168.1.41:/var/www/html

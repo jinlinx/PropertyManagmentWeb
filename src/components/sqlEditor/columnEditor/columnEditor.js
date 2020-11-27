@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup  } from 'react-bootstrap';
+import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup } from 'react-bootstrap';
 import { sqlGetTableInfo, sqlGetTables, sqlFreeForm } from '../../api';
 import { get } from 'lodash';
 import LoadingCover from '../LoadingCover';
 import { TextInputWithError, createStateContext } from '../TextInputWithError';
 import { apiGetTableInfo } from '../apiUtil';
-import { MultiDropdown } from '../MultiBarDropdown';
 import { ConstraintsEditor } from './constraints';
 import { IndexEditor } from './indexEditor';
 function ColumnEditor(props) {

@@ -94,7 +94,7 @@ export default function EmailTemplate(props) {
                     console.log(to);
                     const { subject, data: text } = template;
                     console.log(`${subject} ${text}`);
-                    sendEmail({ from: '"GGBot" <jinlinx@gmail.com>', to, subject, text }).then(r => {
+                    sendEmail({ from: '"Jinlin" <jinlinx@hotmail.com>', to, subject, text }).then(r => {
                         console.log(r);
                     })
                 }}>

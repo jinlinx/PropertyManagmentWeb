@@ -1,9 +1,8 @@
 import React  from 'react';
 import GenList from './GenList';
 import {fmtDate} from './util';
-import { Button } from 'react-bootstrap';
-const { parseCsv } = require('./utils');
 import LeaseEmail from './leaseEmail/leaseEmail';
+const { parseCsv } = require('./utils');
 function LeaseList(props) {  
     return <div>
         <LeaseEmail/>

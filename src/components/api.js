@@ -14,15 +14,15 @@ function doPostOp(url, data) {
     return request.post(url).send(data).then(r => get(r, 'body'));
 }
  
-async function getData(sql) {
+export async function getData(sql) {
     return doGetOp(getUrl(sql));
 }
 
-async function getModel(name) {
+export async function getModel(name) {
     return doGetOp(`${apiBase}/getModel?name=${name}`);
 }
 
-async function sqlGet({table, field, joins, whereArray, order, rowCount, offset}) {
+export async function sqlGet({table, field, joins, whereArray, order, rowCount, offset}) {
     // "table":"tenantInfo",
     // "field":["tenantID", "firstName"],
     // joins:[{ table:{col:als}}]
@@ -38,7 +38,7 @@ async function sqlGet({table, field, joins, whereArray, order, rowCount, offset}
     })
 }
 
-async function sqlAdd(table, fields, create) {
+export async function sqlAdd(table, fields, create) {
 //     "table":"tenantInfo",
 //     "fields":{"tenantID":"289a8120-01fd-11eb-8993-ab1bf8206feb", "firstName":"gang", "lastName":"testlong"},
 //    "create":true
@@ -51,28 +51,28 @@ async function sqlAdd(table, fields, create) {
 }
 
 
-function sqlDelete(table, id) {
+export function sqlDelete(table, id) {
     return doPostOp(`${apiBase}/sql/del`, {
         table,id,
     }) 
 }
 
-function sqlGetTables() {
+export function sqlGetTables() {
     return doGetOp(`${apiBase}/sql/getTables`); 
 }
 
-function sqlGetTableInfo(table) {
+export function sqlGetTableInfo(table) {
     return doGetOp(`${apiBase}/sql/getTableInfo?table=${table}`); 
 }
 
-function sqlFreeForm(sql, parms) {
+export function sqlFreeForm(sql, parms) {
     return doPostOp(`${apiBase}/sql/freeFormSql`, {
         sql,
         parms,
     });
 }
 
-function sendEmail({ from, to, subject, text }) {
+export function sendEmail({ from, to, subject, text }) {
     return doPostOp(`${apiBase}/util/sendMail`, {
         from,
         to,
@@ -81,7 +81,7 @@ function sendEmail({ from, to, subject, text }) {
     });
 }
 
-
+/*
 module.exports = {
     getData,
     getModel,
@@ -92,4 +92,5 @@ module.exports = {
     sqlGetTableInfo,
     sqlFreeForm,
     sendEmail,
-}
+};
+*/

@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import { Table, Button, Form } from 'react-bootstrap';
-import { sqlFreeForm } from '../../api';
 import {v1} from 'uuid';
 import moment from 'moment';
+const { sqlFreeForm } = require('../../api');
 
 export function toSqlVal(fieldType, val) {
     if (fieldType === 'date' || fieldType === 'datetime') {
