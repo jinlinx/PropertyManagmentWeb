@@ -29,6 +29,20 @@ export function getApiError(err) {
     return get(err, 'response.body.message') || err.message;
 } 
 
+export function nameToFirstLast(name) {
+    const names = name.split(' ');
+    const { firstName, lastName } = names.reduce((acc, n) => {
+        const name = n.trim();
+        if (name) {
+            if (!acc.firstName)
+                acc.firstName = name;
+            else
+                acc.lastName = name;
+        }
+        return acc;
+    }, { firstName: '', lastName: '' });
+    return { firstName, lastName };
+}
 
 const seperators = { ',': true, '\n': true };
 export function parseCsv(str) {
