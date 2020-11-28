@@ -4,10 +4,14 @@ import { sqlGetTableInfo, sqlGetTables, sqlFreeForm } from '../api';
 import { nameToFirstLast } from '../util'
 import { get } from 'lodash';
 import {v1} from 'uuid';
+import moment from 'moment';
+import Promise from 'bluebird';
+
 function PaymentMatch(props) {
     const [imported, setImported] = useState([]);
     const [importItem, setImportItem] = useState({});
     const [needCreateItem, setNeedCreateItem] = useState({});
+    const [matchedTo, setMatchedTo] = useState({});
     const getItemId = i => {
         return `${i.date}-${i.name}-${i.amount}-${i.notes}-${i.source}`;
     }
@@ -20,39 +24,89 @@ function PaymentMatch(props) {
                 }
             }));
         })
-    });    
+    },[]);
+    const idToItemMap = imported.reduce((acc,ci)=>{
+        acc[ci.itemId] = ci;
+        return acc;
+    },{});
     return <Table>
+        <thead><td>Date</td><td>Name</td><td>Amount</td><td>Note</td><td>Source</td><td>Action</td><td>
+            <Button onClick={async ()=>{
+                await Promise.map(imported, async imp=>{
+                    const matched = matchedTo[imp.itemId];
+                    if (!imp.matchedTo && matched) {
+                        const id = v1();
+                        await sqlFreeForm(`insert into rentPaymentInfo(paymentID, receivedDate,receivedAmount,
+                        paidBy,leaseID,created,modified,notes)
+                        values(?,?,?,
+                        ?,?,now(),now(),?)`,[id, moment(imp.date).format('YYYY-MM-DD'), imp.amount,
+                        imp.name, matched.id, imp.notes]);
+                        imp.matchedTo = id;
+                        setImported(prev=>[...prev]);
+                    }
+                }, {concurrency: 1});
+            }}>Map</Button>
+        </td></thead>
         {
             imported.map((itm, ind) => {
-                return <tr key={ind}><td>{itm.date.slice(0, 10)}</td><td>{itm.name}</td><td>{itm.amount}</td><td>{itm.notes}</td>{itm.source}<td></td>
+                return <tr key={ind}><td>{itm.date.slice(0, 10)}</td><td>{itm.name}</td><td>{itm.amount}</td><td>{itm.notes}</td><td>{itm.source}</td>
                     <td>
-                        <InputGroup.Checkbox aria-label="Select for import" checked={importItem[itm.itemId] || false} onChange={async e => {
-                            const itemId = itm.itemId;
-                            console.log(`val=${itemId} ${e.target.checked}`);                            
-                            if (e.target.checked) {
-                                const { firstName, lastName } = nameToFirstLast(itm.name);
-                                const tnts = await sqlFreeForm(`select tenantID from tenantInfo where firstName=? and lastName=?`,
-                                    [firstName, lastName]);
-                                const existing = get(tnts, '0.tenantID');
-                                if (!existing) {
-                                    setNeedCreateItem({
-                                        ...needCreateItem,
-                                        [itemId]: true,
-                                    })
-                                } else {
-
-                                }
-                            } else {
-                                setNeedCreateItem({
-                                    ...needCreateItem,
-                                    [itemId]: false,
-                                })
-                            }
-                            setImportItem({
-                                ...importItem,
-                                [itemId]: e.target.checked,
-                            });
-                        }} />
+                        {!itm.matchedTo &&
+                        <InputGroup.Checkbox aria-label="Select for import" checked={importItem[itm.itemId] || false}
+                                             onChange={async e => {
+                                                 const itemId = itm.itemId;
+                                                 const checked = e.target.checked;
+                                                 console.log(`val=${itemId} ${checked}`);
+                                                 if (checked) {
+                                                     const {firstName, lastName} = nameToFirstLast(itm.name);
+                                                     const tnts = await sqlFreeForm(`select tenantID from tenantInfo where firstName=? and lastName=?`,
+                                                         [firstName, lastName]);
+                                                     const existing = get(tnts, '0.tenantID');
+                                                     if (!existing) {
+                                                         setNeedCreateItem({
+                                                             ...needCreateItem,
+                                                             [itemId]: true,
+                                                         })
+                                                     } else {
+                                                         const allMatches = imported.reduce((acc, ci) => {
+                                                             if (ci.name === itm.name) {
+                                                                 acc[ci.itemId] = {
+                                                                     name: itm.name,
+                                                                     id: existing,
+                                                                 }
+                                                             }
+                                                             return acc;
+                                                         }, {});
+                                                         setMatchedTo({
+                                                             ...matchedTo,
+                                                             [itm.itemId]: {
+                                                                 name: itm.name,
+                                                                 id: existing,
+                                                             },
+                                                             ...allMatches
+                                                         })
+                                                     }
+                                                 } else {
+                                                     setNeedCreateItem({
+                                                         ...needCreateItem,
+                                                         [itemId]: false,
+                                                     })
+                                                 }
+                                                 const importItemsCheck = imported.reduce((acc, ci) => {
+                                                         if (checked && idToItemMap[ci.itemId].name === idToItemMap[itemId].name) {
+                                                             if (acc[ci.itemId] !== false) {
+                                                                 acc[ci.itemId] = true;
+                                                             }
+                                                         }
+                                                         return acc;
+                                                     },
+                                                     {
+                                                         ...importItem,
+                                                         [itemId]: checked,
+                                                     });
+                                                 setImportItem(importItemsCheck);
+                                             }}/>
+                        }
                     </td>
                     <td>
                         {
@@ -82,6 +136,11 @@ function PaymentMatch(props) {
                                 })
                                 
                             }}>Create Lease</Button>
+                        }
+                        {
+                            matchedTo[itm.itemId] && <DropdownButton title={matchedTo[itm.itemId].name} >
+                                <Dropdown.Item >{matchedTo[itm.itemId].name}</Dropdown.Item>
+                            </DropdownButton>
                         }
                     </td>
                 </tr> 
