@@ -3,7 +3,7 @@ const {
     parseCsv,
 } = require('../src/components/utils');
 const Promise = require('bluebird');
-const { sqlFreeForm } = require('../src/components/api');
+const { sqlFreeForm } = require('../testdist/api.js');
 const uuid = require('uuid');
 
 const str = require('fs').readFileSync('./x.csv').toString();
