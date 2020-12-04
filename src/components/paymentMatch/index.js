@@ -58,9 +58,12 @@ function PaymentMatch(props) {
                                                  const checked = e.target.checked;
                                                  console.log(`val=${itemId} ${checked}`);
                                                  if (checked) {
-                                                     const {firstName, lastName} = nameToFirstLast(itm.name);
-                                                     const tnts = await sqlFreeForm(`select tenantID from tenantInfo where firstName=? and lastName=?`,
-                                                         [firstName, lastName]);
+                                                     //const {firstName, lastName} = nameToFirstLast(itm.name);
+                                                     const tnts = await sqlFreeForm(`select tenantID 
+                                                     from tenantInfo tn
+                                                     inner join payerTenantMapping ptn on tn.tenantID = ptn.tenantID
+                                                      where ptn.name=? and ptn.source=?`,
+                                                         [itm.name, itm.source]);
                                                      const existing = get(tnts, '0.tenantID');
                                                      if (!existing) {
                                                          setNeedCreateItem({
@@ -117,6 +120,9 @@ function PaymentMatch(props) {
         values(?,?,?,?,?,now(),now())`, [tenantID, firstName, lastName,
                                     'no email', 'no phone',
                                 ]);
+
+                                await sqlFreeForm(`insert into payerTenantMapping( tenantID, name, source, created, modified)
+        values(?,?,?,now(),now())`, [tenantID, itm.name, itm.source]);
                                 
                                 const houseID = v1();
                                 await sqlFreeForm(`insert into houseInfo (houseID,address,city,state, zip,ownerID, created,modified)
