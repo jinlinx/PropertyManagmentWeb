@@ -59,7 +59,7 @@ function PaymentMatch(props) {
                                                  console.log(`val=${itemId} ${checked}`);
                                                  if (checked) {
                                                      //const {firstName, lastName} = nameToFirstLast(itm.name);
-                                                     const tnts = await sqlFreeForm(`select tenantID 
+                                                     const tnts = await sqlFreeForm(`select tn.tenantID 
                                                      from tenantInfo tn
                                                      inner join payerTenantMapping ptn on tn.tenantID = ptn.tenantID
                                                       where ptn.name=? and ptn.source=?`,
@@ -115,7 +115,10 @@ function PaymentMatch(props) {
                         {
                             needCreateItem[itm.itemId] && <Button onClick={async () => {
                                 const { firstName, lastName } = nameToFirstLast(itm.name);
-                                const tenantID = v1();
+                                const existingTenant = await sqlFreeForm(`select tenantID from tenantInfo 
+                                where firstName=? and lastName=?`, [firstName, lastName]);
+                                const existingTenantId = get(existingTenant, '0.tenantID');
+                                const tenantID = existingTenantId|| v1();
                                 await sqlFreeForm(`insert into tenantInfo( tenantID,firstName, lastName, email, phone, created, modified)
         values(?,?,?,?,?,now(),now())`, [tenantID, firstName, lastName,
                                     'no email', 'no phone',
