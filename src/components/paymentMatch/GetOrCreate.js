@@ -16,21 +16,26 @@ export function GetOrCreate(props) {
     const getCurSelectionText = o => o.label;
     const loadOptions = async (name='') => {
         const res = await sqlFreeForm(`select tenantID, name from payerTenantMapping where name like ?`, [`%${name}%`]);
-        return res;
+        const fm = res.map(r => ({
+            label: r.name,
+            value: r,
+        }));        
+        return fm;
     };
     useEffect(() => {       
-        loadOptions().then(res => {
-            setOptions(res.map(r => ({
-                label: r.name,
-                value: r,
-            })));
+        loadOptions().then(res => {            
+            setOptions(res);
+            if (res.length) {
+                setCurSelection(res[0])
+            }
         })
     }, []);
 
     return <div>
         <EditDropdown context={{
             curSelection, setCurSelection, getCurSelectionText,
-            options,
+            options, setOptions,
+            loadOptions,
         }}></EditDropdown>
     </div>
 

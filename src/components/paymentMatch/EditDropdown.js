@@ -6,8 +6,10 @@ import { get } from 'lodash';
 export default function EditDropdown(props) {
     const {
         options, loadOptions,
+        setOptions,
         getCurSelectionText,
         curSelection, setCurSelection,
+        MAXITEMS = 20,
     } = props.context;
 
     const selTextRef = createRef();
@@ -22,7 +24,7 @@ export default function EditDropdown(props) {
                     setShow(false);
                 }}
                 onKeyDown={
-                    e => {
+                    async e => {
                         if (!curSelection || !curSelection.label) return;
                         if (e.key === 'Tab') {
                             setShow(false);
@@ -40,10 +42,14 @@ export default function EditDropdown(props) {
                                     ind: o.label.toLowerCase().indexOf(starts.toLowerCase())
                                 };
                             }).filter(o => o.ind >= 0).sort((a, b) => a.ind - b.ind);
-                            console.log(foundOs);
                             const found = get(foundOs, '0.opt');
                             if (!found) {
-                                loadOptions(starts);
+                                const newOpts = await loadOptions(starts);
+                                if (newOpts.length) {
+                                    if (options.length + newOpts.length > MAXITEMS) {
+                                        setOptions(newOpts.concat(options.slice(0, options.length - newOpts.length)));
+                                    }
+                                }
                                 return setCurSelection({
                                     value: null,
                                     label: curSelection.label,
@@ -53,24 +59,23 @@ export default function EditDropdown(props) {
                                 ...found,
                             });
                             if (selTextRef.current) {
-                                const posAdd = e.key === 'ArrowLeft' ? -1 : 1;
+                                const posAdd = (e.key === 'ArrowLeft' || e.key === 'Backspace') ? -1 : 1;
                                 selTextRef.current.value = found.label;
                                 let newStart = selectionStart + posAdd;
                                 if (newStart <= 0) newStart = 0;
                                 selTextRef.current.selectionStart = newStart;
                                 selTextRef.current.selectionEnd = found.label.length;
-                                console.log(`found, set start=${selectionStart} and end to ${found.label.length}`)
                                 //selTextRef.current.selectionEnd = found.label.length;
                             }
                         }
                     }
-                }
-                onChange={e => {
-                console.log('changed to ' +e.target.value);
-                    console.log(e.target.selectionStart + " " + e.target.selectionEnd);
-                    console.log(selTextRef.current.selectionStart);
-            }} />                        
-            <Dropdown.Toggle split variant="success" id="dropdown-split-basic" />
+                }            
+            />                        
+            <Dropdown.Toggle split variant="success" id="dropdown-split-basic" onClick={() => {
+                setShow(!show);
+            }} onBlur={() => {
+                setShow(false);
+            }}/>
             <Dropdown.Menu show={show}>
                 {
                     options.map((l, ind) => {
