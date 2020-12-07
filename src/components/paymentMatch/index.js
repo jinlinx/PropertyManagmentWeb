@@ -6,6 +6,7 @@ import { get } from 'lodash';
 import {v1} from 'uuid';
 import moment from 'moment';
 import Promise from 'bluebird';
+import {GetOrCreate} from './GetOrCreate';
 
 function PaymentMatch(props) {
     const [imported, setImported] = useState([]);
@@ -30,7 +31,8 @@ function PaymentMatch(props) {
         return acc;
     },{});
     return <Table>
-        <thead><td>Date</td><td>Name</td><td>Amount</td><td>Note</td><td>Source</td><td>Action</td><td>
+        <tr><td><GetOrCreate></GetOrCreate></td></tr>
+        <thead><td>Date</td><td>Name</td><td>Amount</td><td>Note</td><td>Source</td><td>Action</td><td>                        
             <Button onClick={async ()=>{
                 await Promise.map(imported, async imp=>{
                     const matched = matchedTo[imp.itemId];
