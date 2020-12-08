@@ -69,7 +69,8 @@ export default function EditDropdown(props) {
                             }
                         }
                     }
-                }            
+                }
+                onChange={() => { }}
             />                        
             <Dropdown.Toggle split variant="success" id="dropdown-split-basic" onClick={() => {
                 setShow(!show);
@@ -79,7 +80,12 @@ export default function EditDropdown(props) {
             <Dropdown.Menu show={show}>
                 {
                     options.map((l, ind) => {
-                        return <Dropdown.Item key={ind} onSelect={() => setCurSelection(l)}>{getCurSelectionText(l)}</Dropdown.Item>
+                        return <Dropdown.Item key={ind} onSelect={() => {
+                            console.log('selection ' + l);
+                            setCurSelection(l);
+
+                        }
+                        }>{getCurSelectionText(l)}</Dropdown.Item>
                     })
                 }
             </Dropdown.Menu>

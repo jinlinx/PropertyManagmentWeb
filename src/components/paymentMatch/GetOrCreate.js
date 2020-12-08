@@ -9,19 +9,10 @@ import EditDropdown from './EditDropdown';
 
 import { sqlFreeForm } from '../api';
 
-export function GetOrCreate(props) {
-    
-    const [curSelection, setCurSelection] = useState('');
+export function GetOrCreate(props) {    
+    const { curSelection, setCurSelection, loadOptions} = props.context;
     const [options, setOptions] = useState([]);    
-    const getCurSelectionText = o => o.label;
-    const loadOptions = async (name='') => {
-        const res = await sqlFreeForm(`select tenantID, name from payerTenantMapping where name like ?`, [`%${name}%`]);
-        const fm = res.map(r => ({
-            label: r.name,
-            value: r,
-        }));        
-        return fm;
-    };
+    const getCurSelectionText = o => o.label || '';    
     useEffect(() => {       
         loadOptions().then(res => {            
             setOptions(res);

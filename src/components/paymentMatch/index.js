@@ -6,7 +6,7 @@ import { get } from 'lodash';
 import {v1} from 'uuid';
 import moment from 'moment';
 import Promise from 'bluebird';
-import {GetOrCreate} from './GetOrCreate';
+import { TenantMatcher } from './TenantMatcher';
 
 function PaymentMatch(props) {
     const [imported, setImported] = useState([]);
@@ -31,8 +31,9 @@ function PaymentMatch(props) {
         return acc;
     },{});
     return <Table>
-        <tr><td><GetOrCreate></GetOrCreate></td></tr>
-        <thead><td>Date</td><td>Name</td><td>Amount</td><td>Note</td><td>Source</td><td>Action</td><td>                        
+        <thead><tr>
+            <td><TenantMatcher></TenantMatcher></td>
+            <td>Date</td><td>Name</td><td>Amount</td><td>Note</td><td>Source</td><td>Action</td><td>                        
             <Button onClick={async ()=>{
                 await Promise.map(imported, async imp=>{
                     const matched = matchedTo[imp.itemId];
@@ -48,7 +49,8 @@ function PaymentMatch(props) {
                     }
                 }, {concurrency: 1});
             }}>Map</Button>
-        </td></thead>
+            </td></tr></thead>
+        <tbody>
         {
             imported.map((itm, ind) => {
                 return <tr key={ind}><td>{itm.date.slice(0, 10)}</td><td>{itm.name}</td><td>{itm.amount}</td><td>{itm.notes}</td><td>{itm.source}</td>
@@ -156,7 +158,8 @@ function PaymentMatch(props) {
                     </td>
                 </tr> 
             })
-        }
+            }
+        </tbody>
     </Table>
 }
 
