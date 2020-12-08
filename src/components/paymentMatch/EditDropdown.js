@@ -75,7 +75,7 @@ export default function EditDropdown(props) {
             <Dropdown.Toggle split variant="success" id="dropdown-split-basic" onClick={() => {
                 setShow(!show);
             }} onBlur={() => {
-                setShow(false);
+                setTimeout(()=>setShow(false),100);
             }}/>
             <Dropdown.Menu show={show}>
                 {
