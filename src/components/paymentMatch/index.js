@@ -13,6 +13,7 @@ function PaymentMatch(props) {
     const [importItem, setImportItem] = useState({});
     const [needCreateItem, setNeedCreateItem] = useState({});
     const [matchedTo, setMatchedTo] = useState({});
+    const [matchedToName, setMatchedToName] = useState('');
     const getItemId = i => {
         return `${i.date}-${i.name}-${i.amount}-${i.notes}-${i.source}`;
     }
@@ -30,11 +31,16 @@ function PaymentMatch(props) {
         acc[ci.itemId] = ci;
         return acc;
     },{});
-    return <Table>
+    return <>
+        <TenantMatcher context={{
+            onClose: () => setMatchedToName(''),
+            name: matchedToName,
+        } }></TenantMatcher>
+        <Table>
         <thead><tr>
-            <td><TenantMatcher></TenantMatcher></td>
             <td>Date</td><td>Name</td><td>Amount</td><td>Note</td><td>Source</td><td>Action</td><td>                        
-            <Button onClick={async ()=>{
+                    <Button onClick={async () => {
+                        return;
                 await Promise.map(imported, async imp=>{
                     const matched = matchedTo[imp.itemId];
                     if (!imp.matchedTo && matched) {
@@ -57,7 +63,8 @@ function PaymentMatch(props) {
                     <td>
                         {!itm.matchedTo &&
                         <InputGroup.Checkbox aria-label="Select for import" checked={importItem[itm.itemId] || false}
-                                             onChange={async e => {
+                            onChange={async e => {
+                                setMatchedToName(itm.name);
                                                  const itemId = itm.itemId;
                                                  const checked = e.target.checked;
                                                  console.log(`val=${itemId} ${checked}`);
@@ -160,7 +167,8 @@ function PaymentMatch(props) {
             })
             }
         </tbody>
-    </Table>
+        </Table>
+        </>
 }
 
 
