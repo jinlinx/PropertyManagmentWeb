@@ -13,7 +13,7 @@ function PaymentMatch(props) {
     const [importItem, setImportItem] = useState({});
     const [needCreateItem, setNeedCreateItem] = useState({});
     const [matchedTo, setMatchedTo] = useState({});
-    const [matchedToName, setMatchedToName] = useState('');
+    const [matchedToItem, setMatchedToItem] = useState({});
     const getItemId = i => {
         return `${i.date}-${i.name}-${i.amount}-${i.notes}-${i.source}`;
     }
@@ -33,8 +33,9 @@ function PaymentMatch(props) {
     },{});
     return <>
         <TenantMatcher context={{
-            onClose: () => setMatchedToName(''),
-            name: matchedToName,
+            onClose: () => setMatchedToItem({}),
+            name: matchedToItem.name,
+            source: matchedToItem.source,
         } }></TenantMatcher>
         <Table>
         <thead><tr>
@@ -64,7 +65,7 @@ function PaymentMatch(props) {
                         {!itm.matchedTo &&
                         <InputGroup.Checkbox aria-label="Select for import" checked={importItem[itm.itemId] || false}
                             onChange={async e => {
-                                setMatchedToName(itm.name);
+                                setMatchedToItem(itm);
                                                  const itemId = itm.itemId;
                                                  const checked = e.target.checked;
                                                  console.log(`val=${itemId} ${checked}`);

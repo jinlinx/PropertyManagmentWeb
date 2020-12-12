@@ -5,13 +5,17 @@ import { Modal, Container, Row, Col, Tabs, Tab, Form, DropdownButton, Dropdown, 
 import { GetOrCreate } from './GetOrCreate';
 
 import { sqlFreeForm } from '../api';
+import { saveTenantProcessorPayeeMapping} from '../aapi';
 import { nameToFirstLast } from '../util';
+import { get } from 'lodash';
+
 export function TenantMatcher(props) {
 
-    const { onClose, name } = props.context;
+    const { onClose, name, source } = props.context;
     const show = !!name;
     //const { show } = props;
     const [curTenantSelection, setCurTenantSelection] = useState({});    
+    const [showProgress, setShowProgress] = useState(false);
     const loadTenantOptions = async (name = '') => {
         const { firstName, lastName } = nameToFirstLast(name);
         const res = await sqlFreeForm(`select tenantID, firstName, lastName from tenantInfo 
@@ -22,10 +26,19 @@ export function TenantMatcher(props) {
         }));
         return fm;
     };
-        
+    const tenantID = get(curTenantSelection, 'value.tenantID');
+    const mapToLabel = curTenantSelection.label;
+    console.log(curTenantSelection);
     return <div >
+        <Modal show={!!showProgress}>
+            <Container>
+                {showProgress}
+            </Container>
+        </Modal>
         <Modal show={show}>
-            <Modal.Header closeButton>
+            <Modal.Header closeButton onClick={() => {
+                onClose();
+            }}>
                 <Modal.Title id="contained-modal-title-vcenter">
                     Matching name {name}
                 </Modal.Title>
@@ -35,13 +48,31 @@ export function TenantMatcher(props) {
                     <Tabs defaultActiveKey="profile" id="uncontrolled-tab-example">
                         <Tab eventKey="LinkExisting" title="Link Existing">                            
                             <Container>
+                                <Row><Col>Ma: {mapToLabel} to {name} {source} {tenantID}</Col></Row>
+                                <Row>
                                 <Col xs={12} md={8}>
                                     <GetOrCreate context={{
                                         curSelection: curTenantSelection, setCurSelection: setCurTenantSelection,
                                         loadOptions: loadTenantOptions,
-                                    }}></GetOrCreate>
-                                    .col-xs-12 .col-md-8                             
+                                    }}></GetOrCreate>                                    
                                 </Col>
+                                <Col>
+                                        <Button disabled={!!showProgress} onClick={() => {                                            
+                                            if (!tenantID) {
+                                                setShowProgress('Please select a tenant to map to');
+                                                setTimeout(() => setShowProgress(''), 2000);
+                                                return;
+                                            }                                        
+                                            setShowProgress('Please Wait');
+                                            saveTenantProcessorPayeeMapping({ tenantID, name, source })
+                                            .then(() => {
+                                                setShowProgress('');
+                                            }).catch(err => {
+                                                setShowProgress(err.message);
+                                            });
+                                    }}>Link</Button>
+                                    </Col>
+                                </Row>
                             </Container>                            
                         </Tab>
                         <Tab eventKey="new" title="Create New">
