@@ -8,7 +8,6 @@ import { sqlFreeForm } from '../api';
 import { saveTenantProcessorPayeeMapping} from '../aapi';
 import { nameToFirstLast } from '../util';
 import { get } from 'lodash';
-
 export function TenantMatcher(props) {
 
     const { onClose, name, source } = props.context;
@@ -16,6 +15,9 @@ export function TenantMatcher(props) {
     //const { show } = props;
     const [curTenantSelection, setCurTenantSelection] = useState({});    
     const [showProgress, setShowProgress] = useState(false);
+    const firstLast = nameToFirstLast(name);
+    const [tenantFirstName, setTenantFirstname] = useState(firstLast.firstName);
+    const [tenantLastName, setTenantLastname] = useState(firstLast.lastName);
     const loadTenantOptions = async (name = '') => {
         const { firstName, lastName } = nameToFirstLast(name);
         const res = await sqlFreeForm(`select tenantID, firstName, lastName from tenantInfo 
@@ -76,33 +78,20 @@ export function TenantMatcher(props) {
                             </Container>                            
                         </Tab>
                         <Tab eventKey="new" title="Create New">
-                            <div>2</div>
-                        </Tab>
-                        <Tab eventKey="contact" title="Contact" disabled>
-                            <div>3</div>
-                        </Tab>
-                    </Tabs>
-                    <Row>
-                        <Col xs={12} md={8}>
-                            .col-xs-12 .col-md-8
-                             
-            </Col>
-                        <Col xs={6} md={4}>
-                            .col-xs-6 .col-md-4
-            </Col>
-                    </Row>
-
-                    <Row>
-                        <Col xs={6} md={4}>
-                            .col-xs-6 .col-md-4
-                        </Col>
-                        <Col xs={6} md={4}>
-                            .col-xs-6 .col-md-4
-                        </Col>
-                        <Col xs={6} md={4}>
-                            .col-xs-6 .col-md-4
-                        </Col>
-                    </Row>
+                            <Row>
+                                <Col>FirstName</Col>
+                                <Col>< Form.Control as="input" value={tenantFirstName} name="tenantFirstName" onChange={e => {
+                                    setTenantFirstname(e.target.value);
+                                }} /></Col>                                
+                            </Row>
+                            <Row>          
+                                <Col>LastName</Col>
+                                <Col>< Form.Control as="input" value={tenantLastName} name="tenantLastName" onChange={e => {
+                                    setTenantLastname(e.target.value);
+                                }} /></Col>
+                            </Row>
+                        </Tab>                        
+                    </Tabs>                    
                 </Container>
             </Modal.Body>
             <Modal.Footer>
