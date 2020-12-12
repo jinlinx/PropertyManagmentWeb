@@ -12,9 +12,11 @@ const GenCrudAdd=(props) => {
         customSelData,
         customFields = {},
         show,
+        desc,
     }
         =props;
-    let id='';
+    let id = '';
+    const onOK = props.onOK || onCancel;
     const initData=columnInfo.reduce((acc, col) => {
         acc[col.field]='';
         if (editItem) {
@@ -39,12 +41,18 @@ const GenCrudAdd=(props) => {
         setData({ ...data, [name]: value });
     }
 
-    const handleSubmit=e => {
+    const handleSubmit=async e => {
         e.preventDefault();
 
         const missed=requiredFields.filter(r => !data[r]);
-        if (missed.length===0) {
-            handleChange(e, doAdd(data, id));
+        if (missed.length === 0) {
+            const ret = await doAdd(data, id);
+            handleChange(e, ret);            
+            onOK({
+                id,
+                ...data,
+                ...ret,
+            });
         } else {
             if (onError) {
                 onError({
@@ -53,12 +61,7 @@ const GenCrudAdd=(props) => {
                 });
             }
             return;
-        }
-        const onOK = props.onOK || onCancel;
-        onOK({
-            id,
-            ...data,
-        });
+        }        
     }
 
     const optsDataReqSent={
@@ -97,9 +100,9 @@ const GenCrudAdd=(props) => {
         return '';
     }
     return (
-        <Modal show={show} onHide={onCancel}>
+        <Modal show={show} onHide={onOK}>
             <Modal.Header closeButton>
-                <Modal.Title>Add</Modal.Title>
+                <Modal.Title>{desc}</Modal.Title>
             </Modal.Header>
             <Container>
             {
@@ -171,7 +174,7 @@ const GenCrudAdd=(props) => {
                         <Button className="btn-primary" type="submit" onClick={handleSubmit} >Add</Button>
                     </Col>
                     <Col>
-                        <Button className="btn-secondary" onClick={onCancel} >Cancel</Button>
+                        <Button className="btn-secondary" onClick={onOK} >Cancel</Button>
                     </Col>
                     </Row>
                 </Modal.Footer>
