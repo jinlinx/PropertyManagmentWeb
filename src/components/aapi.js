@@ -18,3 +18,12 @@ export async function saveTenantProcessorPayeeMapping({ source, name, tenantID }
     if (exists.length) return;
     await sqlFreeForm(`insert into payerTenantMapping(tenantID, name, source) values(?,?,?)`,parms);
 }
+
+
+export async function getHouses(address) {
+    const houses = await sqlFreeForm(`select houseID,address,city,state
+                                                     from houseInfo                                                     
+                                                      where address like ?`,
+        [`%${address}%`]);
+    return houses;
+}

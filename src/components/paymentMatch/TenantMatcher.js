@@ -5,25 +5,43 @@ import { Modal, Container, Row, Col, Tabs, Tab, Form, DropdownButton, Dropdown, 
 import { GetOrCreate } from './GetOrCreate';
 
 import { sqlFreeForm } from '../api';
-import { saveTenantProcessorPayeeMapping} from '../aapi';
+import {
+    saveTenantProcessorPayeeMapping,
+    getHouses,
+} from '../aapi';
 import { nameToFirstLast } from '../util';
-import { get } from 'lodash';
+import { add, get } from 'lodash';
 export function TenantMatcher(props) {
 
     const { onClose, name, source } = props.context;
     const show = !!name;
     //const { show } = props;
-    const [curTenantSelection, setCurTenantSelection] = useState({});    
+    const [curTenantSelection, setCurTenantSelection] = useState({});
+    const [curHouseSelection, setCurHouseSelection] = useState({});
     const [showProgress, setShowProgress] = useState(false);
-    const firstLast = nameToFirstLast(name);
-    const [tenantFirstName, setTenantFirstname] = useState(firstLast.firstName);
-    const [tenantLastName, setTenantLastname] = useState(firstLast.lastName);
+    const firstLast = nameToFirstLast(name || '');
+    const [tenantName, setTenantName] = useState(firstLast.firstName);
+    useEffect(() => {
+        setTenantName({
+            firstName: firstLast.firstName || '',
+            lastName: firstLast.lastName || '',
+        });
+    }, [firstLast.firstName, firstLast.lastName]);
     const loadTenantOptions = async (name = '') => {
-        const { firstName, lastName } = nameToFirstLast(name);
+        const { firstName, lastName } = nameToFirstLast(name || '');
         const res = await sqlFreeForm(`select tenantID, firstName, lastName from tenantInfo 
-        where firstName like ? and lastName like ?`, [`%${firstName}%`, `%${firstName}%`]);
+        where firstName like ? or lastName like ?`, [`%${firstName}%`, `%${lastName}%`]);
         const fm = res.map(r => ({
             label: `${r.firstName} ${r.lastName}`,
+            value: r,
+        }));
+        return fm;
+    };
+
+    const loadHouseOptions = async (address = '') => {
+        const res = await getHouses(address);
+        const fm = res.map(r => ({
+            label: `${r.address} ${r.city} ${r.state}`,
             value: r,
         }));
         return fm;
@@ -80,15 +98,29 @@ export function TenantMatcher(props) {
                         <Tab eventKey="new" title="Create New">
                             <Row>
                                 <Col>FirstName</Col>
-                                <Col>< Form.Control as="input" value={tenantFirstName} name="tenantFirstName" onChange={e => {
-                                    setTenantFirstname(e.target.value);
+                                <Col>< Form.Control as="input" value={tenantName.firstName} name="tenantFirstName" onChange={e => {                                    
+                                    setTenantName({
+                                        ...tenantName,
+                                        firstName: e.target.value,
+                                    })
                                 }} /></Col>                                
                             </Row>
                             <Row>          
                                 <Col>LastName</Col>
-                                <Col>< Form.Control as="input" value={tenantLastName} name="tenantLastName" onChange={e => {
-                                    setTenantLastname(e.target.value);
+                                <Col>< Form.Control as="input" value={tenantName.lastName} name="tenantLastName" onChange={e => {
+                                    setTenantName({
+                                        ...tenantName,
+                                        lastName: e.target.value,
+                                    })
                                 }} /></Col>
+                            </Row>
+                            <Row>
+                                <Col>
+                                    <GetOrCreate context={{
+                                        curSelection: curHouseSelection, setCurSelection: setCurHouseSelection,
+                                        loadOptions: loadHouseOptions,
+                                    }}></GetOrCreate>
+                                </Col>
                             </Row>
                         </Tab>                        
                     </Tabs>                    
