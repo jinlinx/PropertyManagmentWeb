@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-dropdown-select';
-import { createHelper } from './datahelper';
-import {  Button, Form } from 'react-bootstrap';
+import { createAndLoadHelper } from './datahelper';
+import { Button, Form, Modal, Container, Row, Col } from 'react-bootstrap';
 import get from 'lodash/get';
 
 const GenCrudAdd=(props) => {
@@ -10,7 +10,8 @@ const GenCrudAdd=(props) => {
         editItem, //only available during edit
         onError,
         customSelData,
-        customFields={},
+        customFields = {},
+        show,
     }
         =props;
     let id='';
@@ -25,7 +26,11 @@ const GenCrudAdd=(props) => {
         }
         return acc;
     }, {});
-    const requiredFields=columnInfo.filter(c => c.required&&!c.isId).map(c => c.field);
+    const requiredFields = columnInfo.filter(c => c.required && !c.isId).map(c => c.field);
+    const requiredFieldsMap = requiredFields.reduce((acc, f) => {
+        acc[f] = true;
+        return acc;
+    }, {});
 
     const [data, setData]=useState(initData);
     const [optsData, setOptsData]=useState(customSelData||{});
@@ -41,13 +46,19 @@ const GenCrudAdd=(props) => {
         if (missed.length===0) {
             handleChange(e, doAdd(data, id));
         } else {
-            onError({
-                message: `missing required fields ${missed.length}`,
-                missed,
-            });
+            if (onError) {
+                onError({
+                    message: `missing required fields ${missed.length}`,
+                    missed,
+                });
+            }
             return;
         }
-        onCancel();
+        const onOK = props.onOK || onCancel;
+        onOK({
+            id,
+            ...data,
+        });
     }
 
     const optsDataReqSent={
@@ -63,8 +74,8 @@ const GenCrudAdd=(props) => {
                     const optKey=c.foreignKey.table;
 
                     if (!optsData[optKey]) {
-                        const helper=createHelper(optKey);
-                        await helper.loadModel();
+                        const helper = await createAndLoadHelper(optKey);
+                        //await helper.loadModel();
                         const optDataOrig=await helper.loadData();
                         const optData = optDataOrig.rows;
                         cur=Object.assign({}, cur, {
@@ -79,8 +90,18 @@ const GenCrudAdd=(props) => {
         }
         doLoads();
     }, []);
+
+    const checkErrorInd = c => {
+        if (requiredFieldsMap[c.field] && !data[c.field])
+            return "alert-danger";
+        return '';
+    }
     return (
-        <form>
+        <Modal show={show} onHide={onCancel}>
+            <Modal.Header closeButton>
+                <Modal.Title>Add</Modal.Title>
+            </Modal.Header>
+            <Container>
             {
                 columnInfo.map( ( c, cind ) => {
                     if(!editItem) {
@@ -113,8 +134,8 @@ const GenCrudAdd=(props) => {
                         const lm = async () => {
                             if (!optsData[optKey] && !optsDataReqSent[optKey]) {
                                 optsDataReqSent[optKey] = true;
-                                const helper = createHelper(optKey);
-                                await helper.loadModel();
+                                const helper = await createAndLoadHelper(optKey);
+                                //await helper.loadModel();
                                 const optData = await helper.loadData();
                                 setOptsData({
                                     ...optsData,
@@ -133,17 +154,29 @@ const GenCrudAdd=(props) => {
                         foreignSel=createSelection( c.field, c.field );
                     }
                     const fieldFormatter=c.dspFunc||(x => x);
-                    return <div key={cind}>
-                        <label>{c.desc}</label>
-                        {
+                    return <Row key={cind}>
+                        <Col>{c.desc}</Col>
+                        <Col className={checkErrorInd(c)}>
+                            {
                             foreignSel ||< Form.Control as="input" value={fieldFormatter(data[c.field])} name={c.field} onChange={handleChange} />                        
-                        }
-                        
-                    </div>
+                            }                            
+                        </Col>
+                        <Col xs={1} className={checkErrorInd(c)}>{checkErrorInd(c) && '*'}</Col>
+                    </Row>
                 })
-            }
-            <Button className="button-primary" type="submit" onClick={handleSubmit} >Add</Button>
-        </form>
+                }
+                <Modal.Footer>
+                <Row>
+                    <Col>
+                        <Button className="btn-primary" type="submit" onClick={handleSubmit} >Add</Button>
+                    </Col>
+                    <Col>
+                        <Button className="btn-secondary" onClick={onCancel} >Cancel</Button>
+                    </Col>
+                    </Row>
+                </Modal.Footer>
+            </Container>
+        </Modal>
     )
 }
 
