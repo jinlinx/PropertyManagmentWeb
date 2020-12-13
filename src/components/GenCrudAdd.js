@@ -47,7 +47,7 @@ const GenCrudAdd=(props) => {
         const missed=requiredFields.filter(r => !data[r]);
         if (missed.length === 0) {
             const ret = await doAdd(data, id);
-            handleChange(e, ret);            
+            //handleChange(e, ret);            
             onOK({
                 id,
                 ...data,

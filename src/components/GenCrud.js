@@ -267,7 +267,10 @@ const GenCrud = (props) => {
                 </div>
             }
 
-            <GenCrudAdd {...props} show={dspState === 'addNew'} onCancel={() => setDspState('dsp')}></GenCrudAdd>            
+            <GenCrudAdd {...props} show={dspState === 'addNew'} onCancel={r => {
+                console.log(r);
+                setDspState('dsp')
+            }}></GenCrudAdd>            
             {
                 dspState==='edit' &&
                 <GenCrudAdd {...props} editItem={editItem} idCol={idCol} onCancel={() => setDspState('dsp')}></GenCrudAdd>
