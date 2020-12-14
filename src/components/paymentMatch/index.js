@@ -18,7 +18,9 @@ function PaymentMatch(props) {
         return `${i.date}-${i.name}-${i.amount}-${i.notes}-${i.source}`;
     }
     useEffect(() => {
-        sqlFreeForm(`select name, date, amount, source, notes from importPayments where matchedTo is null`).then(r => {
+        sqlFreeForm(`select id,name, date, amount, source, notes 
+        from importPayments ip
+        where ip.matchedTo is null and ip.deleted is null`).then(r => {
             setImported(r.map(r => {
                 return {
                     ...r,
@@ -163,6 +165,13 @@ function PaymentMatch(props) {
                                 <Dropdown.Item >{matchedTo[itm.itemId].name}</Dropdown.Item>
                             </DropdownButton>
                         }
+                    </td>
+                    <td>
+                        <Button onClick={() => {
+                            sqlFreeForm(`update importPayments set deleted='1' where id=? `, [itm.id]).then(() => {
+                                setImported(imported.filter(r => r.id !== itm.id)); 
+                            });
+                        }}>Delete</Button>
                     </td>
                 </tr> 
             })
