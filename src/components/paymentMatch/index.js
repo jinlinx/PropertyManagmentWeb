@@ -64,8 +64,7 @@ function PaymentMatch(props) {
                     <td>
                         {!itm.matchedTo &&
                         <InputGroup.Checkbox aria-label="Select for import" checked={importItem[itm.itemId] || false}
-                            onChange={async e => {
-                                setMatchedToItem(itm);
+                            onChange={async e => {                                
                                                  const itemId = itm.itemId;
                                                  const checked = e.target.checked;
                                                  console.log(`val=${itemId} ${checked}`);
@@ -78,6 +77,7 @@ function PaymentMatch(props) {
                                                          [itm.name, itm.source]);
                                                      const existing = get(tnts, '0.tenantID');
                                                      if (!existing) {
+                                                         setMatchedToItem(itm);
                                                          setNeedCreateItem({
                                                              ...needCreateItem,
                                                              [itemId]: true,

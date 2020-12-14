@@ -21,6 +21,14 @@ export function TenantMatcher(props) {
     const [showProgress, setShowProgress] = useState(false);
     const [columnInfo, setColumnInfo] = useState([]);
     const [isCreateNew, setIsCreateNew] = useState(false);
+    const firstLast = nameToFirstLast(name || '');
+    const [tenantName, setTenantName] = useState(firstLast.firstName);
+    useEffect(() => {
+        setTenantName({
+            firstName: firstLast.firstName || '',
+            lastName: firstLast.lastName || '',
+        });
+    }, [firstLast.firstName, firstLast.lastName]);
     const loadTenantOptions = async (name = '') => {
         const { firstName, lastName } = nameToFirstLast(name || '');
         const res = await sqlFreeForm(`select tenantID, firstName, lastName from tenantInfo 
@@ -34,10 +42,8 @@ export function TenantMatcher(props) {
 
     const tenantID = get(curTenantSelection, 'value.tenantID');
     const mapToLabel = curTenantSelection.label;
-    
-    useEffect(() => {
-        const helper = createHelper('tenantInfo');
-        
+    const helper = createHelper('tenantInfo');
+    useEffect(() => {                
         helper.loadModel().then(() => {
             const columnInfo = helper.getModelFields();
             setColumnInfo(columnInfo);
@@ -50,15 +56,31 @@ export function TenantMatcher(props) {
             </Container>
         </Modal>
         <GenCrudAdd columnInfo={columnInfo} show={isCreateNew}
+            editItem={tenantName}
+            doAdd={
+                (data, id) => {
+                    return helper.saveData(data, id).then(res => {
+                        return res;
+                    }).catch(err => {
+                        console.log(err);
+                        setShowProgress(err.message);  
+                    })
+                }
+            }
             onOK={added => {
                 if (added) {
-
-                } else {
-                    setIsCreateNew(false);
-                }
+                    setCurTenantSelection({
+                        label: `${added.firstName} ${added.lastName}`,
+                        value: {
+                            tenantID: added.id,
+                        }
+                    })
+                } 
+                setIsCreateNew(false);
+                
             }}
         ></GenCrudAdd>
-        <Modal show={show}>
+        <Modal show={show} onHide={onClose}>
             <Modal.Header closeButton onClick={() => {
                 onClose();
             }}>

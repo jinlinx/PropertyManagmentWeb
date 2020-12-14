@@ -101,6 +101,9 @@ const GenCrudAdd=(props) => {
         doLoads();
     }, []);
 
+    useEffect(() => {
+        setData(initData);
+    },[initData.firstName, initData.lastName])
     const [columnInfoMaps, setColumnInfoMaps] = useState({});
     const loadColumnInfo = async colInf=> {
         const hasFks = colInf.filter(c => c.foreignKey).filter(c => c.foreignKey.table);
