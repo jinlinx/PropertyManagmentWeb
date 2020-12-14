@@ -36,7 +36,6 @@ const GenCrudAdd=(props) => {
 
     const [data, setData]=useState(initData);
     const [optsData, setOptsData] = useState(customSelData || {});
-    const [curSelection, setCurSelection] = useState({});
     const handleChange=e => {
         const { name, value }=e.target;
         setData({ ...data, [name]: value });
@@ -112,18 +111,13 @@ const GenCrudAdd=(props) => {
                         if(c.isId) return null;
                     }                    
 
-                    const createSelection=( optName, colField ) => {
-                        let selected={};
+                    const createSelection=( optName, colField ) => {                        
                         const options=optsData[ optName ];
-                        if ( options ) {
-                            selected=options.filter( o => o.value===get( data, colField ) )[ 0 ]||{};
-                        }
+                        if (!options) return null;
+                        const curSelection = options.filter( o => o.value===get( data, colField ) )[ 0 ]||{};                        
                         return <>
                             <EditDropdown context={{
-                                curSelection: {
-                                    label: ((options||[]).filter(x => x.value === data[colField])[0] || {}).label || '',
-                                    value: data[colField],
-                                },
+                                curSelection,
                                 setCurSelection: s => {
                                     setData({ ...data, [colField]: s.value });
                                 },
@@ -131,19 +125,6 @@ const GenCrudAdd=(props) => {
                                 options, setOptions:null,
                                 loadOptions:()=>[],
                             }}></EditDropdown>
-                            <Select options={options} searchBy={'name'}
-                            values={[ selected ]}
-                            onChange={( value ) => {
-                                if ( value[ 0 ] ) {
-                                    handleChange( {
-                                        target: {
-                                            name: colField,
-                                            value: value[ 0 ].value,
-                                        }
-                                    } )
-                                }
-                            }
-                            }></Select>
                             </>
                     };
                     let foreignSel=null;

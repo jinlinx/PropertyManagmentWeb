@@ -1,7 +1,7 @@
 export function fkDefs() {
-    return {
-        fkDefs: {
-            houseInfo: (fk, datas) => {
+    return {        
+        houseInfo: {
+            processForeignKey: (fk, datas) => {
                 return datas.map(data => {
                     return {
                         value: data[fk.field],
@@ -9,7 +9,9 @@ export function fkDefs() {
                     }
                 })
             },
-            leaseInfo: (fk, datas) => {
+        },
+        leaseInfo: {
+            processForeignKey: (fk, datas) => {
                 return datas.map(data => {
                     return {
                         value: data[fk.field],
@@ -17,7 +19,9 @@ export function fkDefs() {
                     }
                 })
             },
-            workerComp: (fk, datas) => {
+        },
+        workerComp: {
+            processForeignKey: (fk, datas) => {
                 if (fk.table === 'leaseInfo' && fk.field === 'leaseID') {
                     return datas.map(data => {
                         return {
@@ -34,6 +38,6 @@ export function fkDefs() {
                     });
                 }
             },
-        }
+        },
     };
 }
