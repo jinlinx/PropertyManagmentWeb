@@ -1,7 +1,7 @@
-export function fkDefs() {
-    return {        
-        houseInfo: {
-            processForeignKey: (fk, datas) => {
+export function getFKDefs() {
+    return {
+        ownerInfo: {
+            processForeignKey: (fk,datas) => {
                 return datas.map(data => {
                     return {
                         value: data[fk.field],
@@ -10,8 +10,8 @@ export function fkDefs() {
                 })
             },
         },
-        leaseInfo: {
-            processForeignKey: (fk, datas) => {
+        houseInfo: {
+            processForeignKey: (fk,datas) => {
                 return datas.map(data => {
                     return {
                         value: data[fk.field],
@@ -20,23 +20,24 @@ export function fkDefs() {
                 })
             },
         },
-        workerComp: {
-            processForeignKey: (fk, datas) => {
-                if (fk.table === 'leaseInfo' && fk.field === 'leaseID') {
-                    return datas.map(data => {
-                        return {
-                            value: data[fk.field],
-                            label: data['comment'],
-                        }
-                    });
-                } else if (fk.table === 'workerInfo' && fk.field === 'workerID') {
-                    return datas.map(data => {
-                        return {
-                            value: data[fk.field],
-                            label: data['firstName'] + ' ' + data['lastName'],
-                        }
-                    });
-                }
+        workerInfo: {
+            processForeignKey: (fk,datas) => {
+                return datas.map(data => {
+                    return {
+                        value: data[fk.field],
+                        label: data['firstName'] + ' ' + data['lastName'],
+                    }
+                });
+            },
+        },
+        leaseInfo: {
+            processForeignKey: (fk,datas) => {
+                return datas.map(data => {
+                    return {
+                        value: data[fk.field],
+                        label: data['comment'],
+                    }
+                });
             },
         },
     };

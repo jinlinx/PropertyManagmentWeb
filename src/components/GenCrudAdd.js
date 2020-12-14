@@ -14,8 +14,10 @@ const GenCrudAdd=(props) => {
         customFields = {},
         show,
         desc,
+        fkDefs,
     }
-        =props;
+        = props;
+    const getForeignKeyProcessor = fk => get(fkDefs, [fk, 'processForeignKey']);
     let id = '';
     const onOK = props.onOK || onCancel;
     const internalCancel = () => onOK();
@@ -80,13 +82,14 @@ const GenCrudAdd=(props) => {
                 if (c.foreignKey) {
                     const optKey=c.foreignKey.table;
 
-                    if (!optsData[optKey]) {
+                    const processForeignKey = getForeignKeyProcessor(optKey);
+                    if (processForeignKey && !optsData[optKey]) {
                         const helper = await createAndLoadHelper(optKey);
                         //await helper.loadModel();
                         const optDataOrig=await helper.loadData();
                         const optData = optDataOrig.rows;
                         cur=Object.assign({}, cur, {
-                            [optKey]: props.processForeignKey(c.foreignKey, optData)
+                            [optKey]: processForeignKey(c.foreignKey, optData)
                         });
                     }
                 }
@@ -143,6 +146,8 @@ const GenCrudAdd=(props) => {
                 {
                     columnInfo.filter(c => c.foreignKey).filter(c => c.foreignKey.table && columnInfoMaps[c.foreignKey.table]).map((c, cind) => { 
                         const thisTbl = c.foreignKey.table;
+                        const processForeignKey = getForeignKeyProcessor(thisTbl);
+                        if (!processForeignKey) return;
                         const { helper, columnInfo } = columnInfoMaps[thisTbl];
                         const doAdd = (data, id) => {
                             return helper.saveData(data, id).then(res => {                                                            
@@ -153,14 +158,14 @@ const GenCrudAdd=(props) => {
                             });
                         }
                         const addDone = async added => {
-                            console.log(added);
+                            console.log(added);                            
                             if (!add) return setErrorText('Cancelled');
                             const optDataOrig = await columnInfoMaps[thisTbl].helper.loadData();
                             const optData = optDataOrig.rows;
                             setOptsData(prev => {
                                 return {
                                     ...prev,
-                                    [thisTbl]: props.processForeignKey(c.foreignKey, optData)
+                                    [thisTbl]: processForeignKey(c.foreignKey, optData)
                                 }
                             });
                             setData(prev => {
@@ -172,7 +177,7 @@ const GenCrudAdd=(props) => {
                             setAddNewForField('');                            
                         }
                         return <GenCrudAdd key={cind} columnInfo={columnInfo} doAdd={doAdd} onCancel={addDone} show={addNewForField===c.field}></GenCrudAdd>
-                    })
+                    }).filter(x=>x)
                 }
             {
                 columnInfo.map( ( c, cind ) => {
@@ -206,22 +211,6 @@ const GenCrudAdd=(props) => {
                     let foreignSel=null;
                     if (c.foreignKey) {
                         const optKey = c.foreignKey.table;
-                        const lm = async () => {
-                            if (!optsData[optKey] && !optsDataReqSent[optKey]) {
-                                optsDataReqSent[optKey] = true;
-                                const helper = await createAndLoadHelper(optKey);
-                                //await helper.loadModel();
-                                const optData = await helper.loadData();
-                                setOptsData({
-                                    ...optsData,
-                                    [optKey]: props.processForeignKey(c.foreignKey, optData)
-                                });
-                            }
-                        }
-                        //lm();
-                        
-                        //{value:1,label:'opt1'},{value:2,label:'opt2'}
-                        
                         foreignSel=createSelection( optKey, c.field );
                     }
                     const custFieldType=customFields[ c.field ];
