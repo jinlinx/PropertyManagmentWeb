@@ -3,7 +3,7 @@ import Select from 'react-dropdown-select';
 import { createAndLoadHelper } from './datahelper';
 import { Button, Form, Modal, Container, Row, Col } from 'react-bootstrap';
 import get from 'lodash/get';
-
+import EditDropdown from './paymentMatch/EditDropdown';
 const GenCrudAdd=(props) => {
 
     const { columnInfo, doAdd, onCancel,
@@ -35,7 +35,8 @@ const GenCrudAdd=(props) => {
     }, {});
 
     const [data, setData]=useState(initData);
-    const [optsData, setOptsData]=useState(customSelData||{});
+    const [optsData, setOptsData] = useState(customSelData || {});
+    const [curSelection, setCurSelection] = useState({});
     const handleChange=e => {
         const { name, value }=e.target;
         setData({ ...data, [name]: value });
@@ -117,7 +118,20 @@ const GenCrudAdd=(props) => {
                         if ( options ) {
                             selected=options.filter( o => o.value===get( data, colField ) )[ 0 ]||{};
                         }
-                        return <Select options={options} searchBy={'name'}
+                        return <>
+                            <EditDropdown context={{
+                                curSelection: {
+                                    label: ((options||[]).filter(x => x.value === data[colField])[0] || {}).label || '',
+                                    value: data[colField],
+                                },
+                                setCurSelection: s => {
+                                    setData({ ...data, [colField]: s.value });
+                                },
+                                 getCurSelectionText:o=>o.label || '',
+                                options, setOptions:null,
+                                loadOptions:()=>[],
+                            }}></EditDropdown>
+                            <Select options={options} searchBy={'name'}
                             values={[ selected ]}
                             onChange={( value ) => {
                                 if ( value[ 0 ] ) {
@@ -130,6 +144,7 @@ const GenCrudAdd=(props) => {
                                 }
                             }
                             }></Select>
+                            </>
                     };
                     let foreignSel=null;
                     if (c.foreignKey) {

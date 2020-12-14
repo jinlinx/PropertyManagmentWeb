@@ -25,7 +25,7 @@ export default function EditDropdown(props) {
                 }}
                 onKeyDown={
                     async e => {
-                        if (!curSelection || !curSelection.label) return;
+                        if (!curSelection ) return;
                         if (e.key === 'Tab') {
                             setShow(false);
                         }
@@ -34,7 +34,7 @@ export default function EditDropdown(props) {
                             e.preventDefault();
                             const { selectionStart, selectionEnd } = e.target
 
-                            const starts = curSelection.label.substring(0, selectionStart) + (e.key.length ===1?e.key:'');
+                            const starts = (curSelection.label || '').substring(0, selectionStart) + (e.key.length ===1?e.key:'');
                                               
                             const foundOs = options.map(o => {
                                 return {
