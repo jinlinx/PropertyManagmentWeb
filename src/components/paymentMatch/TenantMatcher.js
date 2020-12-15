@@ -110,6 +110,7 @@ export function TenantMatcher(props) {
         curModalInfo, setCurModalInfo,
         setShowProgress
     };
+    const curSelectedHouseId = get(curHouseSelection, 'value.id', 'NA');
     return <div >
         <Modal show={!!showProgress}>
             <Container>
@@ -203,20 +204,20 @@ export function TenantMatcher(props) {
                     <Row>
                         <Col xs={8} md={8}>
                             <GetOrCreate context={{
-                                reloadID: curHouseSelection.value.id,
+                                reloadId: curSelectedHouseId,
                                 optionsAction: (options, setOptions, curSel) => {
                                     if (curSel.value && options.filter(o => o.value.id === curSel.value.id).length === 0) {
                                         setOptions([curSel].concat(options));
                                     }
                                 },
                                 curSelection: curLeaseSelection, setCurSelection: setCurLeaseSelection,
-                                loadOptions: comment=>loadLeaseOptions(curHouseSelection.value.id, comment),
+                                loadOptions: comment => loadLeaseOptions(curSelectedHouseId, comment),
                             }}></GetOrCreate>
                         </Col>
                         <Col>
                             <Button disabled={!!showProgress} style={createNewStyle} onClick={() => {
                                 setCurModalInfo({
-                                    table: 'houseInfo',
+                                    table: 'leaseInfo',
                                     setCurrSelection: added => {
                                         setCurLeaseSelection({
                                             label: getLeaseLabel(added),
