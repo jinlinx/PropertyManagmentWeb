@@ -3,6 +3,7 @@ import get from 'lodash/get';
 import mod from './models';
 
 export function createHelper(table) {
+    if (!table) return null;
     const accModel=() => mod.models[table];
     const accModelFields=() => get(accModel(),'fields',[]);
     return {

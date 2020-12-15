@@ -13,6 +13,7 @@ const GenCrudAdd=(props) => {
         customSelData,
         customFields = {},
         show,
+        table,
         desc,
         fkDefs,
     }
@@ -99,7 +100,7 @@ const GenCrudAdd=(props) => {
             
         }
         doLoads();
-    }, []);
+    }, [table, columnInfo]);
 
     useEffect(() => {
         setData(initData);

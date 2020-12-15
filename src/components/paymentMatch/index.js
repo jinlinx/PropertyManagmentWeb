@@ -16,9 +16,7 @@ function PaymentMatch(props) {
     const [needCreateItem, setNeedCreateItem] = useState({});
     const [matchedTo, setMatchedTo] = useState({});
     const [createTenantItem, setCreateTenantItem] = useState({});
-    const getItemId = i => {
-        return `${i.date}-${i.name}-${i.amount}-${i.notes}-${i.source}`;
-    }
+
     useEffect(() => {
         sqlFreeForm(`select ip.id, ip.name, ip.date, ip.amount, ip.source, ip.notes , ptm.tenantID, t.firstName, t.lastName
         from importPayments ip
