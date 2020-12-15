@@ -11,23 +11,27 @@ import { TenantMatcher } from './TenantMatcher';
 function PaymentMatch(props) {
     const [imported, setImported] = useState([]);
     const [importItem, setImportItem] = useState({});
+
+
     const [needCreateItem, setNeedCreateItem] = useState({});
     const [matchedTo, setMatchedTo] = useState({});
-    const [matchedToItem, setMatchedToItem] = useState({});
+    const [createTenantItem, setCreateTenantItem] = useState({});
     const getItemId = i => {
         return `${i.date}-${i.name}-${i.amount}-${i.notes}-${i.source}`;
     }
     useEffect(() => {
-        sqlFreeForm(`select id,name, date, amount, source, notes 
+        sqlFreeForm(`select ip.id, ip.name, ip.date, ip.amount, ip.source, ip.notes , ptm.tenantID, t.firstName, t.lastName
         from importPayments ip
-        where ip.matchedTo is null and ip.deleted is null`).then(r => {
+        left join payerTenantMapping ptm on ip.source=ptm.source and ip.name=ptm.name
+        left join tenantInfo t on t.tenantID = ptm.tenantID
+        where ip.matchedTo is null and ip.deleted is null`).then(async r => {
             setImported(r.map(r => {
                 return {
                     ...r,
-                    itemId: getItemId(r),
+                    itemId: r.id,
                 }
-            }));
-        })
+            }));            
+        });
     },[]);
     const idToItemMap = imported.reduce((acc,ci)=>{
         acc[ci.itemId] = ci;
@@ -35,9 +39,9 @@ function PaymentMatch(props) {
     },{});
     return <>
         <TenantMatcher context={{
-            onClose: () => setMatchedToItem({}),
-            name: matchedToItem.name,
-            source: matchedToItem.source,
+            onClose: () => setCreateTenantItem({}),
+            name: createTenantItem.name,
+            source: createTenantItem.source,
         } }></TenantMatcher>
         <Table>
         <thead><tr>
@@ -71,15 +75,9 @@ function PaymentMatch(props) {
                                                  const checked = e.target.checked;
                                                  console.log(`val=${itemId} ${checked}`);
                                                  if (checked) {
-                                                     //const {firstName, lastName} = nameToFirstLast(itm.name);
-                                                     const tnts = await sqlFreeForm(`select tn.tenantID 
-                                                     from tenantInfo tn
-                                                     inner join payerTenantMapping ptn on tn.tenantID = ptn.tenantID
-                                                      where ptn.name=? and ptn.source=?`,
-                                                         [itm.name, itm.source]);
-                                                     const existing = get(tnts, '0.tenantID');
+                                                     const existing = itm.tenantID; //get(tnts, '0.tenantID');
                                                      if (!existing) {
-                                                         setMatchedToItem(itm);
+                                                         setCreateTenantItem(itm);
                                                          setNeedCreateItem({
                                                              ...needCreateItem,
                                                              [itemId]: true,
@@ -161,8 +159,8 @@ function PaymentMatch(props) {
                             }}>Create Lease</Button>
                         }
                         {
-                            matchedTo[itm.itemId] && <DropdownButton title={matchedTo[itm.itemId].name} >
-                                <Dropdown.Item >{matchedTo[itm.itemId].name}</Dropdown.Item>
+                            itm.tenantID && <DropdownButton title={`${itm.firstName} - ${itm.lastName}`} >
+                                <Dropdown.Item >{itm.name}</Dropdown.Item>
                             </DropdownButton>
                         }
                     </td>
