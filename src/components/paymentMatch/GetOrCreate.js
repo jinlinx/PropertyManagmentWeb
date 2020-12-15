@@ -10,7 +10,7 @@ import EditDropdown from './EditDropdown';
 import { sqlFreeForm } from '../api';
 
 export function GetOrCreate(props) {    
-    const { curSelection, setCurSelection, loadOptions} = props.context;
+    const { curSelection, setCurSelection, loadOptions, optionsAction, reloadId} = props.context;
     const [options, setOptions] = useState([]);    
     const getCurSelectionText = o => o.label || '';    
     useEffect(() => {       
@@ -20,8 +20,9 @@ export function GetOrCreate(props) {
                 setCurSelection(res[0])
             }
         })
-    }, []);
+    }, [reloadId||'NA']);
 
+    if (optionsAction) optionsAction(options, setOptions, curSelection);
     return <div>
         <EditDropdown context={{
             curSelection, setCurSelection, getCurSelectionText,

@@ -27,3 +27,11 @@ export async function getHouses(address) {
         [`%${address}%`]);
     return houses;
 }
+
+export async function getLeases(houseID, leaseComment='') {
+    const leases = await sqlFreeForm(`select leaseID, deposit, endDate, startDate, houseID, comment, monthlyRent
+                                                     from leaseInfo                                                     
+                                                      where houseID =? and comment like ?`,
+        [houseID, `%${leaseComment}%`]);
+    return leases;
+}

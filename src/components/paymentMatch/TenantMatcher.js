@@ -8,6 +8,7 @@ import { sqlFreeForm } from '../api';
 import {
     saveTenantProcessorPayeeMapping,
     getHouses,
+    getLeases,
 } from '../aapi';
 import { nameToFirstLast } from '../util';
 import { add, get, set } from 'lodash';
@@ -58,10 +59,12 @@ export function TenantMatcher(props) {
     //const { show } = props;
     const [curTenantSelection, setCurTenantSelection] = useState({});
     const [curHouseSelection, setCurHouseSelection] = useState({});
+    const [curLeaseSelection, setCurLeaseSelection] = useState({});
     const [showProgress, setShowProgress] = useState(false);
     const firstLast = nameToFirstLast(name || '');
     const [tenantName, setTenantName] = useState(firstLast.firstName);
-    const getHouseLabel = h => `${r.address} ${r.city} ${r.state}`;
+    const getHouseLabel = r => `${r.address} ${r.city} ${r.state}`;
+    const getLeaseLabel = r => `${r.comment} ${r.leaseID}`;
     useEffect(() => {
         setTenantName({
             firstName: firstLast.firstName || '',
@@ -86,6 +89,15 @@ export function TenantMatcher(props) {
         }));
         return fm;
     };
+
+    const loadLeaseOptions = async (houseID, leaseComment = '') => {
+        const res = await getLeases(houseID, leaseComment);
+        const fm = res.map(r => ({
+            label: getLeaseLabel(r),
+            value: r,
+        }));
+        return fm;
+    }
 
     const tenantID = get(curTenantSelection, 'value.tenantID');
     const mapToLabel = curTenantSelection.label;
@@ -164,6 +176,11 @@ export function TenantMatcher(props) {
                     <Row>
                         <Col xs={8} md={8}>
                             <GetOrCreate context={{
+                                optionsAction: (options, setOptions, curSel) => {
+                                    if (curSel.value && options.filter(o => o.value.id === curSel.value.id).length === 0) {
+                                        setOptions([curSel].concat(options));
+                                    }
+                                },
                                 curSelection: curHouseSelection, setCurSelection: setCurHouseSelection,
                                 loadOptions: loadHouseOptions,
                             }}></GetOrCreate>
@@ -174,12 +191,41 @@ export function TenantMatcher(props) {
                                     table: 'houseInfo',
                                     setCurrSelection: added => {
                                         setCurHouseSelection({
-                                            label: getHouseLabel,
-                                            value:r,
-                                        })
+                                            label: getHouseLabel(added),
+                                            value: added,
+                                        });
+                                        return added;
                                     }
                                 })
                             }}>Create New House</Button>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col xs={8} md={8}>
+                            <GetOrCreate context={{
+                                reloadID: curHouseSelection.value.id,
+                                optionsAction: (options, setOptions, curSel) => {
+                                    if (curSel.value && options.filter(o => o.value.id === curSel.value.id).length === 0) {
+                                        setOptions([curSel].concat(options));
+                                    }
+                                },
+                                curSelection: curLeaseSelection, setCurSelection: setCurLeaseSelection,
+                                loadOptions: comment=>loadLeaseOptions(curHouseSelection.value.id, comment),
+                            }}></GetOrCreate>
+                        </Col>
+                        <Col>
+                            <Button disabled={!!showProgress} style={createNewStyle} onClick={() => {
+                                setCurModalInfo({
+                                    table: 'houseInfo',
+                                    setCurrSelection: added => {
+                                        setCurLeaseSelection({
+                                            label: getLeaseLabel(added),
+                                            value: added,
+                                        });
+                                        return added;
+                                    }
+                                })
+                            }}>Create New Lease</Button>
                         </Col>
                     </Row>
                     <Row>                        
