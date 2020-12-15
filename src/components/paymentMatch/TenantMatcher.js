@@ -110,7 +110,8 @@ export function TenantMatcher(props) {
         curModalInfo, setCurModalInfo,
         setShowProgress
     };
-    const curSelectedHouseId = get(curHouseSelection, 'value.id', 'NA');
+    const curSelectedHouseId = get(curHouseSelection, 'value.houseID', 'NA');
+    console.log(`houseid is ${curSelectedHouseId}`);
     return <div >
         <Modal show={!!showProgress}>
             <Container>
@@ -218,6 +219,9 @@ export function TenantMatcher(props) {
                             <Button disabled={!!showProgress} style={createNewStyle} onClick={() => {
                                 setCurModalInfo({
                                     table: 'leaseInfo',
+                                    editItem: {
+                                        houseID: curSelectedHouseId,
+                                    },
                                     setCurrSelection: added => {
                                         setCurLeaseSelection({
                                             label: getLeaseLabel(added),
