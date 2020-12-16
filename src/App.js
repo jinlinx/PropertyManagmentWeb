@@ -10,6 +10,7 @@ import Tenantlist from './components/tenantlist';
 import OwnerList from './components/ownerList';
 import TablePicker from './components/sqlEditor/TablePicker';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { Navbar, Nav, NavDropdown, Form, FormControl, Button } from 'react-bootstrap';
 //
 
 function App() {
@@ -44,15 +45,36 @@ function App() {
   return (
     <div className="App" >
 
-      <table className='topButtonTbl'>
-        <tbody>
-          <tr>
-            <td className='topHeader' colSpan='6' key={0}>Property Management
-
-
-              </td>
-
-          </tr>
+      <table>
+        <tbody>          
+          <tr><td colSpan='6' key={1}>
+            <Navbar bg="light" expand="lg">
+              <Navbar.Brand href="#home">Property Management</Navbar.Brand>
+              <Navbar.Toggle aria-controls="basic-navbar-nav" />
+              <Navbar.Collapse id="basic-navbar-nav">
+                <Nav className="mr-auto">
+                  <Nav.Link href="#home">Home</Nav.Link>
+                  <Nav.Link href="#link">Link</Nav.Link>
+                  <NavDropdown title="Dropdown" id="basic-nav-dropdown">
+                    <NavDropdown.Item key={0}>Action</NavDropdown.Item>                    
+                    {
+                      pages.map((p, i) => {
+                        return <NavDropdown.Item key={i + 10} onClick={() => {
+                          setShowPage(i);
+                        }}>{ p.desc}</NavDropdown.Item>
+                      })
+                    }
+                    <NavDropdown.Divider />
+                    <NavDropdown.Item href="#action/3.4" key={20}>Developer1</NavDropdown.Item>
+                  </NavDropdown>
+                </Nav>
+                <Form inline>
+                  <FormControl type="text" placeholder="Search" className="mr-sm-2" />
+                  <Button variant="outline-success">Search</Button>
+                </Form>
+              </Navbar.Collapse>
+            </Navbar>
+          </td></tr>
           <tr>
             {
               doPageRange(0, 5)
@@ -70,7 +92,7 @@ function App() {
           //adfasdf
           pages.map((p, i) => {
             if (showPage === i) {
-              return <div key={i}>{p.control}</div>;
+              return <div key={i+10}>{p.control}</div>;
             }
             return null;
           })
