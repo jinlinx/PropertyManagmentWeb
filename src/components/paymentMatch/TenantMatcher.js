@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Container, Row, Col, Tabs, Tab, Form, DropdownButton, Dropdown, Button, Toast, InputGroup, ButtonGroup } from 'react-bootstrap';
+import { Modal, Container, Row, Col, Button, Alert } from 'react-bootstrap';
 
 
 import { GetOrCreate } from './GetOrCreate';
@@ -99,10 +99,21 @@ export function TenantMatcher(props) {
         }));
         return fm;
     }
-
+    
     const tenantID = get(curTenantSelection, 'value.tenantID');
     const mapToLabel = curTenantSelection.label;
     
+    const applyTenantId = props.context.tenantID;
+    useEffect(() => {
+        if (props.context.tenantID) {
+            setCurTenantSelection({
+                label: name,
+                value: {
+                    tenantID: applyTenantId,
+                }
+            })
+        }
+    }, [tenantID, applyTenantId, curTenantSelection.length]);
 
     const createNewStyle = { fontSize: '9px' };    
 
@@ -135,13 +146,15 @@ export function TenantMatcher(props) {
                         <Row><Col>Ma: {mapToLabel} to {name} {source} {tenantID}</Col></Row>
                         <Row>
                         <Col xs={8} md={8}>
-                                    <GetOrCreate context={{
-                                        curSelection: curTenantSelection, setCurSelection: setCurTenantSelection,
-                                        loadOptions: loadTenantOptions,
-                                    }}></GetOrCreate>                                    
+                            {
+                                applyTenantId ? <Alert variant="secondary">{ name }</Alert>:<GetOrCreate context={{
+                                curSelection: curTenantSelection, setCurSelection: setCurTenantSelection,
+                                loadOptions: loadTenantOptions,
+                            }}></GetOrCreate>
+                            }
                         </Col>
-                        <Col >
-                            <Button size="sm" style={createNewStyle} onClick={() => {
+                        {!applyTenantId && <Col >
+                            <Button size="sm" style={createNewStyle} disabled={!!applyTenantId} onClick={() => {
                                 //setIsCreateNew(true);
                                 setCurModalInfo({
                                     table: 'tenantInfo',
@@ -156,9 +169,10 @@ export function TenantMatcher(props) {
                                     }
                                 })
                             }}>Create New Tenant</Button>
-                        </Col>                                
+                        </Col>
+                        }
                     </Row>
-                    <Row>
+                    {!applyTenantId && <Row>
                         <Col>
                             <Button disabled={!!showProgress} onClick={() => {
                                 if (!tenantID) {
@@ -176,6 +190,7 @@ export function TenantMatcher(props) {
                             }}>Link</Button>
                         </Col>
                     </Row>
+                    }
                     <Row>
                         <Col xs={8} md={8}>
                             <GetOrCreate context={{

@@ -18,11 +18,11 @@ function PaymentMatch(props) {
     const [createTenantItem, setCreateTenantItem] = useState({});
 
     useEffect(() => {
-        sqlFreeForm(`select ip.id, ip.name, ip.date, ip.amount, ip.source, ip.notes , ptm.tenantID, t.firstName, t.lastName
+        sqlFreeForm(`select ip.id, ip.name, ip.date, ip.amount, ip.source, ip.notes , ptm.tenantID, t.firstName, t.lastName, lti.leaseID
         from importPayments ip
         left join payerTenantMapping ptm on ip.source=ptm.source and ip.name=ptm.name
         left join tenantInfo t on t.tenantID = ptm.tenantID
-        left join 
+        left join  leaseTenantInfo lti on t.tenantID = lti.tenantID
         where ip.matchedTo is null and ip.deleted is null`).then(async r => {
             setImported(r.map(r => {
                 return {
@@ -41,6 +41,7 @@ function PaymentMatch(props) {
             onClose: () => setCreateTenantItem({}),
             name: createTenantItem.name,
             source: createTenantItem.source,
+            tenantID: createTenantItem.tenantID,
         } }></TenantMatcher>
         <Table>
         <thead><tr>
@@ -74,7 +75,7 @@ function PaymentMatch(props) {
                                                  const checked = e.target.checked;
                                                  console.log(`val=${itemId} ${checked}`);
                                                  if (checked) {
-                                                     const existing = itm.tenantID; //get(tnts, '0.tenantID');
+                                                     const existing = itm.leaseID; //get(tnts, '0.tenantID');
                                                      if (!existing) {
                                                          setCreateTenantItem(itm);
                                                          setNeedCreateItem({

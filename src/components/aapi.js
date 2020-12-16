@@ -41,5 +41,9 @@ export async function getLeases(houseID, leaseComment='') {
 }
 
 export async function createLeaseTenantLink(leaseID, tenantID) {
-    await sqlFreeForm(`insert into leaseTenatInfo(leaseID,tenantId) values(?,?)`, [leaseID, tenantID]);
+    const parms = [leaseID, tenantID];
+    const existing = await sqlFreeForm(`select 1 from leaseTenantInfo where leaseID=? and tenantId=?`, parms);
+    if (!existing.length) {
+        await sqlFreeForm(`insert into leaseTenantInfo( leaseID,tenantId, id) values(?,?, uuid())`, parms);
+    }
 }
