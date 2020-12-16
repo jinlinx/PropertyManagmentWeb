@@ -121,41 +121,7 @@ function PaymentMatch(props) {
                                              }}/>
                         }
                     </td>
-                    <td>
-                        {
-                            needCreateItem[itm.itemId] && <Button onClick={async () => {
-                                const { firstName, lastName } = nameToFirstLast(itm.name);
-                                const existingTenant = await sqlFreeForm(`select tenantID from tenantInfo 
-                                where firstName=? and lastName=?`, [firstName, lastName]);
-                                const existingTenantId = get(existingTenant, '0.tenantID');
-                                const tenantID = existingTenantId|| v1();
-                                await sqlFreeForm(`insert into tenantInfo( tenantID,firstName, lastName, email, phone, created, modified)
-        values(?,?,?,?,?,now(),now())`, [tenantID, firstName, lastName,
-                                    'no email', 'no phone',
-                                ]);
-
-                                await sqlFreeForm(`insert into payerTenantMapping( tenantID, name, source, created, modified)
-        values(?,?,?,now(),now())`, [tenantID, itm.name, itm.source]);
-                                
-                                const houseID = v1();
-                                await sqlFreeForm(`insert into houseInfo (houseID,address,city,state, zip,ownerID, created,modified)
-        values(?,?,?,?,?,?,now(),now())`, [houseID, `House Created for ${itm.name}`, 'no city', 'na', 'nozip', null]).catch(err => {
-                                    console.log(err.response.body)
-                                })
-                            
-                                const leaseID = v1();
-                                await sqlFreeForm(`insert into leaseInfo (leaseID, houseID, startDate, endDate, comment, created, modified)
-        values (?,?,now(), now()+ interval 365 day,?,now(),now())`, [leaseID, houseID, `created for ${itm.name}`])
-    
-                                
-                                await sqlFreeForm(`insert into leaseTeantsInfo(leaseID,tenantId) values(?,?)`, [leaseID, tenantID]);
-                                setNeedCreateItem({
-                                    ...needCreateItem,
-                                    [itm.itemId]: false,
-                                })
-                                
-                            }}>Create Lease</Button>
-                        }
+                    <td>                        
                         {
                             itm.tenantID && <DropdownButton title={`${itm.firstName} - ${itm.lastName}`} >
                                 <Dropdown.Item >{itm.name}</Dropdown.Item>
