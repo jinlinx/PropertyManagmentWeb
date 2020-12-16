@@ -19,7 +19,11 @@ export async function saveTenantProcessorPayeeMapping({ source, name, tenantID }
     await sqlFreeForm(`insert into payerTenantMapping(tenantID, name, source) values(?,?,?)`,parms);
 }
 
-
+export async function getTenants(firstName, lastName) {
+    const res = await sqlFreeForm(`select tenantID, firstName, lastName from tenantInfo 
+        where firstName like ? or lastName like ?`, [`%${firstName}%`, `%${lastName}%`]);
+    return res;
+}
 export async function getHouses(address) {
     const houses = await sqlFreeForm(`select houseID,address,city,state
                                                      from houseInfo                                                     
@@ -34,4 +38,8 @@ export async function getLeases(houseID, leaseComment='') {
                                                       where houseID =? and comment like ?`,
         [houseID, `%${leaseComment}%`]);
     return leases;
+}
+
+export async function createLeaseTenantLink(leaseID, tenantID) {
+    await sqlFreeForm(`insert into leaseTeantsInfo(leaseID,tenantId) values(?,?)`, [leaseID, tenantID]);
 }

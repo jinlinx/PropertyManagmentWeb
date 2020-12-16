@@ -7,8 +7,10 @@ import { GetOrCreate } from './GetOrCreate';
 import { sqlFreeForm } from '../api';
 import {
     saveTenantProcessorPayeeMapping,
+    getTenants,
     getHouses,
     getLeases,
+    createLeaseTenantLink,
 } from '../aapi';
 import { nameToFirstLast } from '../util';
 import { add, get, set } from 'lodash';
@@ -73,8 +75,7 @@ export function TenantMatcher(props) {
     }, [firstLast.firstName, firstLast.lastName]);
     const loadTenantOptions = async (name = '') => {
         const { firstName, lastName } = nameToFirstLast(name || '');
-        const res = await sqlFreeForm(`select tenantID, firstName, lastName from tenantInfo 
-        where firstName like ? or lastName like ?`, [`%${firstName}%`, `%${lastName}%`]);
+        const res = await getTenants(firstName, lastName);
         const fm = res.map(r => ({
             label: `${r.firstName} ${r.lastName}`,
             value: r,
@@ -221,6 +222,7 @@ export function TenantMatcher(props) {
                                     table: 'leaseInfo',
                                     editItem: {
                                         houseID: curSelectedHouseId,
+                                        comment: `Auto created for ${name}`
                                     },
                                     setCurrSelection: added => {
                                         setCurLeaseSelection({
@@ -236,19 +238,26 @@ export function TenantMatcher(props) {
                     <Row>                        
                         <Col>
                             <Button disabled={!!showProgress} onClick={() => {
-                                if (!tenantID) {
-                                    setShowProgress('Please select a tenant to map to');
+                                if (!curSelectedHouseId || curSelectedHouseId === 'NA'
+                                    || !tenantID || !curLeaseSelection.value || !curLeaseSelection.value.leaseID
+                                ) {
+                                    setShowProgress('Please select a house to map to');
                                     setTimeout(() => setShowProgress(''), 2000);
                                     return;
                                 }
                                 setShowProgress('Please Wait');
                                 saveTenantProcessorPayeeMapping({ tenantID, name, source })
                                     .then(() => {
+                                        const leaseID = curLeaseSelection.value.leaseID;
+                                        return createLeaseTenantLink(leaseID, tenantID);
+                                    })
+                                    .then(() => {
                                         setShowProgress('');
+                                        onClose();
                                     }).catch(err => {
                                         setShowProgress(err.message);
                                     });
-                            }}>Link</Button>
+                            }}>Create</Button>
                         </Col>
                     </Row>
                 </Container>
