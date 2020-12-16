@@ -22,6 +22,7 @@ function PaymentMatch(props) {
         from importPayments ip
         left join payerTenantMapping ptm on ip.source=ptm.source and ip.name=ptm.name
         left join tenantInfo t on t.tenantID = ptm.tenantID
+        left join 
         where ip.matchedTo is null and ip.deleted is null`).then(async r => {
             setImported(r.map(r => {
                 return {

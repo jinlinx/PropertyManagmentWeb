@@ -79,9 +79,9 @@ Promise.map(result.res, async data => {
     } else {
         tenantID = tenant[0].tenantID;
     }
-    const leaseTen = await sqlFreeForm(`select leaseID from leaseTeantsInfo where leaseID=? and tenantId=?`, [leaseID, tenantID]);
+    const leaseTen = await sqlFreeForm(`select leaseID from leaseTenantInfo where leaseID=? and tenantId=?`, [leaseID, tenantID]);
     if (!leaseTen.length) {
-        await sqlFreeForm(`insert into leaseTeantsInfo(leaseID,tenantId) values(?,?)`, [leaseID, tenantID]);
+        await sqlFreeForm(`insert into leaseTenantInfo(leaseID,tenantId) values(?,?)`, [leaseID, tenantID]);
     }
     console.log(`lease id ${leaseID} ${houseID} ${firstName} ${lastName} ${data.email ||''}`);
 }, { concurrency: 1 }).catch(err => {

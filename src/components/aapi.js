@@ -41,5 +41,5 @@ export async function getLeases(houseID, leaseComment='') {
 }
 
 export async function createLeaseTenantLink(leaseID, tenantID) {
-    await sqlFreeForm(`insert into leaseTeantsInfo(leaseID,tenantId) values(?,?)`, [leaseID, tenantID]);
+    await sqlFreeForm(`insert into leaseTenatInfo(leaseID,tenantId) values(?,?)`, [leaseID, tenantID]);
 }
