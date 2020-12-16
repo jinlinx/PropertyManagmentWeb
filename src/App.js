@@ -9,6 +9,7 @@ import Reportlist from './components/reportlist';
 import Tenantlist from './components/tenantlist';
 import OwnerList from './components/ownerList';
 import TablePicker from './components/sqlEditor/TablePicker';
+import Developer from './components/Developer';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, NavDropdown, Form, FormControl, Button } from 'react-bootstrap';
 //
@@ -37,6 +38,12 @@ function App() {
     { control: <TablePicker pageState={pageState} />, desc: 'TableEditor' },
   ]
 
+  const devPages = [
+    {
+      control: <Developer />,
+      desc: 'Developer',
+    }
+  ]
   const doPageRange = (from, end) => pages.slice(from, end).map((page, who) => {
     return <td className='topButtonTbl' key={who + 10}><button className='blueButton' onClick={() => {
       setShowPage(who + from);
@@ -66,6 +73,15 @@ function App() {
                     }
                     <NavDropdown.Divider />
                     <NavDropdown.Item href="#action/3.4" key={20}>Developer1</NavDropdown.Item>
+                  </NavDropdown>
+                  <NavDropdown title="Developer" id="basic-nav-dropdown">                    
+                    {
+                      devPages.map((p, i) => {
+                        return <NavDropdown.Item key={i + 100} onClick={() => {
+                          setShowPage(i+100);
+                        }}>{p.desc}</NavDropdown.Item>
+                      })
+                    }                    
                   </NavDropdown>
                 </Nav>
                 <Form inline>
@@ -97,7 +113,15 @@ function App() {
             return null;
           })
         }
-
+        {
+          //adfasdf
+          devPages.map((p, i) => {
+            if (showPage === i+100) {
+              return <div key={i + 10}>{p.control}</div>;
+            }
+            return null;
+          })
+        }
       </main>
 
     </div>
