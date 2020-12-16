@@ -56,7 +56,9 @@ function AddNewDlgFunc(props) {
 }
 export function TenantMatcher(props) {
 
-    const { onClose, name, source } = props.context;
+    const { onClose, name, source,
+        imported, setImported,
+    } = props.context;
     const show = !!name;
     //const { show } = props;
     const [curTenantSelection, setCurTenantSelection] = useState({});
@@ -262,9 +264,19 @@ export function TenantMatcher(props) {
                                 }
                                 setShowProgress('Please Wait');
                                 saveTenantProcessorPayeeMapping({ tenantID, name, source })
-                                    .then(() => {
+                                    .then(async () => {
                                         const leaseID = curLeaseSelection.value.leaseID;
-                                        return createLeaseTenantLink(leaseID, tenantID);
+                                        await createLeaseTenantLink(leaseID, tenantID);
+                                        setImported(imported.map(imp => {
+
+                                            if (imp.tenantID === tenantID && imp.source === source) {
+                                                return {
+                                                    ...imp,
+                                                    leaseID,
+                                                }
+                                            }
+                                            return imp;
+                                        }))
                                     })
                                     .then(() => {
                                         setShowProgress('');

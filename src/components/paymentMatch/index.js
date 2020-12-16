@@ -42,6 +42,7 @@ function PaymentMatch(props) {
             name: createTenantItem.name,
             source: createTenantItem.source,
             tenantID: createTenantItem.tenantID,
+            imported, setImported,
         } }></TenantMatcher>
         <Table>
         <thead><tr>
