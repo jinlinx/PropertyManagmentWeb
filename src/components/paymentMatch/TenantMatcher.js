@@ -110,14 +110,16 @@ export function TenantMatcher(props) {
     
     const applyTenantId = props.context.tenantID;
     
-    if (applyTenantId) {
-        setCurTenantSelection({
-            label: name,
-            value: {
-                tenantID: applyTenantId,
-            }
-        });        
-    }
+    useEffect(() => {
+        if (applyTenantId) {
+            setCurTenantSelection({
+                label: name,
+                value: {
+                    tenantID: applyTenantId,
+                }
+            });
+        }
+    },[applyTenantId]);
 
     useEffect(() => {
         if (tenantID) {
