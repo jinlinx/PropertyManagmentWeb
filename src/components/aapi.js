@@ -1,5 +1,6 @@
 import { sqlFreeForm } from './api';
 import { get } from 'lodash';
+import moment from 'moment';
 
 export async function checkTenantProcessorPayee({ source, name }) {
     const tnts = await sqlFreeForm(`select tn.tenantID 
@@ -56,4 +57,13 @@ export async function createLeaseTenantLink(leaseID, tenantID) {
     if (!existing.length) {
         await sqlFreeForm(`insert into leaseTenantInfo( leaseID,tenantId, id) values(?,?, uuid())`, parms);
     }
+}
+
+export async function linkPayment(id, imp) {
+    await sqlFreeForm(`insert into rentPaymentInfo(paymentID, receivedDate,receivedAmount,
+                        paidBy,leaseID,created,modified,notes)
+                        values(?,?,?,
+                        ?,?,now(),now(),?)`, [id, moment(imp.date).format('YYYY-MM-DD'), imp.amount,
+        imp.name, imp.leaseID, imp.notes]);
+    return await sqlFreeForm(`update importPayments set matchedTo=? where id=?`, [id, imp.id]);
 }

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup } from 'react-bootstrap';
 import { sqlGetTableInfo, sqlGetTables, sqlFreeForm } from '../api';
-import { nameToFirstLast } from '../util'
-import { create, get } from 'lodash';
 import {v1} from 'uuid';
 import moment from 'moment';
 import Promise from 'bluebird';
 import { TenantMatcher } from './TenantMatcher';
+import { linkPayment } from '../aapi';
 
 function PaymentMatch(props) {
     const [imported, setImported] = useState([]);
@@ -56,21 +55,24 @@ function PaymentMatch(props) {
         <thead><tr>
             <td>Date</td><td>Name</td><td>Amount</td><td>Note</td><td>Source</td><td>Action</td><td>                        
                     <Button onClick={async () => {
-                        return;
-                await Promise.map(imported, async imp=>{
-                    const matched = matchedTo[imp.itemId];
-                    if (!imp.matchedTo && matched) {
-                        const id = v1();
-                        await sqlFreeForm(`insert into rentPaymentInfo(paymentID, receivedDate,receivedAmount,
-                        paidBy,leaseID,created,modified,notes)
-                        values(?,?,?,
-                        ?,?,now(),now(),?)`,[id, moment(imp.date).format('YYYY-MM-DD'), imp.amount,
-                        imp.name, matched.id, imp.notes]);
-                        imp.matchedTo = id;
-                        setImported(prev=>[...prev]);
-                    }
-                }, {concurrency: 1});
-            }}>Map</Button>
+                        await Promise.map(imported, async imp => {
+                            const canImport = importItem[imp.itemId];                            
+                            if (canImport && imp.leaseID && !imp.matchedTo) {
+                                const id = v1();                                
+                                console.log(`importing ${imp.date} ${imp.amount} ${imp.name} leaseid=${imp.leaseID} ${imp.notes}`)
+                                setImported(prev => prev.map(p => {
+                                    if (p.id === imp.id) {
+                                        return {
+                                            ...imp,
+                                            matchedTo: id,
+                                        }
+                                    }
+                                    return p;
+                                }));
+                                await linkPayment(id, imp);
+                            }
+                        }, { concurrency: 1 });
+                    }}>Map</Button>
             </td></tr></thead>
         <tbody>
         {
