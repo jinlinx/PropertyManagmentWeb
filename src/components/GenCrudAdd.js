@@ -133,7 +133,7 @@ const GenCrudAdd=(props) => {
         return '';
     }
     return (
-        <Modal show={show} onHide={internalCancel}>
+        <Modal show={show} onHide={internalCancel} backdrop='static'>
             <Modal.Header closeButton>
                 <Modal.Title>{desc}</Modal.Title>
             </Modal.Header>
