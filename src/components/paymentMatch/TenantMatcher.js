@@ -239,7 +239,7 @@ export function TenantMatcher(props) {
                                 reloadId: curSelectedHouseId,
                                 optionsAction: (options, setOptions, curSel) => {
                                     if (curSel.value && options.filter(o => o.value.id === curSel.value.id).length === 0) {
-                                        setOptions([curSel].concat(options));
+                                        setOptions([curSel]);
                                     }
                                 },
                                 curSelection: curLeaseSelection, setCurSelection: setCurLeaseSelection,
