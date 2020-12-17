@@ -126,7 +126,7 @@ const GenCrudAdd=(props) => {
     }
     useEffect(() => {
         loadColumnInfo(columnInfo);
-    },[]);
+    }, [columnInfo]);
     const checkErrorInd = c => {
         if (requiredFieldsMap[c.field] && !data[c.field])
             return "alert-danger";
