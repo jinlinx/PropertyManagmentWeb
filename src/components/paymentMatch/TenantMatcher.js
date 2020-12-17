@@ -4,7 +4,7 @@ import { Modal, Container, Row, Col, Button, Alert } from 'react-bootstrap';
 
 import { GetOrCreate } from './GetOrCreate';
 
-import { sqlFreeForm } from '../api';
+import moment from 'moment';
 import {
     saveTenantProcessorPayeeMapping,
     getTenants,
@@ -252,7 +252,11 @@ export function TenantMatcher(props) {
                                     table: 'leaseInfo',
                                     editItem: {
                                         houseID: curSelectedHouseId,
-                                        comment: `Auto created for ${name}`
+                                        comment: `Auto created for ${name}`,
+                                        deposit: '0',
+                                        endDate: moment().add(1, 'year').format('YYYY-MM-DD'),
+                                        startDate: moment().format('YYYY-MM-DD'),
+                                        monthlyRent: '0',
                                     },
                                     setCurrSelection: added => {
                                         setCurLeaseSelection({
