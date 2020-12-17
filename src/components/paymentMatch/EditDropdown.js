@@ -75,7 +75,7 @@ export default function EditDropdown(props) {
             <Dropdown.Toggle split variant="success" id="dropdown-split-basic" onClick={() => {
                 setShow(!show);
             }} onBlur={() => {
-                setTimeout(()=>setShow(false),100);
+                setTimeout(()=>setShow(false),400);
             }}/>
             <Dropdown.Menu show={show}>
                 {
@@ -83,7 +83,7 @@ export default function EditDropdown(props) {
                         return <Dropdown.Item key={ind} onSelect={() => {
                             console.log('selection ' + l);
                             setCurSelection(l);
-
+                            setShow(false);
                         }
                         }>{getCurSelectionText(l)}</Dropdown.Item>
                     })
