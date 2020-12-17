@@ -18,6 +18,11 @@ export function GetOrCreate(props) {
             setOptions(res);
             if (res.length) {
                 setCurSelection(res[0])
+            } else {
+                setCurSelection({
+                    label: 'AddNew',
+                    value: 'AddNew',
+                })
             }
         })
     }, [reloadId||'NA']);
