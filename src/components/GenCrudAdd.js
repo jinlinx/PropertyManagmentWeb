@@ -163,7 +163,10 @@ const GenCrudAdd=(props) => {
                         }
                         const addDone = async added => {
                             console.log(added);                            
-                            if (!add) return setErrorText('Cancelled');
+                            if (!added) {
+                                setAddNewForField('');  
+                                return setErrorText('Cancelled');
+                            }
                             const optDataOrig = await columnInfoMaps[thisTbl].helper.loadData();
                             const optData = optDataOrig.rows;
                             setOptsData(prev => {

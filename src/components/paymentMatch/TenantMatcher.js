@@ -58,6 +58,7 @@ export function TenantMatcher(props) {
 
     const { onClose, name, source,
         imported, setImported,
+        addTenantIdToItem,
     } = props.context;
     const show = !!name;
     //const { show } = props;
@@ -161,7 +162,7 @@ export function TenantMatcher(props) {
                                 setCurModalInfo({
                                     table: 'tenantInfo',
                                     editItem: tenantName,
-                                    setCurSelection: added => {
+                                    setCurrSelection: added => {
                                         setCurTenantSelection({
                                             label: `${added.firstName} ${added.lastName}`,
                                             value: {
@@ -185,6 +186,18 @@ export function TenantMatcher(props) {
                                 setShowProgress('Please Wait');
                                 saveTenantProcessorPayeeMapping({ tenantID, name, source })
                                     .then(() => {
+                                        setImported(imported.map(imp => {
+                                            if (imp.name === name && imp.source === source) {
+                                                return {
+                                                    ...imp,
+                                                    tenantID,
+                                                    firstName: name,
+                                                    lastName: 'justAdded'
+                                                }
+                                            }
+                                            return imp;
+                                        }));
+                                        addTenantIdToItem(tenantID);
                                         setShowProgress('');
                                     }).catch(err => {
                                         setShowProgress(err.message);

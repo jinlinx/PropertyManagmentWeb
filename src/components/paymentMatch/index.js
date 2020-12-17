@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup } from 'react-bootstrap';
 import { sqlGetTableInfo, sqlGetTables, sqlFreeForm } from '../api';
 import { nameToFirstLast } from '../util'
-import { get } from 'lodash';
+import { create, get } from 'lodash';
 import {v1} from 'uuid';
 import moment from 'moment';
 import Promise from 'bluebird';
@@ -43,6 +43,10 @@ function PaymentMatch(props) {
             source: createTenantItem.source,
             tenantID: createTenantItem.tenantID,
             imported, setImported,
+            addTenantIdToItem: tenantID => setCreateTenantItem({
+                ...createTenantItem,
+                tenantID,
+            })
         } }></TenantMatcher>
         <Table>
         <thead><tr>
