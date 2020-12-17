@@ -11,13 +11,14 @@ import {
     getHouses,
     getLeases,
     createLeaseTenantLink,
+    getLeaseByTenant,
 } from '../aapi';
 import { nameToFirstLast } from '../util';
 import { add, get, set } from 'lodash';
 import GenCrudAdd from '../GenCrudAdd';
 import { createHelper } from '../datahelper';
 import { getFKDefs } from '../GenCrudTableFkTrans';
-import { sqlFreeForm } from '../api';
+//import { sqlFreeForm } from '../api';
 
 function AddNewDlgFunc(props) {
     const { curModalInfo,
@@ -124,12 +125,7 @@ export function TenantMatcher(props) {
     useEffect(() => {
         if (tenantID) {
             async function doSet() {
-                const leaseTenants = await sqlFreeForm(`select l.leaseID, l.deposit, l.endDate, l.startDate, h.houseID, l.comment, l.monthlyRent,
-        h.address, h.city, h.state
-                                                     from leaseInfo l
-                                                     inner join houseInfo h on l.houseID=h.houseID
-                                                     inner join leaseTenantInfo lt on lt.leaseID = l.leaseID                                                     
-                                                      where lt.tenantID=? `, [tenantID]);
+                const leaseTenants = await getLeaseByTenant(tenantID);
                 if (leaseTenants.length) {
                     const lt = leaseTenants[0];
                     setCurHouseSelection({

@@ -40,6 +40,16 @@ export async function getLeases(houseID, leaseComment='') {
     return leases;
 }
 
+export async function getLeaseByTenant(tenantID) {
+    const leaseTenants = await sqlFreeForm(`select l.leaseID, l.deposit, l.endDate, l.startDate, h.houseID, l.comment, l.monthlyRent,
+        h.address, h.city, h.state
+                                                     from leaseInfo l
+                                                     inner join houseInfo h on l.houseID=h.houseID
+                                                     inner join leaseTenantInfo lt on lt.leaseID = l.leaseID                                                     
+                                                      where lt.tenantID=? `, [tenantID]);
+    return leaseTenants;
+}
+
 export async function createLeaseTenantLink(leaseID, tenantID) {
     const parms = [leaseID, tenantID];
     const existing = await sqlFreeForm(`select 1 from leaseTenantInfo where leaseID=? and tenantId=?`, parms);
