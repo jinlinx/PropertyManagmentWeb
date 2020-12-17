@@ -161,8 +161,7 @@ const GenCrudAdd=(props) => {
                                 setErrorText(err.message);
                             });
                         }
-                        const addDone = async added => {
-                            console.log(added);                            
+                        const addDone = async added => {                        
                             if (!added) {
                                 setAddNewForField('');  
                                 return setErrorText('Cancelled');

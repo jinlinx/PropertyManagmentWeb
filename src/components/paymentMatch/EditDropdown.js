@@ -15,7 +15,6 @@ export default function EditDropdown(props) {
 
     const selTextRef = createRef();
     const [show, setShow] = useState(false);
-console.log(disabled)
     return <div>
         <Dropdown as={ButtonGroup} show={show} >            
             < Form.Control as="input"
