@@ -29,7 +29,11 @@ function PaymentMatch(props) {
                     ...r,
                     itemId: r.id,
                 }
-            }));            
+            }));
+            setImportItem(r.reduce((acc, rr) => { 
+                if (rr.leaseID) acc[rr.id] = true;
+                return acc;
+            }, {}))
         });
     },[]);
     const idToItemMap = imported.reduce((acc,ci)=>{
