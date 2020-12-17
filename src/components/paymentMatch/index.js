@@ -5,7 +5,7 @@ import {v1} from 'uuid';
 import moment from 'moment';
 import Promise from 'bluebird';
 import { TenantMatcher } from './TenantMatcher';
-import { linkPayment } from '../aapi';
+import { linkPayment, getImportablePayments } from '../aapi';
 
 function PaymentMatch(props) {
     const [imported, setImported] = useState([]);
@@ -17,12 +17,7 @@ function PaymentMatch(props) {
     const [createTenantItem, setCreateTenantItem] = useState({});
 
     useEffect(() => {
-        sqlFreeForm(`select ip.id, ip.name, ip.date, ip.amount, ip.source, ip.notes , ptm.tenantID, t.firstName, t.lastName, lti.leaseID
-        from importPayments ip
-        left join payerTenantMapping ptm on ip.source=ptm.source and ip.name=ptm.name
-        left join tenantInfo t on t.tenantID = ptm.tenantID
-        left join  leaseTenantInfo lti on t.tenantID = lti.tenantID
-        where ip.matchedTo is null and ip.deleted is null`).then(async r => {
+        getImportablePayments().then(async r => {
             setImported(r.map(r => {
                 return {
                     ...r,
@@ -143,7 +138,8 @@ function PaymentMatch(props) {
                     </td>
                     <td>
                         <Button onClick={() => {
-                            sqlFreeForm(`update importPayments set deleted='1' where id=? `, [itm.id]).then(() => {
+                            //sqlFreeForm(`update importPayments set deleted='1' where id=? `, [itm.id])
+                            deletePaymentImport(item.id).then(() => {
                                 setImported(imported.filter(r => r.id !== itm.id)); 
                             });
                         }}>Delete</Button>

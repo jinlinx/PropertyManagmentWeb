@@ -59,6 +59,9 @@ export async function createLeaseTenantLink(leaseID, tenantID) {
     }
 }
 
+export async function deletePaymentImport(id) {
+    sqlFreeForm(`update importPayments set deleted='1' where id=? `, [id])
+}
 export async function linkPayment(id, imp) {
     await sqlFreeForm(`insert into rentPaymentInfo(paymentID, receivedDate,receivedAmount,
                         paidBy,leaseID,created,modified,notes)
@@ -66,4 +69,13 @@ export async function linkPayment(id, imp) {
                         ?,?,now(),now(),?)`, [id, moment(imp.date).format('YYYY-MM-DD'), imp.amount,
         imp.name, imp.leaseID, imp.notes]);
     return await sqlFreeForm(`update importPayments set matchedTo=? where id=?`, [id, imp.id]);
+}
+
+export async function getImportablePayments() {
+    return sqlFreeForm(`select ip.id, ip.name, ip.date, ip.amount, ip.source, ip.notes , ptm.tenantID, t.firstName, t.lastName, lti.leaseID
+        from importPayments ip
+        left join payerTenantMapping ptm on ip.source=ptm.source and ip.name=ptm.name
+        left join tenantInfo t on t.tenantID = ptm.tenantID
+        left join  leaseTenantInfo lti on t.tenantID = lti.tenantID
+        where ip.matchedTo is null and ip.deleted is null`);
 }
