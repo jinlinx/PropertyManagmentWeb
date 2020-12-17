@@ -17,6 +17,7 @@ import { add, get, set } from 'lodash';
 import GenCrudAdd from '../GenCrudAdd';
 import { createHelper } from '../datahelper';
 import { getFKDefs } from '../GenCrudTableFkTrans';
+import { sqlFreeForm } from '../api';
 
 function AddNewDlgFunc(props) {
     const { curModalInfo,
@@ -68,6 +69,7 @@ export function TenantMatcher(props) {
     const [showProgress, setShowProgress] = useState(false);
     const firstLast = nameToFirstLast(name || '');
     const [tenantName, setTenantName] = useState(firstLast.firstName);
+    const [disableHL, setDisableHL] = useState(false);
     const getHouseLabel = r => `${r.address} ${r.city} ${r.state}`;
     const getLeaseLabel = r => `${r.comment} ${r.leaseID}`;
     useEffect(() => {
@@ -107,16 +109,43 @@ export function TenantMatcher(props) {
     const mapToLabel = curTenantSelection.label;
     
     const applyTenantId = props.context.tenantID;
+    
+    if (applyTenantId) {
+        setCurTenantSelection({
+            label: name,
+            value: {
+                tenantID: applyTenantId,
+            }
+        });        
+    }
+
     useEffect(() => {
-        if (props.context.tenantID) {
-            setCurTenantSelection({
-                label: name,
-                value: {
-                    tenantID: applyTenantId,
+        if (tenantID) {
+            async function doSet() {
+                const leaseTenants = await sqlFreeForm(`select l.leaseID, l.deposit, l.endDate, l.startDate, h.houseID, l.comment, l.monthlyRent,
+        h.address, h.city, h.state
+                                                     from leaseInfo l
+                                                     inner join houseInfo h on l.houseID=h.houseID
+                                                     inner join leaseTenantInfo lt on lt.leaseID = l.leaseID                                                     
+                                                      where lt.tenantID=? `, [tenantID]);
+                if (leaseTenants.length) {
+                    const lt = leaseTenants[0];
+                    setCurHouseSelection({
+                        label: getHouseLabel(lt),
+                        value: lt,
+                    });
+                    setCurLeaseSelection({
+                        label: getLeaseLabel(lt),
+                        value: lt,
+                    })
                 }
-            })
+                setDisableHL(!!leaseTenants.length);
+            }
+            doSet().catch(err => {
+                console.log(err);
+            });
         }
-    }, [tenantID, applyTenantId, curTenantSelection.length]);
+    },[tenantID]);
 
     const createNewStyle = { fontSize: '9px' };    
 
@@ -208,7 +237,7 @@ export function TenantMatcher(props) {
                     }
                     <Row>
                         <Col xs={8} md={8}>
-                            <GetOrCreate context={{
+                            <GetOrCreate disabled={disableHL} context={{
                                 optionsAction: (options, setOptions, curSel) => {
                                     if (curSel.value && options.filter(o => o.value.id === curSel.value.id).length === 0) {
                                         setOptions([curSel].concat(options));
@@ -235,7 +264,7 @@ export function TenantMatcher(props) {
                     </Row>
                     <Row>
                         <Col xs={8} md={8}>
-                            <GetOrCreate context={{
+                            <GetOrCreate disabled={disableHL} context={{
                                 reloadId: curSelectedHouseId,
                                 optionsAction: (options, setOptions, curSel) => {
                                     if (curSel.value && options.filter(o => o.value.id === curSel.value.id).length === 0) {

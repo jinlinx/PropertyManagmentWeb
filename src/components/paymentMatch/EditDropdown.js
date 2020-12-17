@@ -9,15 +9,17 @@ export default function EditDropdown(props) {
         setOptions,
         getCurSelectionText,
         curSelection, setCurSelection,
+        disabled,
         MAXITEMS = 20,
     } = props.context;
 
     const selTextRef = createRef();
     const [show, setShow] = useState(false);
-
+console.log(disabled)
     return <div>
-        <Dropdown as={ButtonGroup} show={show}>            
+        <Dropdown as={ButtonGroup} show={show} >            
             < Form.Control as="input"
+                disabled={disabled}
                 ref={selTextRef}                
                 value={getCurSelectionText(curSelection)}
                 onBlur={() => {
@@ -72,7 +74,7 @@ export default function EditDropdown(props) {
                 }
                 onChange={() => { }}
             />                        
-            <Dropdown.Toggle split variant="success" id="dropdown-split-basic" onClick={() => {
+            <Dropdown.Toggle disabled={disabled} split variant="success" id="dropdown-split-basic" onClick={() => {
                 setShow(!show);
             }} onBlur={() => {
                 setTimeout(()=>setShow(false),400);
