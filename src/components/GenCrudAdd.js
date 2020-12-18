@@ -56,7 +56,7 @@ const GenCrudAdd=(props) => {
             const ret = await doAdd(data, id);
             //handleChange(e, ret);            
             onOK({
-                id,
+                id: id || ret.id,
                 ...data,
                 ...ret,
             });
