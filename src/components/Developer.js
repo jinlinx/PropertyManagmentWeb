@@ -44,14 +44,14 @@ function Developer(props) {
                         "ownerInfo",
                         "tenantInfo",
                         "payerTenantMapping",
-                        "leaseInfo",
-                        "importPayments",
+                        "leaseInfo",                        
                         "leaseTenantInfo"], async name => {
                             setMessage(`deleting ${name}`);
                             const res = await sqlFreeForm(`delete from ${name}`);
                             console.log(res);
                             setMessage(`done delete ${name} affected=${res.affectedRows} changed=${res.changedRows}`)
-                        });
+                    });
+                    await sqlFreeForm(`update importPayments set matchedTo=null`);
                 }}>Delete All Data</Button>
             </Col>
             <Col>
