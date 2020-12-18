@@ -38,7 +38,7 @@ function Developer(props) {
         </Row>
         <Row>
             <Col>
-                <Button onClick={async () => {
+                <Button disabled={!!message}  onClick={async () => {
                     await Promise.map([
                         "houseInfo",
                         "ownerInfo",
@@ -66,10 +66,10 @@ function Developer(props) {
         </Row>
         <Row>
             <Col>
-                <Button onClick={() => importPayment('paypal')}>Import Paypal</Button>
+                <Button disabled={!!message}  onClick={() => importPayment('paypal')}>Import Paypal</Button>
             </Col>
             <Col>
-                <Button onClick={() => importPayment('venmo')}>Import Venmo</Button>
+                <Button disabled={!!message}  onClick={() => importPayment('venmo')}>Import Venmo</Button>
             </Col>
         </Row>
     </Container>
