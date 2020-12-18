@@ -4,7 +4,6 @@ import { Button, Form, Modal, Container, Row, Col } from 'react-bootstrap';
 import get from 'lodash/get';
 import EditDropdown from './paymentMatch/EditDropdown';
 import Promise from 'bluebird';
-import { add } from 'lodash';
 const GenCrudAdd=(props) => {
 
     const { columnInfo, doAdd, onCancel,
@@ -20,6 +19,7 @@ const GenCrudAdd=(props) => {
         = props;
     const getForeignKeyProcessor = fk => get(fkDefs, [fk, 'processForeignKey']);
     let id = '';
+    let idName = '';
     const onOK = props.onOK || onCancel;
     const internalCancel = () => onOK();
     const initData=columnInfo.reduce((acc, col) => {
@@ -28,8 +28,11 @@ const GenCrudAdd=(props) => {
             const val=editItem[col.field];
             acc[col.field]=val===0? 0:val||'';
             if (col.isId) {
-                id=val;
+                id = val;            
             }
+        }
+        if (col.isId) {         
+            idName = col.field;
         }
         return acc;
     }, {});
@@ -54,11 +57,12 @@ const GenCrudAdd=(props) => {
         const missed=requiredFields.filter(r => !data[r]);
         if (missed.length === 0) {
             const ret = await doAdd(data, id);
-            //handleChange(e, ret);            
-            onOK({
-                id: id || ret.id,
+            //handleChange(e, ret);          
+            const fid = id || ret.id;
+            onOK({                
                 ...data,
-                ...ret,
+                [idName]: fid,
+                id: fid,
             });
         } else {
             if (onError) {
