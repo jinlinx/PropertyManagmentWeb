@@ -313,6 +313,13 @@ export function TenantMatcher(props) {
                                         await createLeaseTenantLink(leaseID, tenantID);
                                         setImported(imported.map(imp => {
 
+                                            if (!imp.tenantID) {
+                                                if (imp.name === name && imp.source === source) {
+                                                    imp.tenantID = tenantID;
+                                                    imp.firstName = name;
+                                                    imp.lastName = 'justAdded';
+                                                }
+                                            }
                                             if (imp.tenantID === tenantID && imp.source === source) {
                                                 return {
                                                     ...imp,
