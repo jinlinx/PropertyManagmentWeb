@@ -44,7 +44,8 @@ function Developer(props) {
                         "ownerInfo",
                         "tenantInfo",
                         "payerTenantMapping",
-                        "leaseInfo",                        
+                        "leaseInfo",
+                        "rentPaymentInfo",
                         "leaseTenantInfo"], async name => {
                             setMessage(`deleting ${name}`);
                             const res = await sqlFreeForm(`delete from ${name}`);

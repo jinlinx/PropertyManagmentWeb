@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup } from 'react-bootstrap';
-import { sqlGetTableInfo, sqlGetTables, sqlFreeForm } from '../api';
+import { Table, DropdownButton, Dropdown, Button, InputGroup } from 'react-bootstrap';
 import {v1} from 'uuid';
-import moment from 'moment';
 import Promise from 'bluebird';
 import { TenantMatcher } from './TenantMatcher';
 import { linkPayment, getImportablePayments, deletePaymentImport } from '../aapi';
