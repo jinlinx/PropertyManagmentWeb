@@ -5,7 +5,7 @@ import {v1} from 'uuid';
 import moment from 'moment';
 import Promise from 'bluebird';
 import { TenantMatcher } from './TenantMatcher';
-import { linkPayment, getImportablePayments } from '../aapi';
+import { linkPayment, getImportablePayments, deletePaymentImport } from '../aapi';
 
 function PaymentMatch(props) {
     const [imported, setImported] = useState([]);
@@ -139,7 +139,7 @@ function PaymentMatch(props) {
                     <td>
                         <Button onClick={() => {
                             //sqlFreeForm(`update importPayments set deleted='1' where id=? `, [itm.id])
-                            deletePaymentImport(item.id).then(() => {
+                            deletePaymentImport(itm.id).then(() => {
                                 setImported(imported.filter(r => r.id !== itm.id)); 
                             });
                         }}>Delete</Button>
