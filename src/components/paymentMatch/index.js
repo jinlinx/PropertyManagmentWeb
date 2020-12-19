@@ -3,7 +3,7 @@ import { Table, DropdownButton, Dropdown, Button, InputGroup } from 'react-boots
 import {v1} from 'uuid';
 import Promise from 'bluebird';
 import { TenantMatcher } from './TenantMatcher';
-import { linkPayment, getImportablePayments, deletePaymentImport } from '../aapi';
+import { linkPayments, getImportablePayments, deletePaymentImport } from '../aapi';
 
 function PaymentMatch(props) {
     const [imported, setImported] = useState([]);
@@ -48,6 +48,7 @@ function PaymentMatch(props) {
         <thead><tr>
             <td>Date</td><td>Name</td><td>Amount</td><td>Note</td><td>Source</td><td>Action</td><td>                        
                     <Button onClick={async () => {
+                        await linkPayments();
                         await Promise.map(imported, async imp => {
                             const canImport = importItem[imp.itemId];                            
                             if (canImport && imp.leaseID && !imp.matchedTo) {
@@ -62,7 +63,7 @@ function PaymentMatch(props) {
                                     }
                                     return p;
                                 }));
-                                await linkPayment(id, imp);
+                                //await linkPayment(id, imp);
                             }
                         }, { concurrency: 1 });
                     }}>Map</Button>
