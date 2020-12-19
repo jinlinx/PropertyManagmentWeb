@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useRef} from 'react';
 import {
     Navbar, Nav, NavDropdown, Form, FormControl, Button,
     Row, Col, Alert,
@@ -11,22 +11,20 @@ function Developer(props) {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [timerId, setTimerId] = useState(0);
+    const timerRef = useRef(null);
     
     const pullStatementMsg = () => {
         const tfunc = () => {
             getData('misc/getStatementProcessingMsg').then(msg => {
                 setMessage(msg.message);
-                console.log('timerid is = '+timerId);
-                //if (timerId) {
-                    const hndl = setTimeout(tfunc, 100);
-                    setTimerId(hndl);
-                //}
+                console.log('timerid is = ' + timerRef.current);                
             });
 
         };
-        const hndl = setTimeout(tfunc, 100);
+        const hndl = setInterval(tfunc, 100);
         console.log('start time=' + hndl);
         setTimerId(hndl);
+        timerRef.current = hndl;
     }
     const importPayment = who => {
         setMessage('Please wait');
@@ -57,9 +55,10 @@ function Developer(props) {
         </Row>
         <Row>
             <Col><Button onClick={() => {
-                if (timerId) {
-                    console.log('stop timer ' + timerId);
-                    clearTimeout(timerId);
+                if (timerRef.current) {
+                    console.log('stop timer ' + timerRef.current);
+                    clearInterval(timerRef.current);
+                    timerRef.current = 0;
                     setTimerId(0);
                 } else {
                     pullStatementMsg();
