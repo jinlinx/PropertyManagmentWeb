@@ -112,6 +112,11 @@ export function doStatementWS() {
                 statementFuncs.askCodeListener(msg);
             }
         });
+        socket.on('ggFreeFormMsg', msg => {
+            if (statementFuncs.freeFormMsgListener) {
+                statementFuncs.freeFormMsgListener(msg);
+            }
+        })
         socket.on('disconnect', function () {
             console.log('disconnet')
         });

@@ -32,6 +32,9 @@ function Developer(props) {
     statementFuncs.askCodeListener = msg => {
         setAskCode(msg);
     };
+    statementFuncs.freeFormMsgListener = msg => {
+        setMessage(JSON.stringify(msg));
+    }
     const pullStatementMsg = () => {
         return;
         const tfunc = () => {
@@ -145,6 +148,18 @@ function Developer(props) {
             <Col>
                 <Button disabled={!!message} onClick={() => importPayment('cashapp')}>Import Cashapp</Button>
             </Col>
+        </Row>
+        <Row>
+            <Col>
+                <Button onClick={() => {
+                    const skt = getSocket();
+                    if (!skt) return;
+                    skt.emit('ggFreeFormMsg', {
+                        type: 'text',
+                        data: new Date().toISOString(),
+                    })
+                }}>Test Free Form</Button>
+            </Col>            
         </Row>
     </Container>
 }
