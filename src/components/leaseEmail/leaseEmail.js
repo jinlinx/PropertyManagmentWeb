@@ -31,7 +31,7 @@ export default function LeaseEmail() {
     }
     useEffect(() => {
         sqlFreeForm(`select t.tenantID, t.firstName, t.lastName, t.email, t.phone
-        from leaseTeantsInfo lt inner join tenantInfo t on lt.tenantID=t.tenantID
+        from leaseTenantInfo lt inner join tenantInfo t on lt.tenantID=t.tenantID
         where lt.leaseID=?
         order by t.firstName`, [selectedLease.leaseID]).then(res => {
             setTenants(res);

@@ -15,6 +15,7 @@
     "react-dom": "^16.13.1",
     "react-dropdown-select": "^4.5.2",
     "react-scripts": "^4.0.0",
+    "socket.io-client": "^3.0.4",
     "superagent": "^6.1.0",
     "uuid": "^8.3.0"
   },
@@ -22,6 +23,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "imp": "babel src/components/api.js -d testdist;babel tests/test.js -d testdist;",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -38,5 +40,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.12.8",
+    "@babel/core": "^7.12.9",
+    "@babel/preset-env": "^7.12.7"
   }
 }

@@ -1,53 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import Select from 'react-dropdown-select';
-import { createHelper } from './datahelper';
-import {  Button, Form } from 'react-bootstrap';
+import { createAndLoadHelper } from './datahelper';
+import { Button, Form, Modal, Container, Row, Col } from 'react-bootstrap';
 import get from 'lodash/get';
-
+import EditDropdown from './paymentMatch/EditDropdown';
+import Promise from 'bluebird';
 const GenCrudAdd=(props) => {
 
     const { columnInfo, doAdd, onCancel,
         editItem, //only available during edit
         onError,
         customSelData,
-        customFields={},
+        customFields = {},
+        show,
+        table,
+        desc,
+        fkDefs,
     }
-        =props;
-    let id='';
+        = props;
+    const getForeignKeyProcessor = fk => get(fkDefs, [fk, 'processForeignKey']);
+    let id = '';
+    let idName = '';
+    const onOK = props.onOK || onCancel;
+    const internalCancel = () => onOK();
     const initData=columnInfo.reduce((acc, col) => {
         acc[col.field]='';
         if (editItem) {
             const val=editItem[col.field];
             acc[col.field]=val===0? 0:val||'';
             if (col.isId) {
-                id=val;
+                id = val;            
             }
+        }
+        if (col.isId) {         
+            idName = col.field;
         }
         return acc;
     }, {});
-    const requiredFields=columnInfo.filter(c => c.required&&!c.isId).map(c => c.field);
+    const requiredFields = columnInfo.filter(c => c.required && !c.isId).map(c => c.field);
+    const requiredFieldsMap = requiredFields.reduce((acc, f) => {
+        acc[f] = true;
+        return acc;
+    }, {});
 
-    const [data, setData]=useState(initData);
-    const [optsData, setOptsData]=useState(customSelData||{});
+    const [data, setData] = useState(initData);
+    const [errorText, setErrorText] = useState('');
+    const [addNewForField, setAddNewForField] = useState('');
+    const [optsData, setOptsData] = useState(customSelData || {});
     const handleChange=e => {
         const { name, value }=e.target;
         setData({ ...data, [name]: value });
     }
 
-    const handleSubmit=e => {
+    const handleSubmit=async e => {
         e.preventDefault();
 
         const missed=requiredFields.filter(r => !data[r]);
-        if (missed.length===0) {
-            handleChange(e, doAdd(data, id));
-        } else {
-            onError({
-                message: `missing required fields ${missed.length}`,
-                missed,
+        if (missed.length === 0) {
+            const ret = await doAdd(data, id);
+            //handleChange(e, ret);          
+            const fid = id || ret.id;
+            onOK({                
+                ...data,
+                [idName]: fid,
+                id: fid,
             });
+        } else {
+            if (onError) {
+                onError({
+                    message: `missing required fields ${missed.length}`,
+                    missed,
+                });
+            }
             return;
-        }
-        onCancel();
+        }        
     }
 
     const optsDataReqSent={
@@ -62,13 +87,14 @@ const GenCrudAdd=(props) => {
                 if (c.foreignKey) {
                     const optKey=c.foreignKey.table;
 
-                    if (!optsData[optKey]) {
-                        const helper=createHelper(optKey);
-                        await helper.loadModel();
+                    const processForeignKey = getForeignKeyProcessor(optKey);
+                    if (processForeignKey && !optsData[optKey]) {
+                        const helper = await createAndLoadHelper(optKey);
+                        //await helper.loadModel();
                         const optDataOrig=await helper.loadData();
                         const optData = optDataOrig.rows;
                         cur=Object.assign({}, cur, {
-                            [optKey]: props.processForeignKey(c.foreignKey, optData)
+                            [optKey]: processForeignKey(c.foreignKey, optData)
                         });
                     }
                 }
@@ -78,54 +104,123 @@ const GenCrudAdd=(props) => {
             
         }
         doLoads();
-    }, []);
+    }, [table, columnInfo]);
+
+    useEffect(() => {
+        setData(initData);
+    },[JSON.stringify(initData)])
+    const [columnInfoMaps, setColumnInfoMaps] = useState({});
+    const loadColumnInfo = async colInf=> {
+        const hasFks = colInf.filter(c => c.foreignKey).filter(c => c.foreignKey.table);
+        await Promise.map(hasFks, async fk => {
+            const tbl = fk.foreignKey.table;
+            const helper = await createAndLoadHelper(tbl);
+            await helper.loadModel();
+            const columnInfo = helper.getModelFields();
+            setColumnInfoMaps(prev => {
+                return {
+                    ...prev,
+                    [tbl]: {
+                        helper,
+                        columnInfo,
+                    }
+                };
+            });
+        })
+    }
+    useEffect(() => {
+        loadColumnInfo(columnInfo);
+    }, [columnInfo]);
+    const checkErrorInd = c => {
+        if (requiredFieldsMap[c.field] && !data[c.field])
+            return "alert-danger";
+        return '';
+    }
     return (
-        <form>
+        <Modal show={show} onHide={internalCancel} backdrop='static'>
+            <Modal.Header closeButton>
+                <Modal.Title>{desc}</Modal.Title>
+            </Modal.Header>
+            <Container>
+                <Modal show={!!errorText} onHide={() => {
+                    setErrorText('');
+                }}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{errorText}</Modal.Title>
+                    </Modal.Header>
+                    <Container>
+                    </Container>
+                </Modal>
+                {
+                    columnInfo.filter(c => c.foreignKey).filter(c => c.foreignKey.table && columnInfoMaps[c.foreignKey.table]).map((c, cind) => { 
+                        const thisTbl = c.foreignKey.table;
+                        const processForeignKey = getForeignKeyProcessor(thisTbl);
+                        if (!processForeignKey) return;
+                        const { helper, columnInfo } = columnInfoMaps[thisTbl];
+                        const doAdd = (data, id) => {
+                            return helper.saveData(data, id).then(res => {                                                            
+                                return res;
+                            }).catch(err => { 
+                                console.log(err);
+                                setErrorText(err.message);
+                            });
+                        }
+                        const addDone = async added => {                        
+                            if (!added) {
+                                setAddNewForField('');  
+                                return setErrorText('Cancelled');
+                            }
+                            const optDataOrig = await columnInfoMaps[thisTbl].helper.loadData();
+                            const optData = optDataOrig.rows;
+                            setOptsData(prev => {
+                                return {
+                                    ...prev,
+                                    [thisTbl]: processForeignKey(c.foreignKey, optData)
+                                }
+                            });
+                            setData(prev => {
+                                return {
+                                    ...prev,
+                                    [c.field]: added.id,
+                                }
+                            })
+                            setAddNewForField('');                            
+                        }
+                        return <GenCrudAdd key={cind} columnInfo={columnInfo} doAdd={doAdd} onCancel={addDone} show={addNewForField===c.field}></GenCrudAdd>
+                    }).filter(x=>x)
+                }
             {
                 columnInfo.map( ( c, cind ) => {
                     if(!editItem) {
                         if(c.isId) return null;
                     }                    
 
-                    const createSelection=( optName, colField ) => {
-                        let selected={};
-                        const options=optsData[ optName ];
-                        if ( options ) {
-                            selected=options.filter( o => o.value===get( data, colField ) )[ 0 ]||{};
-                        }
-                        return <Select options={options} searchBy={'name'}
-                            values={[ selected ]}
-                            onChange={( value ) => {
-                                if ( value[ 0 ] ) {
-                                    handleChange( {
-                                        target: {
-                                            name: colField,
-                                            value: value[ 0 ].value,
-                                        }
-                                    } )
-                                }
-                            }
-                            }></Select>
+                    const createSelection=( optName, colField ) => {                        
+                        const selOptions = optsData[ optName ];
+                        if (!selOptions) return null;
+                        const options = selOptions.concat({
+                            label: 'Add New',
+                            value: 'AddNew',
+                        })
+                        const curSelection = options.filter( o => o.value===get( data, colField ) )[ 0 ]||{};                        
+                        return <>
+                            <EditDropdown context={{
+                                curSelection,
+                                setCurSelection: s => {
+                                    if (s.value === 'AddNew') {
+                                        setAddNewForField(colField);
+                                    }else 
+                                    setData({ ...data, [colField]: s.value });
+                                },
+                                 getCurSelectionText:o=>o.label || '',
+                                options, setOptions:null,
+                                loadOptions:()=>[],
+                            }}></EditDropdown>
+                            </>
                     };
                     let foreignSel=null;
                     if (c.foreignKey) {
                         const optKey = c.foreignKey.table;
-                        const lm = async () => {
-                            if (!optsData[optKey] && !optsDataReqSent[optKey]) {
-                                optsDataReqSent[optKey] = true;
-                                const helper = createHelper(optKey);
-                                await helper.loadModel();
-                                const optData = await helper.loadData();
-                                setOptsData({
-                                    ...optsData,
-                                    [optKey]: props.processForeignKey(c.foreignKey, optData)
-                                });
-                            }
-                        }
-                        //lm();
-                        
-                        //{value:1,label:'opt1'},{value:2,label:'opt2'}
-                        
                         foreignSel=createSelection( optKey, c.field );
                     }
                     const custFieldType=customFields[ c.field ];
@@ -133,17 +228,29 @@ const GenCrudAdd=(props) => {
                         foreignSel=createSelection( c.field, c.field );
                     }
                     const fieldFormatter=c.dspFunc||(x => x);
-                    return <div key={cind}>
-                        <label>{c.desc}</label>
-                        {
+                    return <Row key={cind}>
+                        <Col>{c.desc}</Col>
+                        <Col className={checkErrorInd(c)}>
+                            {
                             foreignSel ||< Form.Control as="input" value={fieldFormatter(data[c.field])} name={c.field} onChange={handleChange} />                        
-                        }
-                        
-                    </div>
+                            }                            
+                        </Col>
+                        <Col xs={1} className={checkErrorInd(c)}>{checkErrorInd(c) && '*'}</Col>
+                    </Row>
                 })
-            }
-            <Button className="button-primary" type="submit" onClick={handleSubmit} >Add</Button>
-        </form>
+                }
+                <Modal.Footer>
+                <Row>
+                    <Col>
+                        <Button className="btn-primary" type="submit" onClick={handleSubmit} >Add</Button>
+                    </Col>
+                    <Col>
+                            <Button className="btn-secondary" onClick={internalCancel} >Cancel</Button>
+                    </Col>
+                    </Row>
+                </Modal.Footer>
+            </Container>
+        </Modal>
     )
 }
 

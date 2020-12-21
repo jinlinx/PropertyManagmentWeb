@@ -1,5 +1,4 @@
 //import { get } from 'superagent';
-
 const apiBase = 'http://192.168.1.41:8081';
 //const apiBase='http://localhost:8081';
 const getUrl=path => `${apiBase}/${path}`;
@@ -81,6 +80,31 @@ export function sendEmail({ from, to, subject, text }) {
     });
 }
 
+const statementSocket = {
+    socket: null,
+}
+export const statementFuncs = {
+    listener: null,
+}
+export function doStatementWS() {
+    if (!statementSocket.socket) {
+        const socket = require('socket.io-client')(apiBase, {
+            transports: ['websocket']
+        });
+        statementSocket.socket = socket;
+        socket.on('connect', function () {
+            console.log('connect')
+        });
+        socket.on('statementStatus', function (data) {
+            if (statementFuncs.listener)
+                statementFuncs.listener(data);
+            console.log(data)
+        });
+        socket.on('disconnect', function () {
+            console.log('disconnet')
+        });
+    }
+}
 /*
 module.exports = {
     getData,

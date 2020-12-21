@@ -3,11 +3,12 @@ import get from 'lodash/get';
 import mod from './models';
 
 export function createHelper(table) {
+    if (!table) return null;
     const accModel=() => mod.models[table];
     const accModelFields=() => get(accModel(),'fields',[]);
     return {
         getModelFields: accModelFields,
-        loadModel: async name => {
+        loadModel: async () => {
             if(!accModel()) {
                 mod.models[table]=await getModel(table);
             }
@@ -28,4 +29,10 @@ export function createHelper(table) {
         },
         deleteData: async id => sqlDelete(table,id),
     }
+}
+
+export async function createAndLoadHelper(table) {
+    const helper = createHelper(table);
+    await helper.loadModel();
+    return helper;
 }

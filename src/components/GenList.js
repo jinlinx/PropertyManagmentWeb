@@ -2,10 +2,11 @@ import React,{useState,useEffect} from 'react';
 import GenCrud from './GenCrud';
 import { createHelper } from './datahelper';
 import { getPageSorts, getPageFilters } from './util';
+import { getFKDefs } from './GenCrudTableFkTrans';
 
 //props: table and displayFields [fieldNames]
 function GenList(props) {
-    const {table, columnInfo, loadMapper, pageState } = props;
+    const {table, columnInfo, loadMapper, pageState , fkDefs} = props;
     const [paggingInfo, setPaggingInfo] = useState({
         PageSize: 10,        
         pos: 0,
@@ -50,10 +51,10 @@ function GenList(props) {
     },[columnInfo, pageState.pageProps.reloadCount, paggingInfo.pos, paggingInfo.total]);
 
     const doAdd=(data,id) => {        
-        helper.saveData(data,id).then(() => {
-            setLoading(true);
-            console.log('reloading');
+        helper.saveData(data,id).then(res => {
+            setLoading(true);            
             reload();
+            return res;
         }).catch(err => {
             setLoading(false);
             console.log(err);
@@ -73,6 +74,7 @@ function GenList(props) {
             (loading||!columnInf)? <p>Loading</p>:
                 <div>
                     <GenCrud
+                        fkDefs={fkDefs || getFKDefs()}
                     paggingInfo={paggingInfo} setPaggingInfo={setPaggingInfo}
                     reload = {reload}
                         {...props}
