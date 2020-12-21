@@ -1,19 +1,26 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
     Navbar, Nav, NavDropdown, Form, FormControl, Button,
     Row, Col, Alert,
     Container
 } from 'react-bootstrap';
 import Promise from 'bluebird';
-import { sqlFreeForm, getData } from './api';
+import { sqlFreeForm, getData, statementFuncs, doStatementWS} from './api';
 
 function Developer(props) {
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [timerId, setTimerId] = useState(0);
     const timerRef = useRef(null);
+    useEffect(() => {
+        doStatementWS();
+    }, []);
     
+    statementFuncs.listener = msg => {
+        setMessage(msg);
+    }
     const pullStatementMsg = () => {
+        return;
         const tfunc = () => {
             getData('misc/getStatementProcessingMsg').then(msg => {
                 setMessage(msg.message);
