@@ -8,6 +8,7 @@ import Promise from 'bluebird';
 import moment from 'moment';
 import {
     sqlFreeForm, getData, statementFuncs, doStatementWS,
+    getSocket,
 } from './api';
 
 import {
@@ -15,6 +16,8 @@ import {
 } from './aapi';
 
 function Developer(props) {
+    const [askCode, setAskCode] = useState('');
+    const [code, setCode] = useState('');
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [timerId, setTimerId] = useState(0);
@@ -26,6 +29,9 @@ function Developer(props) {
     statementFuncs.listener = msg => {
         setMessage(msg);
     }
+    statementFuncs.askCodeListener = msg => {
+        setAskCode(msg);
+    };
     const pullStatementMsg = () => {
         return;
         const tfunc = () => {
@@ -49,6 +55,20 @@ function Developer(props) {
         pullStatementMsg();
     }
     return <Container>
+        {
+            askCode && <Row>
+                <Col>{askCode}</Col>
+                <Col><FormControl type="text" value={code || ''} placeholder="Code" className="mr-sm-2" onChange={e => {
+                    setCode(e.target.value);
+                }} /></Col>
+                <Col><Button onClick={() => {
+                    setAskCode('');
+                    if (getSocket()) {
+                        getSocket().emit('receivedStatementCode', code)
+                    }
+                }}>Send Code</Button></Col>
+            </Row>
+        }
         <Row>
             <Col><Button onClick={() => {
                 setMessage('');
@@ -119,6 +139,9 @@ function Developer(props) {
             </Col>
             <Col>
                 <Button disabled={!!message}  onClick={() => importPayment('venmo')}>Import Venmo</Button>
+            </Col>
+            <Col>
+                <Button disabled={!!message} onClick={() => importPayment('cashapp')}>Import Cashapp</Button>
             </Col>
         </Row>
     </Container>

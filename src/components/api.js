@@ -85,7 +85,12 @@ const statementSocket = {
 }
 export const statementFuncs = {
     listener: null,
+    askCodeListener: null,
 }
+export function getSocket() {
+    return statementSocket.socket;
+}
+
 export function doStatementWS() {
     if (!statementSocket.socket) {
         const socket = require('socket.io-client')(apiBase, {
@@ -99,6 +104,11 @@ export function doStatementWS() {
             if (statementFuncs.listener)
                 statementFuncs.listener(data);
             console.log(data)
+        });
+        socket.on('askStatementCode', msg => {
+            if (statementFuncs.askCodeListener) {
+                statementFuncs.askCodeListener(msg);
+            }
         });
         socket.on('disconnect', function () {
             console.log('disconnet')
