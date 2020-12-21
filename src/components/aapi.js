@@ -76,5 +76,5 @@ export async function getImportablePayments() {
 }
 
 export async function getImportLogs() {
-    return sqlFreeForm(`select start,end,msg from importLog order by start desc limit 10`);
+    return sqlFreeForm(`select start,end,source,msg from importLog order by start desc limit 10`);
 }
