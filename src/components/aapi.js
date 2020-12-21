@@ -74,3 +74,7 @@ export async function getImportablePayments() {
         left join  leaseTenantInfo lti on t.tenantID = lti.tenantID
         where ip.matchedTo is null and ip.deleted is null`);
 }
+
+export async function getImportLogs() {
+    return sqlFreeForm(`select start,end,msg from importLog order by start desc limit 10`);
+}

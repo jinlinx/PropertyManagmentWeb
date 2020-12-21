@@ -5,7 +5,14 @@ import {
     Container
 } from 'react-bootstrap';
 import Promise from 'bluebird';
-import { sqlFreeForm, getData, statementFuncs, doStatementWS} from './api';
+import moment from 'moment';
+import {
+    sqlFreeForm, getData, statementFuncs, doStatementWS,
+} from './api';
+
+import {
+    getImportLogs
+} from './aapi';
 
 function Developer(props) {
     const [message, setMessage] = useState('');
@@ -47,6 +54,11 @@ function Developer(props) {
                 setMessage('');
                 setMessages([]);
             }}>Clear Messages</Button></Col>
+            <Col><Button onClick={() => {
+                getImportLogs().then(logs => {
+                    setMessages(logs.map(l => `${moment(l.start).format('YYYY-MM-DD HH:mm:ss')} ${l.msg}`))
+                });
+            }}>Show import logs</Button></Col>
         </Row>
         <Row>
             <Col>
