@@ -76,7 +76,7 @@ function Developer(props) {
             }}>Clear Messages</Button></Col>
             <Col><Button onClick={() => {
                 getImportLogs().then(logs => {
-                    setMessages(logs.map(l => `${moment(l.start).format('YYYY-MM-DD HH:mm:ss')} ${l.msg}`))
+                    setMessages(logs.map(l => `${moment(l.start).format('YYYY-MM-DD HH:mm:ss')} ${l.source} ${l.msg}`))
                 });
             }}>Show import logs</Button></Col>
         </Row>
@@ -94,19 +94,21 @@ function Developer(props) {
         </Row>
         <Row>
             <Col><Button onClick={() => {
-                if (timerRef.current) {
-                    console.log('stop timer ' + timerRef.current);
-                    clearInterval(timerRef.current);
-                    timerRef.current = 0;
-                    setTimerId(0);
-                } else {
-                    pullStatementMsg();
-                }
+                // if (timerRef.current) {
+                //     console.log('stop timer ' + timerRef.current);
+                //     clearInterval(timerRef.current);
+                //     timerRef.current = 0;
+                //     setTimerId(0);
+                // } else {
+                //     pullStatementMsg();
+                // }
             }}>{timerId ? 'Stop Timer' : 'Start Timer'}</Button></Col>
         </Row>
         <Row>
             <Col>
-                <Button disabled={!!message}  onClick={async () => {
+                <Button disabled={!!message} onClick={async () => {
+                    setMessage(`Delete all is now disabled`);
+                    return;
                     await Promise.map([
                         "houseInfo",
                         "ownerInfo",
