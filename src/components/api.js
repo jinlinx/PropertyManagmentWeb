@@ -1,6 +1,7 @@
 //import { get } from 'superagent';
-const apiBase = 'http://192.168.1.41:8081';
-//const apiBase='http://localhost:8081';
+//const urlBase = 'http://localhost:8081';
+const urlBase = 'http://192.168.1.41:8081';
+const apiBase=`${urlBase}/pmapi`;
 const getUrl=path => `${apiBase}/${path}`;
 const request = require('superagent');
 const get = require('lodash/get');
@@ -93,8 +94,9 @@ export function getSocket() {
 
 export function doStatementWS() {
     if (!statementSocket.socket) {
-        const socket = require('socket.io-client')(apiBase, {
-            transports: ['websocket']
+        const socket = require('socket.io-client')(urlBase, {
+            transports: ['websocket'],
+            path:'/pmapi/socket.io'
         });
         statementSocket.socket = socket;
         socket.on('connect', function () {
