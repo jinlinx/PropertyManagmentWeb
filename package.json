@@ -24,6 +24,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "imp": "babel src/components/api.js -d testdist;babel tests/test.js -d testdist;",
+    "release41": "scp -r build/* pi@192.168.1.41:/var/www/html",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
