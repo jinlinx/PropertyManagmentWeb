@@ -72,7 +72,8 @@ export async function getImportablePayments() {
         left join payerTenantMapping ptm on ip.source=ptm.source and ip.name=ptm.name
         left join tenantInfo t on t.tenantID = ptm.tenantID
         left join  leaseTenantInfo lti on t.tenantID = lti.tenantID
-        where ip.matchedTo is null and ip.deleted is null`);
+        where ip.matchedTo is null and ip.deleted is null
+        order by ip.date desc`);
 }
 
 export async function getImportLogs() {
