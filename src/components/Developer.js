@@ -5,9 +5,19 @@ import {
     Container
 } from 'react-bootstrap';
 import Promise from 'bluebird';
-import { sqlFreeForm, getData, statementFuncs, doStatementWS} from './api';
+import moment from 'moment';
+import {
+    sqlFreeForm, getData, statementFuncs, doStatementWS,
+    getSocket,
+} from './api';
+
+import {
+    getImportLogs
+} from './aapi';
 
 function Developer(props) {
+    const [askCode, setAskCode] = useState('');
+    const [code, setCode] = useState('');
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [timerId, setTimerId] = useState(0);
@@ -18,6 +28,12 @@ function Developer(props) {
     
     statementFuncs.listener = msg => {
         setMessage(msg);
+    }
+    statementFuncs.askCodeListener = msg => {
+        setAskCode(msg);
+    };
+    statementFuncs.freeFormMsgListener = msg => {
+        setMessage(JSON.stringify(msg));
     }
     const pullStatementMsg = () => {
         return;
@@ -42,11 +58,30 @@ function Developer(props) {
         pullStatementMsg();
     }
     return <Container>
+        {
+            askCode && <Row>
+                <Col>{askCode}</Col>
+                <Col><FormControl type="text" value={code || ''} placeholder="Code" className="mr-sm-2" onChange={e => {
+                    setCode(e.target.value);
+                }} /></Col>
+                <Col><Button onClick={() => {
+                    setAskCode('');
+                    if (getSocket()) {
+                        getSocket().emit('receivedStatementCode', code)
+                    }
+                }}>Send Code</Button></Col>
+            </Row>
+        }
         <Row>
             <Col><Button onClick={() => {
                 setMessage('');
                 setMessages([]);
             }}>Clear Messages</Button></Col>
+            <Col><Button onClick={() => {
+                getImportLogs().then(logs => {
+                    setMessages(logs.map(l => `${moment(l.start).format('YYYY-MM-DD HH:mm:ss')} ${l.source} ${l.msg}`))
+                });
+            }}>Show import logs</Button></Col>
         </Row>
         <Row>
             <Col>
@@ -62,19 +97,21 @@ function Developer(props) {
         </Row>
         <Row>
             <Col><Button onClick={() => {
-                if (timerRef.current) {
-                    console.log('stop timer ' + timerRef.current);
-                    clearInterval(timerRef.current);
-                    timerRef.current = 0;
-                    setTimerId(0);
-                } else {
-                    pullStatementMsg();
-                }
+                // if (timerRef.current) {
+                //     console.log('stop timer ' + timerRef.current);
+                //     clearInterval(timerRef.current);
+                //     timerRef.current = 0;
+                //     setTimerId(0);
+                // } else {
+                //     pullStatementMsg();
+                // }
             }}>{timerId ? 'Stop Timer' : 'Start Timer'}</Button></Col>
         </Row>
         <Row>
             <Col>
-                <Button disabled={!!message}  onClick={async () => {
+                <Button disabled={!!message} onClick={async () => {
+                    setMessage(`Delete all is now disabled`);
+                    return;
                     await Promise.map([
                         "houseInfo",
                         "ownerInfo",
@@ -108,6 +145,21 @@ function Developer(props) {
             <Col>
                 <Button disabled={!!message}  onClick={() => importPayment('venmo')}>Import Venmo</Button>
             </Col>
+            <Col>
+                <Button disabled={!!message} onClick={() => importPayment('cashapp')}>Import Cashapp</Button>
+            </Col>
+        </Row>
+        <Row>
+            <Col>
+                <Button onClick={() => {
+                    const skt = getSocket();
+                    if (!skt) return;
+                    skt.emit('ggFreeFormMsg', {
+                        type: 'text',
+                        data: new Date().toISOString(),
+                    })
+                }}>Test Free Form</Button>
+            </Col>            
         </Row>
     </Container>
 }

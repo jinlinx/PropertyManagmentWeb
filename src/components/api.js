@@ -1,6 +1,7 @@
 //import { get } from 'superagent';
-const apiBase = 'http://192.168.1.41:8081';
-//const apiBase='http://localhost:8081';
+//const urlBase = 'http://localhost:8081';
+const urlBase = 'http://192.168.1.41:8081';
+const apiBase=`${urlBase}/pmapi`;
 const getUrl=path => `${apiBase}/${path}`;
 const request = require('superagent');
 const get = require('lodash/get');
@@ -85,11 +86,17 @@ const statementSocket = {
 }
 export const statementFuncs = {
     listener: null,
+    askCodeListener: null,
 }
+export function getSocket() {
+    return statementSocket.socket;
+}
+
 export function doStatementWS() {
     if (!statementSocket.socket) {
-        const socket = require('socket.io-client')(apiBase, {
-            transports: ['websocket']
+        const socket = require('socket.io-client')(urlBase, {
+            transports: ['websocket'],
+            path:'/pmapi/socket.io'
         });
         statementSocket.socket = socket;
         socket.on('connect', function () {
@@ -100,6 +107,16 @@ export function doStatementWS() {
                 statementFuncs.listener(data);
             console.log(data)
         });
+        socket.on('askStatementCode', msg => {
+            if (statementFuncs.askCodeListener) {
+                statementFuncs.askCodeListener(msg);
+            }
+        });
+        socket.on('ggFreeFormMsg', msg => {
+            if (statementFuncs.freeFormMsgListener) {
+                statementFuncs.freeFormMsgListener(msg);
+            }
+        })
         socket.on('disconnect', function () {
             console.log('disconnet')
         });
