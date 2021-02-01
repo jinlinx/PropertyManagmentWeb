@@ -42,6 +42,27 @@
 }
 
 
+  .btn-blue {
+    background-color:#61dafb;
+	border-radius:28px;
+	border:1px solid #000607;
+	display:inline-block;
+	cursor:pointer;
+	color:#050505;
+	font-family:Arial;
+	padding:16px 31px;
+	text-decoration:none;
+  text-shadow:0px 1px 0px #032d38;
+  width: 100px;
+  }
+
+  .btn-xxl {
+    padding: 1rem 15rem;
+    font-size: 100rem;
+  }
+
+
+
 .blueButton {
 	background-color:#61dafb;
 	border-radius:28px;
@@ -53,7 +74,8 @@
 	font-size:17px;
 	padding:16px 31px;
 	text-decoration:none;
-	text-shadow:0px 1px 0px #032d38;
+  text-shadow:0px 1px 0px #032d38;
+  width: 100px;
 }
 .blueButtonn:hover {
 	background-color:#572abf;

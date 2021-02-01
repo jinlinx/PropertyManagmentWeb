@@ -19,7 +19,8 @@ displayFields={
         { field: 'startDate', desc: 'Start Date', dspFunc: fmtDate },
             { field: 'houseAddress', desc: 'House'},
             { field: 'comment', desc: 'Comment' },
-            { field: 'monthlyRent', desc: 'Monthly Rent' },
+        { field: 'monthlyRent', desc: 'Monthly Rent' },
+        { field: 'shortName', desc: 'Owner' },
             //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
         ]
     }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import Propertylist from './components/propertylist';
 import Leaselist from './components/leaselist';
@@ -12,13 +12,26 @@ import TablePicker from './components/sqlEditor/TablePicker';
 import Developer from './components/Developer';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, NavDropdown, Form, FormControl, Button } from 'react-bootstrap';
-//
+import HomePage from './components/HomePage';
+import { getOwners } from './components/aapi';
+import LeftMenu from './components/leftMenu';
 
 function App() {
 
   const [showPage, setShowPage] = useState(0);
   const [pageProps, setPageProps] = useState({});
   const pageState = { pageProps, setPageProps };
+  const [owners, setOwners] = useState([]);
+  const [ownerInfo, setOwnerInfo] = useState({ ownerID: '', ownerName:''});
+  useEffect(() => {
+    getOwners().then(owners => {
+      console.log(owners);
+      setOwners(owners);
+      setOwnerInfo(owners[1]);
+    }).catch(err => {
+      console.log('Error get owners in app.js');
+    })
+  },[]);
   const pages = [
     {
       control:
@@ -49,9 +62,9 @@ function App() {
       setShowPage(who + from);
     }}>{page.desc}</button></td>
   })
+  return <HomePage />;
   return (
     <div className="App" >
-
       <table>
         <tbody>          
           <tr><td colSpan='6' key={1}>
@@ -60,19 +73,18 @@ function App() {
               <Navbar.Toggle aria-controls="basic-navbar-nav" />
               <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="mr-auto">
-                  <Nav.Link href="#home">Home</Nav.Link>
-                  <Nav.Link href="#link">Link</Nav.Link>
-                  <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-                    <NavDropdown.Item key={0}>Action</NavDropdown.Item>                    
+                  <Nav.Link href="#reports">Reports</Nav.Link>
+                  <Nav.Link href="#dateEntry">Data Entry</Nav.Link>
+                  <Nav.Link href="#adminTools">Admin Tools</Nav.Link>
+                  <NavDropdown title={"Owner:" +ownerInfo.ownerName} id="basic-nav-dropdown">                   
                     {
-                      pages.map((p, i) => {
-                        return <NavDropdown.Item key={i + 10} onClick={() => {
-                          setShowPage(i);
-                        }}>{ p.desc}</NavDropdown.Item>
+                      owners.map((p, i) => {
+                        return <NavDropdown.Item key={i} onClick={() => {
+                          //setShowPage(i);
+                          setOwnerInfo(p);
+                        }}>{p.ownerName}</NavDropdown.Item>
                       })
                     }
-                    <NavDropdown.Divider />
-                    <NavDropdown.Item href="#action/3.4" key={20}>Developer1</NavDropdown.Item>
                   </NavDropdown>
                   <NavDropdown title="Developer" id="basic-nav-dropdown">                    
                     {
@@ -83,7 +95,7 @@ function App() {
                       })
                     }                    
                   </NavDropdown>
-                </Nav>
+                </Nav> 
                 <Form inline>
                   <FormControl type="text" placeholder="Search" className="mr-sm-2" />
                   <Button variant="outline-success">Search</Button>
