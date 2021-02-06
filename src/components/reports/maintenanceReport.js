@@ -18,7 +18,7 @@ export default function MaintenanceReport() {
     const [options, setOptions] = useState([]);
 
     const formatData = (datas,curSelection) => datas.reduce((acc, r) => {
-        const month = moment(r.month).format('YY-MM');
+        const month = moment(r.month).add(2,'days').format('YY-MM');
         if (curSelection && month < curSelection.label) return acc;
         if (!acc.dateKeys[month]) {
             acc.dateKeys[month] = true;
