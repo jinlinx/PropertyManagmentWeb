@@ -2,39 +2,60 @@ import React, {useState, useEffect} from 'react';
 import moment from 'moment';
 import { getMaintenanceReport } from '../aapi';
 import { Table } from 'react-bootstrap';
-
+import EditDropdown from '../paymentMatch/EditDropdown';
 export default function MaintenanceReport() {
-    const getInitTableData = ()=>( {
+    const getInitTableData = () => ({
         dateKeys: {},
         monthes: [],
         categorieKeys: {},
         categories: [],
-    })
-    const [tableData, setTableData] = useState(getInitTableData());
+    });
 
+    const [origData, setOrigData] = useState([]);
+    const [tableData, setTableData] = useState(getInitTableData());
+    const [curSelection, setCurSelection] = useState({label: ''});
+    const [options, setOptions] = useState([]);
+
+    const formatData = (datas,curSelection) => datas.reduce((acc, r) => {
+        const month = moment(r.month).format('YY-MM');
+        if (curSelection && month < curSelection.label) return acc;
+        if (!acc.dateKeys[month]) {
+            acc.dateKeys[month] = true;
+            acc.monthes.push(month);
+        }
+        let cats = acc.categorieKeys[r.category];
+        if (!cats) {
+            cats = { total: 0 };
+            acc.categorieKeys[r.category] = cats;
+            acc.categories.push(r.category);
+        }
+        cats[month] = r.amount;
+        cats['total'] += r.amount;
+        return acc;
+    }, getInitTableData());
     useEffect(() => {
         getMaintenanceReport().then(datas => {
-            const catToDate = datas.reduce((acc, r) => {
-                const month = moment(r.month).format('YY-MM');
-                if (!acc.dateKeys[month]) {
-                    acc.dateKeys[month] = true;
-                    acc.monthes.push(month);
-                }
-                let cats = acc.categorieKeys[r.category];
-                if (!cats) {
-                    cats = {total: 0};
-                    acc.categorieKeys[r.category] = cats;
-                    acc.categories.push(r.category);
-                }
-                cats[month] = r.amount;
-                cats['total'] += r.amount;
-                return acc;
-            }, getInitTableData());
-            setTableData(catToDate);
-            console.log(catToDate);
+            setOrigData(datas);
+            const catToDate = formatData(datas);
+            setOptions(catToDate.monthes.map(label => ({
+                label
+            })))
         })
-    },[]);
+    }, []);
+    
+    useEffect(() => {
+        const catToDate = formatData(origData, curSelection);
+        setTableData(catToDate);
+        
+        console.log(catToDate);
+    }, [origData, curSelection])
     return <>
+        <EditDropdown context={{
+            disabled: false,
+            curSelection, setCurSelection, getCurSelectionText: x=>x.label || '',
+            options, setOptions,
+            loadOptions: ()=>null,
+        }}></EditDropdown>
         <Table>
             <thead>
                 <tr>
