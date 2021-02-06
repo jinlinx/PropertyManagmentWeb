@@ -18,6 +18,7 @@ import LeftMenu from './leftMenu';
 import myStyles from './HomePage.css';
 import CashFlowReport from './reports/cashflow';
 import MaintenanceReport from './reports/maintenanceReport';
+import AppOld from '../AppOld';
 
 function App() {
     const [owners, setOwners] = useState([]);
@@ -95,7 +96,8 @@ function App() {
                                                 <Button>Owners Info</Button><br></br><br></br>
                                                 <Button>Workers Info</Button><br></br><br></br>
                                                 <Button>Expanse Category List</Button><br></br><br></br>
-                                                <Button onClick={()=>setCurView('developer')}>Developer Tools</Button><br></br><br></br>
+                                                <Button onClick={() => setCurView('developer')}>Developer Tools</Button><br></br><br></br>
+                                                <Button onClick={() => setCurView('oldapp')}>OldApp</Button><br></br><br></br>
                                             </>
                                         }
                                     </Col>
@@ -127,6 +129,9 @@ function App() {
                 }
                 {
                     curView ==='developer' && <div><Developer/></div>
+                }
+                {
+                    curView === 'oldapp' && <div><AppOld /></div>
                 }
             </div>
         </>
