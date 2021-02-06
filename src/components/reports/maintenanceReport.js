@@ -71,7 +71,7 @@ export default function MaintenanceReport() {
                 {
                     tableData.categories.map(cat => {
                         return <tr>
-                            <td>{cat}</td><td>{tableData.categorieKeys[cat]['total']}</td>
+                            <td>{cat}</td><td>{tableData.categorieKeys[cat]['total'].toFixed(2)}</td>
                             {
                                 tableData.monthes.map(mon => {
                                     return <td>{tableData.categorieKeys[cat][mon] || '' }</td>  
@@ -83,7 +83,7 @@ export default function MaintenanceReport() {
                 <tr><td>Total:</td><td>{
                     tableData.categories.reduce((acc, c) => {
                         return acc + (tableData.categorieKeys[c]['total'] || 0);
-                    },0)
+                    },0).toFixed(2)
                 }</td>
                     {
                         tableData.monthes.map(mon => {
