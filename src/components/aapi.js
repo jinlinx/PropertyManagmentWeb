@@ -83,3 +83,7 @@ export async function getImportLogs() {
 export async function getOwners() {
     return sqlFreeForm(`select * from ownerInfo`);
 }
+
+export async function getMaintenanceReport() {
+    return sqlFreeForm(`select month, sum(amount) amount, expenseCategoryName category from maintenanceRecords m inner join expenseCategories e on m.expenseCategoryID=e.expenseCategoryID group by m.month, expenseCategoryName order by month, expenseCategoryName`);
+}

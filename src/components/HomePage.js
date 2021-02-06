@@ -16,15 +16,21 @@ import HomePage from './HomePage';
 import { getOwners } from './aapi';
 import LeftMenu from './leftMenu';
 import myStyles from './HomePage.css';
+import CashFlowReport from './reports/cashflow';
+import MaintenanceReport from './reports/maintenanceReport';
+
 function App() {
     const [owners, setOwners] = useState([]);
     const [curPage, setCurPage] = useState('reports');
     const [ownerInfo, setOwnerInfo] = useState({ ownerID: '', ownerName: '' });
+    const [curView, setCurView] = useState('maintenanceReport')
     useEffect(() => {
         getOwners().then(owners => {
             console.log(owners);
-            setOwners(owners);
-            setOwnerInfo(owners[1]);
+            if (owners) {
+                setOwners(owners);
+                setOwnerInfo(owners[1] || {});
+            }
         }).catch(err => {
             console.log('network failed');
         })
@@ -59,25 +65,7 @@ function App() {
                             </Navbar>
             </div>
             <div id="mySidenav" class="sidenav">
-            <ui>
-                                                    <Button>Cash Flow Summary Report</Button><br></br><br></br>
-                                                    <Button>House Maintenance Report</Button><br></br><br></br>
-                                                    <Button>Payment Report</Button><br></br><br></br>
-                                                    <Button>Worker Compensation Report</Button><br></br>
-                                                </ui>
-                <NavDropdown title={"Owner:  " + ownerInfo.ownerName} id="basic-nav-dropdown">
-                                            {
-                                                owners.map((p, i) => {
-                                                    return <NavDropdown.Item key={i} onClick={() => {
-                                                        //setShowPage(i);
-                                                        setOwnerInfo(p);
-                                                    }}>{p.ownerName}</NavDropdown.Item>
-                                                })
-                                            }
-                                        </NavDropdown>
-            </div>
-            <div style={{marginLeft:'250px', marginTop:30}}>
-                <Container fluid='xl'  >
+            <Container fluid='xl'  >
                     <Row>
                         <Col>
                             <Container>
@@ -86,8 +74,8 @@ function App() {
                                         {
                                             curPage === 'reports' && <>
                                                 <ui>
-                                                    <Button variant="blue" size="xxl" class="btn-blue" >Cash Flow Summary Report</Button><br></br><br></br>
-                                                    <Button>House Maintenance Report</Button><br></br><br></br>
+                                                    <Button onClick={()=>setCurView('cashFlowSummary')}>Cash Flow Summary Report</Button><br></br><br></br>
+                                                    <Button onClick={()=>setCurView('maintenanceReport')}>House Maintenance Report</Button><br></br><br></br>
                                                     <Button>Payment Report</Button><br></br><br></br>
                                                     <Button>Worker Compensation Report</Button><br></br>
                                                 </ui>
@@ -118,6 +106,25 @@ function App() {
                         <Col md="auto"></Col>
                     </Row>
                 </Container>
+                <NavDropdown title={"Owner:  " + ownerInfo.ownerName} id="basic-nav-dropdown">
+                                            {
+                                                owners.map((p, i) => {
+                                                    return <NavDropdown.Item key={i} onClick={() => {
+                                                        //setShowPage(i);
+                                                        setOwnerInfo(p);
+                                                    }}>{p.ownerName}</NavDropdown.Item>
+                                                })
+                                            }
+                                        </NavDropdown>
+            </div>
+            <div style={{marginLeft:'255px', marginTop:30}}>
+                TODO: Data
+                 {
+                    curView ==='cashFlowSummary' && <CashFlowReport />
+                }
+                {
+                    curView ==='maintenanceReport' && <MaintenanceReport />
+                }
             </div>
         </>
     );
