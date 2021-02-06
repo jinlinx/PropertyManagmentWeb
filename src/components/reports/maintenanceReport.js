@@ -7,6 +7,7 @@ export default function MaintenanceReport() {
     const getInitTableData = () => ({
         dateKeys: {},
         monthes: [],
+        monthlyTotal: {},
         categorieKeys: {},
         categories: [],
     });
@@ -31,6 +32,7 @@ export default function MaintenanceReport() {
         }
         cats[month] = r.amount;
         cats['total'] += r.amount;
+        acc.monthlyTotal[month] = (acc.monthlyTotal[month] || 0) + r.amount;
         return acc;
     }, getInitTableData());
     useEffect(() => {
@@ -78,6 +80,17 @@ export default function MaintenanceReport() {
                         </tr>
                     })
                 }
+                <tr><td>Total:</td><td>{
+                    tableData.categories.reduce((acc, c) => {
+                        return acc + (tableData.categorieKeys[c]['total'] || 0);
+                    },0)
+                }</td>
+                    {
+                        tableData.monthes.map(mon => {
+                            return <td>{ (tableData.monthlyTotal[mon] || 0).toFixed(2) }</td>
+                        })
+                    }
+                </tr>
             </tbody>
         </Table>
     </>
