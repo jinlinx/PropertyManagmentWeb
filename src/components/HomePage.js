@@ -95,7 +95,7 @@ function App() {
                                                 <Button>Owners Info</Button><br></br><br></br>
                                                 <Button>Workers Info</Button><br></br><br></br>
                                                 <Button>Expanse Category List</Button><br></br><br></br>
-                                        
+                                                <Button onClick={()=>setCurView('developer')}>Developer Tools</Button><br></br><br></br>
                                             </>
                                         }
                                     </Col>
@@ -124,6 +124,9 @@ function App() {
                 }
                 {
                     curView ==='maintenanceReport' && <MaintenanceReport />
+                }
+                {
+                    curView ==='developer' && <div><Developer/></div>
                 }
             </div>
         </>
