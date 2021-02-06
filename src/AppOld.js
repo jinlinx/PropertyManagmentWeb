@@ -27,7 +27,7 @@ export default function AppOld() {
     getOwners().then(owners => {
       console.log(owners);
       setOwners(owners);
-      setOwnerInfo(owners[1]);
+      setOwnerInfo(owners[0] || {});
     }).catch(err => {
       console.log('Error get owners in app.js');
     })
