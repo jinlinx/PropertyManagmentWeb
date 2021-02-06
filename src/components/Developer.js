@@ -142,7 +142,7 @@ function Developer(props) {
                     setMessage('Starting imports, please wait');
                     getData('misc/gsimport').then(res => {
                         setMessage('import done');
-                        setMessages(res.message)
+                        setMessages([res.message]);
                     });
                 }}>Import MaintenanceReport</Button>
             </Col>
