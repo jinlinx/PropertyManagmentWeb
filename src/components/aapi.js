@@ -87,3 +87,7 @@ export async function getOwners() {
 export async function getMaintenanceReport() {
     return sqlFreeForm(`select month, sum(amount) amount, expenseCategoryName category from maintenanceRecords m inner join expenseCategories e on m.expenseCategoryID=e.expenseCategoryID group by m.month, expenseCategoryName order by month, expenseCategoryName`);
 }
+
+export async function getPaymnents() {
+    return sqlFreeForm(` select rp.receivedAmount amount, rp.receivedDate date, rp.paidBy, rp.notes, h.address from rentPaymentInfo rp inner join leaseInfo l on l.leaseID=rp.leaseID inner join houseInfo h on h.houseID=l.houseID order by rp.receivedDate;`);
+}

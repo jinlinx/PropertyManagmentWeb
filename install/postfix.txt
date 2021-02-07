@@ -1,0 +1,4 @@
+cat /etc/postfix/sasl_passwd
+[localhsot]:1587 username:password
+
+sudo postmap /etc/postfix/sasl_passwd
