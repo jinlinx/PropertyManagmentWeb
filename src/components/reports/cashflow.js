@@ -32,8 +32,7 @@ export default function CashFlow() {
             return pm.months[n];
         }))
     }, [payments]);
-    const houses = ['All', '1633 Highland', '1637 Highland', '1543 something'];
-    const [houseChecked, setHouseChecked] = useState(houses.map(x => false));
+
     return <>
         <Form>
             <Row>
