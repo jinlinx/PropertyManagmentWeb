@@ -19,6 +19,7 @@ import CashFlowReport from './reports/cashflow';
 import MaintenanceReport from './reports/maintenanceReport';
 import AppOld from '../AppOld';
 import logo from '../images/Logo.png'
+import PaymentRport from './reports/paymentReport';
 
 function App() {
     const [owners, setOwners] = useState([]);
@@ -78,7 +79,7 @@ function App() {
                                                 <ui>
                                                     <Button onClick={()=>setCurView('cashFlowSummary')}>Cash Flow Summary Report</Button><br></br><br></br>
                                                     <Button onClick={()=>setCurView('maintenanceReport')}>House Maintenance Report</Button><br></br><br></br>
-                                                    <Button>Payment Report</Button><br></br><br></br>
+                                                    <Button onClick={()=>setCurView('paymentReport')}>Payment Report</Button><br></br><br></br>
                                                     <Button>Worker Compensation Report</Button><br></br>
                                                 </ui>
                                             </>
@@ -133,6 +134,9 @@ function App() {
                 }
                 {
                     curView === 'oldapp' && <div><AppOld /></div>
+                }
+                {
+                    curView === 'paymentReport' && <PaymentRport/>
                 }
             </div>
         </>

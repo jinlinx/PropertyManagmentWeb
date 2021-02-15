@@ -89,5 +89,11 @@ export async function getMaintenanceReport() {
 }
 
 export async function getPaymnents() {
-    return sqlFreeForm(` select rp.receivedAmount amount, rp.receivedDate date, rp.paidBy, rp.notes, h.address from rentPaymentInfo rp inner join leaseInfo l on l.leaseID=rp.leaseID inner join houseInfo h on h.houseID=l.houseID order by rp.receivedDate;`);
+    return sqlFreeForm(` select rp.receivedAmount amount, rp.receivedDate date, rp.paidBy, rp.notes, h.address,
+    ip.source
+     from rentPaymentInfo rp inner join leaseInfo l on l.leaseID=rp.leaseID
+     inner join houseInfo h on h.houseID=l.houseID
+     inner join ownerInfo oi on oi.ownerID  = h.ownerID 
+left join importPayments ip  on ip.paymentID  = rp.paymentID 
+     order by rp.receivedDate;`);
 }
