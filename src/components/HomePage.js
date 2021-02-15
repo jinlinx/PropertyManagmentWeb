@@ -12,13 +12,13 @@ import TablePicker from './sqlEditor/TablePicker';
 import Developer from './Developer';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, NavDropdown, Form, FormControl, Button,Container, Row, Col } from 'react-bootstrap';
-import HomePage from './HomePage';
 import { getOwners } from './aapi';
 import LeftMenu from './leftMenu';
 import myStyles from './HomePage.css';
 import CashFlowReport from './reports/cashflow';
 import MaintenanceReport from './reports/maintenanceReport';
 import AppOld from '../AppOld';
+import logo from '../images/Logo.png'
 
 function App() {
     const [owners, setOwners] = useState([]);
@@ -41,8 +41,9 @@ function App() {
     return (
         <>
             <div>
+                
             <Navbar bg="light" expand="lg">
-                                <Navbar.Brand href="#home">Property Management</Navbar.Brand>
+                    <Navbar.Brand href="#home"><img src={logo} style={{ width: 200, height: 80}}/>Property Management</Navbar.Brand>
                                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                                 <Navbar.Collapse id="basic-navbar-nav">
                                     <Nav className="mr-auto">
