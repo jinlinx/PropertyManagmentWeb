@@ -35,7 +35,7 @@ export default function MaintenanceReport() {
         }
         let cats = acc.categorieKeys[r.category];
         if (!cats) {
-            cats = { total: 0 };
+            cats = { total: 0, order: r.displayOrder };
             acc.categorieKeys[r.category] = cats;
             acc.categories.push(r.category);
         }
@@ -130,6 +130,18 @@ export default function MaintenanceReport() {
         setPaymentsByMonth(pm.months)
     }, [origData, payments, curSelection]);
 
+    const fMoneyformat = amt=> {
+        if (!amt) return '-';
+        const formatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+          
+            // These options are needed to round to whole numbers if that's what you want.
+            //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
+            //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+        });
+        return formatter.format(amt);
+    };
     return <>
         <EditDropdown context={{
             disabled: false,
@@ -137,65 +149,70 @@ export default function MaintenanceReport() {
             options, setOptions,
             loadOptions: ()=>null,
         }}></EditDropdown>
-        <Table>
+        <table className='tableReport'>
             <thead>
             <tr>
-                <td>Categories</td><td>total</td>
+                <td className='reportSubHeader'></td><td className='tdColumnHeader'>Total</td>
                 {
                     monthes.map(mon => {
-                        return <td>{ mon}</td>
+                        return <td className='tdColumnHeader'>{ mon}</td>
                     })
                 }
                 </tr>
             </thead>
             <tbody><tr>
-                <td>Income</td><td>{ paymentsByMonth.total.toFixed(2) }</td>
+                <td className='tdLeftSubHeader' colSpan={monthes.length+2}>Income</td></tr>
+                <tr><td>
+                </td><td >{fMoneyformat(paymentsByMonth.total)}</td>
                 {
                     monthes.map(name => {
                         const mon = paymentsByMonth[name];
                         if (!mon) return <td></td>;
-                        return <td>{ mon.total.toFixed(2)}</td>
+                        return <td>{ fMoneyformat(mon.total)}</td>
                     })
                 }</tr>
-                <tr><td>Expenses</td></tr>
+                <tr><td className='tdLeftSubHeader' colSpan={monthes.length+2}>Expenses</td></tr>
                 {
                     tableData.categories.map(cat => {
                         return <tr>
-                            <td>{cat}</td><td>{tableData.categorieKeys[cat]['total'].toFixed(2)}</td>
+                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(tableData.categorieKeys[cat]['total'])}</td>
                             {
                                 monthes.map(mon => {
-                                    return <td>{tableData.categorieKeys[cat][mon] || '' }</td>  
+                                    return <td class='tdCenter'>{fMoneyformat(tableData.categorieKeys[cat][mon] || '' )}</td>  
                                 })
                             }
                         </tr>
                     })
                 }
-                <tr><td>Total:</td><td>{
-                    tableData.categories.reduce((acc, c) => {
+                <tr><td className='tdLeftSubCategoryHeader'>Total</td><td class='tdCenter  tdTotalItalic'>{
+                    fMoneyformat(tableData.categories.reduce((acc, c) => {
                         return acc + (tableData.categorieKeys[c]['total'] || 0);
-                    },0).toFixed(2)
+                    },0))
                 }</td>
                     {
                         monthes.map(mon => {
-                            return <td>{ (tableData.monthlyTotal[mon] || 0).toFixed(2) }</td>
+                            return <td class='tdCenter tdTotalItalic'>{ fMoneyformat((tableData.monthlyTotal[mon] || 0)) }</td>
                         })
                     }
                 </tr>
                 <tr>
-                    <td>Net Income:</td>
-                    <td>{ (paymentsByMonth.total -tableData.categories.reduce((acc, c) => {
+                    <td colSpan={monthes.length+2}></td>
+                </tr>
+                <tr>
+                    <td className='tdLeftSubHeader tdButtomTotalCell'>Net Income</td>
+                    <td class='tdCenter tdTotalBold'>{ fMoneyformat((paymentsByMonth.total -tableData.categories.reduce((acc, c) => {
                         return acc + (tableData.categorieKeys[c]['total'] || 0);
-                    },0)).toFixed(2)}</td>
+                    },0)))}</td>
                     {
                         monthes.map(mon => {
                             const inc = paymentsByMonth[mon];
                             const incTotal = inc.total || 0;
                             const cost = tableData.monthlyTotal[mon] || 0;
-                            return <td>{ (incTotal - cost).toFixed(2)}</td>
+                            return <td className='tdButtomTotalCell tdTotalBold tdCenter t'>${fMoneyformat( (incTotal - cost))}</td>
                         })
                     }
                 </tr>
             </tbody>
-        </Table>
+        </table>
     </>
 }

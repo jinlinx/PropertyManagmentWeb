@@ -85,7 +85,11 @@ export async function getOwners() {
 }
 
 export async function getMaintenanceReport() {
-    return sqlFreeForm(`select month, sum(amount) amount, expenseCategoryName category from maintenanceRecords m inner join expenseCategories e on m.expenseCategoryID=e.expenseCategoryID group by m.month, expenseCategoryName order by month, expenseCategoryName`);
+    return sqlFreeForm(`select month, sum(amount) amount,  expenseCategoryName category, e.displayOrder 
+    from maintenanceRecords m inner join expenseCategories e on m.expenseCategoryID=e.expenseCategoryID 
+    group by m.month,
+    e.expenseCategoryID ,e.displayOrder 
+    order by month, e.displayOrder,expenseCategoryName`);
 }
 
 export async function getPaymnents() {
@@ -96,4 +100,14 @@ export async function getPaymnents() {
      inner join ownerInfo oi on oi.ownerID  = h.ownerID 
 left join importPayments ip  on ip.paymentID  = rp.paymentID 
      order by rp.receivedDate;`);
+}
+
+export async function getPaymentSubTotalInfo() {
+    return sqlFreeForm(`
+    select month(rpi.receivedDate)  paymentMonth, Year(rpi.receivedDate)  paymentYear, sum(receivedAmount) amount,  hi.address  
+    from rentPaymentInfo rpi inner join leaseInfo li  on rpi.leaseID = li.leaseID
+    inner join houseInfo hi on hi.houseID = li.houseID 
+    group by paymentMonth,paymentYear, hi.address
+    order by paymentMonth,paymentYear, hi.address
+    `); 
 }

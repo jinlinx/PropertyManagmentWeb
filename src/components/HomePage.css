@@ -1,8 +1,5 @@
-
-
-
   .btn-blue {
-    background-color:#61dafb;
+  background-color:#61dafb;
 	border-radius:28px;
 	border:1px solid #000607;
 	display:inline-block;
@@ -15,43 +12,68 @@
   width: 100px;
   }
 
-  .btn-xxl {
-    padding: 1rem 15rem;
-    font-size: 3rem;
+ 
+.topNav {
+    height: 150px; /* 100% Full-height */
+    width: 100%; /* 100% full width */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0; /* Stay at the top */
+    left: 0;
+    overflow: hidden;
+    
   }
 
+  .TopTitleFont {
 
+    font-family:cursive;
+    font-weight: bold;
+    font-size:40px;
+  }
+  
   /* The side navigation menu */
 .sidenav {
     height: 100%; /* 100% Full-height */
-    width: 250px; /* 0 width - change this with JavaScript */
+    width: 200px; /* 0 width - change this with JavaScript */
     position: fixed; /* Stay in place */
     z-index: 1; /* Stay on top */
-    top: 30; /* Stay at the top */
+    top: 150px; /* Stay at the top */
     left: 0;
-    background-color: #111; /* Black*/
-    overflow-x: hidden; /* Disable horizontal scroll */
     padding-top: 60px; /* Place content 60px from the top */
+    
+  }
+
+  .sidenav, .topNav {
+    
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    background-color:rgba(12, 169, 180, 0.822); /* Black*/
+    overflow-x: hidden; /* Disable horizontal scroll */
     transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
   }
   
   /* The navigation menu links */
   .sidenav a {
-    padding: 8px 8px 8px 32px;
+    
     text-decoration: none;
-    font-size: 25px;
     color: #818181;
     display: block;
     transition: 0.3s;
+    padding: 8px 8px 8px 32px;
   }
+  .sidenav a {
+    font-size: 25px;
+ 
+  }
+ 
   
   /* When you mouse over the navigation links, change their color */
-  .sidenav a:hover {
+  .sidenav a:hover, .topNav a:hover {
     color: #f1f1f1;
   }
   
   /* Position and style the close button (top right corner) */
-  .sidenav .closebtn {
+  .sidenav .closebtn, .topNav .closebtn {
     position: absolute;
     top: 0;
     right: 25px;
@@ -59,10 +81,35 @@
     margin-left: 50px;
   }
   
+  .btn-LeftMenuButton {
+    padding: 16px 31px;
+    width: 150px;
+    border-radius:28px;
+  }
+
+
+
+  .btn-LeftMenuButton, .btnTopButton {
+    background-color:#3d33ca;
+    border:1px solid #000607;
+    display:inline-block;
+    cursor:pointer;
+    color:#050505;
+    font-family:Arial;
+    text-decoration:none;
+    text-shadow:0px 1px 0px #032d38;
+  }
+
+ 
+  
+  .btn-xxl {
+    padding: 1rem 15rem;
+    font-size: 3rem;
+  }
   /* Style page content - use this if you want to push the page content to the right when you open the side navigation */
   #main {
     transition: margin-left .5s;
-    padding: 20px;
+    padding: 10px;
   }
   
   /* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
@@ -70,3 +117,69 @@
     .sidenav {padding-top: 15px;}
     .sidenav a {font-size: 18px;}
   }
+  .reportSubHeader{
+    font-weight: bold;
+  }
+
+  
+  
+  table, tbody, td, tr{
+    padding: 5px;
+  }
+  
+
+ .tdColumnHeader{
+    font-weight: bold;
+    border: 1px solid black;
+    text-align: center;
+ }
+ .tdLeftSubHeader{
+   font-size:20px;   
+    font-weight: bold;
+   border: 1px solid black;
+ }
+ .tdLeftSubCategoryHeader{
+  font-style:oblique;       /* Fees and taxes and income*/ 
+  font-weight:normal;
+  text-align: right;
+  border: 1px solid black;
+  
+ } 
+
+ .tdCenter{
+  text-align: center;
+  border: 1px solid black;
+ }
+ .tdButtomTotalCell{
+   border-top-style:double;
+   border-top-width: 2px;
+   border-top-color:black;
+
+  }
+
+.tdTotalBold{
+  font-weight: bold;
+  border: 1px solid black;
+  
+}
+.tdTotalItalic{
+  border: 1px solid black;
+  font-style: italic;
+  font-weight: bold;
+}
+ .tableReport{
+   width: 80%;
+  border: 1px solid black;
+  
+ }
+.divMain{
+  width: 100%;
+  left: 255px;
+  top: 255px;
+  position: fixed;
+  overflow-y: scroll;
+  top: 255; 
+  left: 255; 
+  top: 255; 
+  bottom: 0;
+}

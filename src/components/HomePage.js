@@ -41,17 +41,26 @@ function App() {
     /*return <HomePage/>*/
     return (
         <>
-            <div>
-                
-            <Navbar bg="light" expand="lg">
-                    <Navbar.Brand href="#home"><img src={logo} style={{ width: 200, height: 80}}/>Property Management</Navbar.Brand>
-                                <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                                <Navbar.Collapse id="basic-navbar-nav">
-                                    <Nav className="mr-auto">
-                                        <Nav.Link href="#reports" onClick={() => setCurPage('reports')}>Reports</Nav.Link>
-                                        <Nav.Link href="#dateEntry" onClick={() => setCurPage('dataEntry')}>Data Entry</Nav.Link>
-                                        <Nav.Link href="#adminTools" onClick={() => setCurPage('tools')}>Admin Tools</Nav.Link>
-                                        <NavDropdown title={"Owner:  " + ownerInfo.ownerName} id="basic-nav-dropdown">
+          
+           
+            <div id="topNav" className="topNav">
+            
+            <table>
+                                <tr>
+                                    <td rowSpan='2'>
+                                        
+                            <ui>
+                                <img src={logo} style={{ width: 200, height: 150 }} /></ui></td>
+                                <td colSpan='2' className='TopTitleFont'>Property Management</td>
+                            <td colspan="3"></td>
+                        </tr>
+                    <tr>
+                        <td colspan='2'></td>
+                            <td><Button className='btnTopButton' href="#reports" onClick={() => setCurPage('reports')}>Reports</Button> </td>                     
+                            <td><Button className='btnTopButton' href="#dateEntry" onClick={() => setCurPage('dataEntry')}>Data Entry</Button> </td>
+                            <td><Button className='btnTopButton' href="#adminTools" onClick={() => setCurPage('tools')}>Admin Tools</Button> </td> 
+           
+                            <td><NavDropdown title={"Owner:  " + ownerInfo.ownerName} id="basic-nav-dropdown">
                                             {
                                                 owners.map((p, i) => {
                                                     return <NavDropdown.Item key={i} onClick={() => {
@@ -60,12 +69,15 @@ function App() {
                                                     }}>{p.ownerName}</NavDropdown.Item>
                                                 })
                                             }
-                                        </NavDropdown>
-                  
-                                    </Nav>
-                
-                                </Navbar.Collapse>
-                            </Navbar>
+ 
+                                        </NavDropdown>       
+                                       
+                                       
+                                        </td>
+                                </tr>
+        
+                            </table>       
+
             </div>
             <div id="mySidenav" class="sidenav">
             <Container fluid='xl'  >
@@ -77,29 +89,29 @@ function App() {
                                         {
                                             curPage === 'reports' && <>
                                                 <ui>
-                                                    <Button onClick={()=>setCurView('cashFlowSummary')}>Cash Flow Summary Report</Button><br></br><br></br>
-                                                    <Button onClick={()=>setCurView('maintenanceReport')}>House Maintenance Report</Button><br></br><br></br>
-                                                    <Button onClick={()=>setCurView('paymentReport')}>Payment Report</Button><br></br><br></br>
-                                                    <Button>Worker Compensation Report</Button><br></br>
+                                                    <Button className='btn-LeftMenuButton' onClick={()=>setCurView('cashFlowSummary')}>Cash Flow Summary Report</Button><br></br><br></br>
+                                                    <Button className='btn-LeftMenuButton' onClick={()=>setCurView('maintenanceReport')}>House Maintenance Report</Button><br></br><br></br>
+                                                    <Button className='btn-LeftMenuButton' onClick={()=>setCurView('paymentReport')}>Payment Report</Button><br></br><br></br>
+                                                    <Button className='btn-LeftMenuButton' >Worker Compensation Report</Button><br></br>
                                                 </ui>
                                             </>
                                         }
                                         {
                                             curPage === 'dataEntry' && <>
-                                                <Button>House Maintenance Data Entry</Button><br></br><br></br>
-                                                <Button>Payment Data Entry</Button><br></br><br></br>
-                                                <Button>House Info Data Entry</Button><br></br><br></br>
-                                                <Button>Lease Data Entry</Button><br></br><br></br>
-                                                <Button>Tenants Data Entry</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' >House Maintenance Data Entry</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' >Payment Data Entry</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' >House Info Data Entry</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' >Lease Data Entry</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' >Tenants Data Entry</Button><br></br><br></br>
                                             </>
                                         }
                                         {
                                             curPage === 'tools' && <>
-                                                <Button>Owners Info</Button><br></br><br></br>
-                                                <Button>Workers Info</Button><br></br><br></br>
-                                                <Button>Expanse Category List</Button><br></br><br></br>
-                                                <Button onClick={() => setCurView('developer')}>Developer Tools</Button><br></br><br></br>
-                                                <Button onClick={() => setCurView('oldapp')}>OldApp</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' >Owners Info</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' >Workers Info</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' >Expanse Category List</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' onClick={() => setCurView('developer')}>Developer Tools</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' onClick={() => setCurView('oldapp')}>OldApp</Button><br></br><br></br>
                                             </>
                                         }
                                     </Col>
@@ -121,7 +133,7 @@ function App() {
                                             }
                                         </NavDropdown>
             </div>
-            <div style={{marginLeft:'255px', marginTop:30}}>
+            <div className='divMain'>
                 TODO: Data
                  {
                     curView ==='cashFlowSummary' && <CashFlowReport />
