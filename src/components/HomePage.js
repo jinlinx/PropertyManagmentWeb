@@ -21,6 +21,7 @@ import AppOld from '../AppOld';
 import logo from '../images/Logo.png'
 import PaymentRport from './reports/paymentReport';
 
+import { JJDataRoot, IncomeExpensesContext} from './reports/rootData';
 function App() {
     const [owners, setOwners] = useState([]);
     const [curPage, setCurPage] = useState('reports');
@@ -133,24 +134,24 @@ function App() {
                                             }
                                         </NavDropdown>
             </div>
+            <JJDataRoot>
+
+            
             <div className='divMain'>
-                TODO: Data
-                 {
-                    curView ==='cashFlowSummary' && <CashFlowReport />
-                }
-                {
-                    curView ==='maintenanceReport' && <MaintenanceReport />
-                }
-                {
-                    curView ==='developer' && <div><Developer/></div>
-                }
-                {
-                    curView === 'oldapp' && <div><AppOld /></div>
-                }
-                {
-                    curView === 'paymentReport' && <PaymentRport/>
-                }
-            </div>
+                    <IncomeExpensesContext.Consumer>
+                        {
+                            value => {
+                                if (curView === 'cashFlowSummary') return <CashFlowReport />
+                                if (curView === 'maintenanceReport') return <MaintenanceReport jjctx={value} />
+                                if (curView === 'developer') return <div><Developer /></div>
+                                if (curView === 'oldapp') return <div><AppOld /></div>
+                                if (curView === 'paymentReport') return <PaymentRport />
+                            }
+                        }
+                
+                </IncomeExpensesContext.Consumer>
+                </div>
+                </JJDataRoot>
         </>
     );
 }

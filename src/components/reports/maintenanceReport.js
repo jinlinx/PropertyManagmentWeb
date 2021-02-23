@@ -4,7 +4,12 @@ import { getMaintenanceReport, getPaymnents } from '../aapi';
 import { Table } from 'react-bootstrap';
 import EditDropdown from '../paymentMatch/EditDropdown';
 import { sumBy, uniq } from 'lodash';
-export default function MaintenanceReport() {
+import { IncomeExpensesContext } from './rootData';
+
+export default function MaintenanceReport(props) {
+    const jjctx = props.jjctx;
+    console.log(jjctx);
+    const { paymentsByMonth } = jjctx;
     const getInitTableData = () => ({
         dateKeys: {},
         monthes: [],
@@ -15,9 +20,7 @@ export default function MaintenanceReport() {
 
     const [origData, setOrigData] = useState([]);
     const [payments, setPayments] = useState([]);
-    const [paymentsByMonth, setPaymentsByMonth] = useState({
-        total:0
-    });
+
 
     const [allMonthes, setAllMonthes] = useState([]);
     const [monthes, setMonthes] = useState([]);
@@ -106,28 +109,6 @@ export default function MaintenanceReport() {
         setTableData(catToDate);
         setMonthes(allMonthes.filter(m => !curSelection || m >= curSelection.label));
         
-        const pm = payments.reduce((acc, p) => {
-            const month = moment(p.date).format('YYYY-MM');
-            if (curSelection && month < curSelection.label) return acc;
-            let m = acc.months[month];
-            acc.months.total += p.amount;
-            if (!m) {
-                m = {
-                    month,
-                    total: 0,
-                };
-                acc.months[month] = m;
-                acc.monthNames.push(month);
-            }
-            m.total += parseFloat(p.amount);
-            return acc;
-        }, {
-            months: {
-                total: 0,
-            },
-            monthNames: [],
-        });
-        setPaymentsByMonth(pm.months)
     }, [origData, payments, curSelection]);
 
     const fMoneyformat = amt=> {
@@ -151,14 +132,14 @@ export default function MaintenanceReport() {
         }}></EditDropdown>
         <table className='tableReport'>
             <thead>
-            <tr>
-                <td className='reportSubHeader'></td><td className='tdColumnHeader'>Total</td>
+            
+                <th className='tdColumnHeader'></th><th className='tdColumnHeader'>Total</th>
                 {
                     monthes.map(mon => {
-                        return <td className='tdColumnHeader'>{ mon}</td>
+                        return <th className='tdColumnHeader'>{ mon}</th>
                     })
                 }
-                </tr>
+                
             </thead>
             <tbody><tr>
                 <td className='tdLeftSubHeader' colSpan={monthes.length+2}>Income</td></tr>
@@ -205,7 +186,7 @@ export default function MaintenanceReport() {
                     },0)))}</td>
                     {
                         monthes.map(mon => {
-                            const inc = paymentsByMonth[mon];
+                            const inc = paymentsByMonth[mon] || {};
                             const incTotal = inc.total || 0;
                             const cost = tableData.monthlyTotal[mon] || 0;
                             return <td className='tdButtomTotalCell tdTotalBold tdCenter t'>${fMoneyformat( (incTotal - cost))}</td>
