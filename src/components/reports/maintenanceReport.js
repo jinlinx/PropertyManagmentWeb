@@ -7,7 +7,7 @@ import { TOTALCOLNAME} from './rootData';
 export default function MaintenanceReport(props) {
     const jjctx = props.jjctx;
     console.log(jjctx);
-    const { paymentsByMonth, expenseData, calculateExpenseByDate} = jjctx;
+    const { paymentsByMonth, expenseData, calculateExpenseByDate, calculateIncomeByDate} = jjctx;
     const getInitTableData = () => ({
         dateKeys: {},
         monthes: [],
@@ -16,14 +16,12 @@ export default function MaintenanceReport(props) {
         categories: [],
     });
 
-    const [origData, setOrigData] = useState([]);
     const [payments, setPayments] = useState([]);
 
 
     const [allMonthes, setAllMonthes] = useState([]);
     const [monthes, setMonthes] = useState([]);
 
-    const [tableData, setTableData] = useState(getInitTableData());
     const [curSelection, setCurSelection] = useState({label: ''});
     const [options, setOptions] = useState([]);
 
@@ -46,10 +44,6 @@ export default function MaintenanceReport(props) {
         return acc;
     }, getInitTableData());
     useEffect(() => {
-        getMaintenanceReport().then(datas => {
-            setOrigData(datas);
-            
-        })
 
         getPaymnents().then(r => {
             r = r.map(r => {
@@ -102,12 +96,11 @@ export default function MaintenanceReport(props) {
 
     //format data
     useEffect(() => {
-        const catToDate = formatData(origData, curSelection);
-        setTableData(catToDate);
         setMonthes(allMonthes.filter(m => !curSelection || m >= curSelection.label));
         
-        calculateExpenseByDate(expenseData, curSelection)
-    }, [origData, payments, curSelection]);
+        calculateExpenseByDate(expenseData, curSelection);
+        calculateIncomeByDate(paymentsByMonth, curSelection);
+    }, [expenseData.originalData, payments, curSelection]);
 
     const fMoneyformat = amt=> {
         if (!amt) return '-';
@@ -142,7 +135,7 @@ export default function MaintenanceReport(props) {
             <tbody><tr>
                 <td className='tdLeftSubHeader' colSpan={monthes.length+2}>Income</td></tr>
                 <tr><td>
-                </td><td >{fMoneyformat(paymentsByMonth.total)}</td>
+                </td><td >{fMoneyformat(paymentsByMonth[TOTALCOLNAME].total)}</td>
                 {
                     monthes.map(name => {
                         const mon = paymentsByMonth[name];
@@ -154,7 +147,7 @@ export default function MaintenanceReport(props) {
             
                 
                 {
-                    //new stuff
+                    //expenses
                     [...expenseData.categoryNames].map(cat => {
                         return <tr>
                             <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(expenseData.categoriesByKey[cat][TOTALCOLNAME])}</td>
@@ -167,7 +160,7 @@ export default function MaintenanceReport(props) {
                     })
                     }
                 <tr><td className='tdLeftSubCategoryHeader'>Total</td><td class='tdCenter  tdTotalItalic'>{
-                    fMoneyformat(expenseData.categoriesByKey[TOTALCOLNAME].total)
+                    fMoneyformat(expenseData.categoriesByKey[TOTALCOLNAME][TOTALCOLNAME])
                 }</td>
                     {
                         monthes.map(mon => {
@@ -180,9 +173,7 @@ export default function MaintenanceReport(props) {
                 </tr>
                 <tr>
                     <td className='tdLeftSubHeader tdButtomTotalCell'>Net Income</td>
-                    <td class='tdCenter tdTotalBold'>{ fMoneyformat((paymentsByMonth.total -expenseData.categoryNames.reduce((acc, c) => {
-                        return acc + (expenseData.categoriesByKey[c]['total'] || 0);
-                    },0)))}</td>
+                    <td class='tdCenter tdTotalBold'>{ fMoneyformat((paymentsByMonth[TOTALCOLNAME].total -expenseData.categoriesByKey[TOTALCOLNAME][TOTALCOLNAME]))}</td>
                     {
                         monthes.map(mon => {
                             const inc = paymentsByMonth[mon] || {};

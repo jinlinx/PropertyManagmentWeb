@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { getMaintenanceReport, getPaymnents } from '../aapi';
+import { sumBy } from 'lodash';
 
-export const TOTALCOLNAME = 'total';
+export const TOTALCOLNAME = 'coltotal';
 const getInitExpenseTableData = () => ({
     dateKeys: {}, //temp dedup 
     monthes: [],
@@ -20,7 +21,9 @@ export const IncomeExpensesContext = React.createContext();
 export function JJDataRoot(props) {
     const [expenseData, setExpenseData] = useState(getInitExpenseTableData);
     const [payments, setPayments] = useState([]);
-    const [paymentsByMonth, setPaymentsByMonth] = useState([]);
+    const [paymentsByMonth, setPaymentsByMonth] = useState({
+        monthNames:[],
+    });
     useEffect(() => {
         getMaintenanceReport().then(d => {
             const maintenceData = d.reduce((acc, r) => {
@@ -77,7 +80,7 @@ export function JJDataRoot(props) {
             const pm = r.res.reduce((acc, p) => {
                 const month = moment(p.date).format('YYYY-MM');
                 let m = acc.months[month];
-                acc.months.total += p.amount;
+                acc.months[TOTALCOLNAME].total += p.amount;
                 if (!m) {
                     m = {
                         month,
@@ -90,7 +93,10 @@ export function JJDataRoot(props) {
                 return acc;
             }, {
                 months: {
-                    total: 0,
+                    [TOTALCOLNAME]: {
+                        month: 'Total',
+                        total: 0,
+                    }
                 },
                 monthNames: [],
             });
@@ -110,7 +116,7 @@ export function JJDataRoot(props) {
             categoryNames } = expenseData;
         [...categoryNames,TOTALCOLNAME].map(cn => {
             const cat = categoriesByKey[cn]
-            cat.total = monthes.reduce((acc, mon) => {
+            cat[TOTALCOLNAME] = monthes.reduce((acc, mon) => {
                 if (!checkDate(mon, dateSel)) return acc;
                 return acc + (cat[mon] || 0);
             }, 0)
@@ -120,12 +126,23 @@ export function JJDataRoot(props) {
             categoriesByKey,
         })
     };
+
+    const calculateIncomeByDate = (incomeData, dateSel) => {
+
+        console.log(incomeData);
+        if (!incomeData[TOTALCOLNAME] ) return;
+        incomeData[TOTALCOLNAME].total = 0;
+        
+        incomeData[TOTALCOLNAME].total = sumBy(incomeData.monthNames.filter(n => checkDate(n, dateSel)).map(n=>incomeData[n]), 'total');
+        setPaymentsByMonth(incomeData)
+    };
     return <IncomeExpensesContext.Provider value={
         {
             expenseData,
             payments,
             paymentsByMonth,
             calculateExpenseByDate,
+            calculateIncomeByDate,
         }
     }>
         { props.children}
