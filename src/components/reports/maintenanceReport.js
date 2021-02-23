@@ -4,12 +4,11 @@ import { getMaintenanceReport, getPaymnents } from '../aapi';
 import { Table } from 'react-bootstrap';
 import EditDropdown from '../paymentMatch/EditDropdown';
 import { sumBy, uniq } from 'lodash';
-import { IncomeExpensesContext } from './rootData';
-
+import { TOTALCOLNAME} from './rootData';
 export default function MaintenanceReport(props) {
     const jjctx = props.jjctx;
     console.log(jjctx);
-    const { paymentsByMonth } = jjctx;
+    const { paymentsByMonth, expenseData, calculateExpenseByDate} = jjctx;
     const getInitTableData = () => ({
         dateKeys: {},
         monthes: [],
@@ -109,6 +108,7 @@ export default function MaintenanceReport(props) {
         setTableData(catToDate);
         setMonthes(allMonthes.filter(m => !curSelection || m >= curSelection.label));
         
+        calculateExpenseByDate(expenseData, curSelection)
     }, [origData, payments, curSelection]);
 
     const fMoneyformat = amt=> {
@@ -165,6 +165,21 @@ export default function MaintenanceReport(props) {
                         </tr>
                     })
                 }
+                
+                {
+                    //new stuff
+                    [...expenseData.categoryNames,TOTALCOLNAME].map(cat => {
+                        return <tr>
+                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(expenseData.categoriesByKey[cat][TOTALCOLNAME])}</td>
+                            {
+                                monthes.map(mon => {
+                                    return <td class='tdCenter'>{fMoneyformat(expenseData.categoriesByKey[cat][mon] || '' )}</td>  
+                                })
+                            }
+                        </tr>
+                    })
+                    }
+                    
                 <tr><td className='tdLeftSubCategoryHeader'>Total</td><td class='tdCenter  tdTotalItalic'>{
                     fMoneyformat(tableData.categories.reduce((acc, c) => {
                         return acc + (tableData.categorieKeys[c]['total'] || 0);

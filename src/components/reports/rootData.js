@@ -2,18 +2,23 @@ import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { getMaintenanceReport, getPaymnents } from '../aapi';
 
+export const TOTALCOLNAME = 'total';
 const getInitExpenseTableData = () => ({
     dateKeys: {}, //temp dedup 
     monthes: [],
     monthlyTotal: {},
-    categoriesByKey: {},
+    categoriesByKey: {
+        [TOTALCOLNAME]: { 
+            total: 0,
+        }
+    },
     categoryNames: [],
 });
 
 export const IncomeExpensesContext = React.createContext();
 
 export function JJDataRoot(props) {
-    const [expenseData, setExpenseData] = useState([]);
+    const [expenseData, setExpenseData] = useState(getInitExpenseTableData);
     const [payments, setPayments] = useState([]);
     const [paymentsByMonth, setPaymentsByMonth] = useState([]);
     useEffect(() => {
@@ -26,12 +31,14 @@ export function JJDataRoot(props) {
                 }
                 let cats = acc.categoriesByKey[r.category];
                 if (!cats) {
-                    cats = { total: 0, order: r.displayOrder };
+                    cats = { [TOTALCOLNAME]: 0, order: r.displayOrder };
                     acc.categoriesByKey[r.category] = cats;
                     acc.categoryNames.push(r.category);
                 }
+                const ctotal = acc.categoriesByKey[TOTALCOLNAME];
                 cats[month] = r.amount;
-                cats['total'] = 0;
+                ctotal[month] = (ctotal[month] || 0) + r.amount;
+                cats[TOTALCOLNAME] = 0;
                 acc.monthlyTotal[month] = (acc.monthlyTotal[month] || 0) + r.amount;
                 return acc;
             }, getInitExpenseTableData());
@@ -91,15 +98,20 @@ export function JJDataRoot(props) {
         })
     }, []);
     
+    function checkDate(mon, selectedDate) {
+        if (mon === TOTALCOLNAME) return true;
+        if (!selectedDate) return true;
+        return mon >= selectedDate.label;
+    }
     const calculateExpenseByDate = (expenseData, dateSel) => {
         const { monthes,
             categoriesByKey,
             categoryNames } = expenseData;
-        categoryNames.map(cn => {
+        [...categoryNames,TOTALCOLNAME].map(cn => {
             const cat = categoriesByKey[cn]
             cat.total = monthes.reduce((acc, mon) => {
-                if (dateSel && !dateSel(mon)) return acc;
-                return acc + cat[mon] || 0;
+                if (!checkDate(mon, dateSel)) return acc;
+                return acc + (cat[mon] || 0);
             }, 0)
         });
         setExpenseData({
