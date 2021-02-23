@@ -26,6 +26,15 @@ export function JJDataRoot(props) {
         [TOTALCOLNAME]:{total:0}
     });
     const [allMonthes, setAllMonths] = useState([]);
+
+
+    //month selection states
+    const [monthes, setMonthes] = useState([]);
+    const [curMonthSelection, setCurMonthSelection] = useState({label: ''});
+    const [selectedMonths, setSelectedMonths] = useState({});
+
+
+
     function addMonths(mons) {
         setAllMonths(mons, orig => {
             const r = orig.concat(mons).reduce((acc, m) => {
@@ -41,6 +50,56 @@ export function JJDataRoot(props) {
             return r;
         });
     }
+    useEffect(() => {
+        setMonthes(allMonthes);
+    }, [allMonthes]);
+    
+    //format data
+    useEffect(() => {
+        setMonthes(allMonthes.filter(m => selectedMonths[m]));
+        
+        calculateExpenseByDate(expenseData, selectedMonths);
+        calculateIncomeByDate(paymentsByMonth, selectedMonths);
+    }, [expenseData.originalData, paymentsByMonth.originalData, curMonthSelection, selectedMonths]);
+
+    useEffect(() => {
+        allMonthes.forEach(m => selectedMonths[m] = false);
+        let lm;
+        switch (curMonthSelection.value) {
+            case 'LastMonth':
+                lm = moment().subtract(1, 'month').format('YYYY-MM');
+                selectedMonths[lm] = true;
+                break;
+            case 'Last3Month':
+                lm = moment().subtract(3, 'month').format('YYYY-MM');
+                allMonthes.forEach(m => {
+                    if (m >= lm)
+                        selectedMonths[m] = true;
+                });
+                break;
+            case 'Y2D':
+                lm = moment().startOf('year').format('YYYY-MM');
+                allMonthes.forEach(m => {
+                    if (m >= lm)
+                        selectedMonths[m] = true;
+                });
+                break;
+            case 'LastYear':
+                lm = moment().startOf('year').format('YYYY-MM');
+                allMonthes.forEach(m => {
+                    if (m < lm)
+                        selectedMonths[m] = true;
+                });
+                break;
+            default:
+                allMonthes.forEach(m => selectedMonths[m] = true);
+                break;
+        }
+        setSelectedMonths({ ...selectedMonths });
+    }, [expenseData.originalData, paymentsByMonth.originalData,curMonthSelection]);
+    
+
+
     useEffect(() => {
         getMaintenanceReport().then(d => {
             const maintenceData = d.reduce((acc, r) => {
@@ -164,6 +223,9 @@ export function JJDataRoot(props) {
             calculateExpenseByDate,
             calculateIncomeByDate,
             allMonthes,
+            monthes, setMonthes,
+            curMonthSelection, setCurMonthSelection,
+            selectedMonths, setSelectedMonths
         }
     }>
         { props.children}

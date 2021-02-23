@@ -4,65 +4,13 @@ import moment from 'moment';
 import { TOTALCOLNAME} from './rootData';
 export default function CashFlowReport(props) {
     const jjctx = props.jjctx;
-    const { paymentsByMonth, expenseData, calculateExpenseByDate, calculateIncomeByDate, allMonthes} = jjctx;
+    const { paymentsByMonth, expenseData, calculateExpenseByDate, calculateIncomeByDate, allMonthes,
+        monthes, setMonthes,
+        curMonthSelection, setCurMonthSelection,
+        selectedMonths, setSelectedMonths
+    } = jjctx;
 
-    const [monthes, setMonthes] = useState([]);
 
-    const [curSelection, setCurSelection] = useState({label: ''});
-    const [options, setOptions] = useState([]);
-
-    const [selectedMonths, setSelectedMonths] = useState({});
-    //set month selection
-    useEffect(() => {
-        setMonthes(allMonthes);
-        setOptions(allMonthes.map(label => ({
-            label
-        })));
-    }, [allMonthes])
-
-    //format data
-    useEffect(() => {
-        setMonthes(allMonthes.filter(m => selectedMonths[m]));
-        
-        calculateExpenseByDate(expenseData, selectedMonths);
-        calculateIncomeByDate(paymentsByMonth, selectedMonths);
-    }, [expenseData.originalData, paymentsByMonth.originalData, curSelection, selectedMonths]);
-
-    useEffect(() => {
-        allMonthes.forEach(m => selectedMonths[m] = false);
-        let lm;
-        switch (curSelection.value) {
-            case 'LastMonth':
-                lm = moment().subtract(1, 'month').format('YYYY-MM');
-                selectedMonths[lm] = true;
-                break;
-            case 'Last3Month':
-                lm = moment().subtract(3, 'month').format('YYYY-MM');
-                allMonthes.forEach(m => {
-                    if (m >= lm)
-                        selectedMonths[m] = true;
-                });
-                break;
-            case 'Y2D':
-                lm = moment().startOf('year').format('YYYY-MM');
-                allMonthes.forEach(m => {
-                    if (m >= lm)
-                        selectedMonths[m] = true;
-                });
-                break;
-            case 'LastYear':
-                lm = moment().startOf('year').format('YYYY-MM');
-                allMonthes.forEach(m => {
-                    if (m < lm)
-                        selectedMonths[m] = true;
-                });
-                break;
-            default:
-                allMonthes.forEach(m => selectedMonths[m] = true);
-                break;
-        }
-        setSelectedMonths({ ...selectedMonths });
-    },[curSelection]);
     const fMoneyformat = amt=> {
         if (!amt) return '-';
         const formatter = new Intl.NumberFormat('en-US', {
@@ -78,11 +26,11 @@ export default function CashFlowReport(props) {
     return <>
         <EditDropdown context={{
             disabled: false,
-            curSelection, setCurSelection, getCurSelectionText: x=>x.label || '',
+            curSelection:curMonthSelection, setCurSelection:setCurMonthSelection, getCurSelectionText: x=>x.label || '',
             options: ['LastMonth', 'Last3Month', 'Y2D', 'LastYear'].map(value => ({
                 value,
                     label:value,
-            })), setOptions,
+            })), setOptions: () => { },
             loadOptions: ()=>null,
         }}></EditDropdown>
         <div>
