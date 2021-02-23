@@ -141,7 +141,7 @@ function App() {
                     <IncomeExpensesContext.Consumer>
                         {
                             value => {
-                                if (curView === 'cashFlowSummary') return <CashFlowReport />
+                                if (curView === 'cashFlowSummary') return <CashFlowReport jjctx={value}/>
                                 if (curView === 'maintenanceReport') return <MaintenanceReport jjctx={value} />
                                 if (curView === 'developer') return <div><Developer /></div>
                                 if (curView === 'oldapp') return <div><AppOld /></div>

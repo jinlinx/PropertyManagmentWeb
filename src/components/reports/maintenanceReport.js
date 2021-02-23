@@ -1,20 +1,9 @@
 import React, {useState, useEffect} from 'react';
-import moment from 'moment';
-import { getMaintenanceReport, getPaymnents } from '../aapi';
-import uniq from 'lodash/uniq';
 import EditDropdown from '../paymentMatch/EditDropdown';
 import { TOTALCOLNAME} from './rootData';
 export default function MaintenanceReport(props) {
     const jjctx = props.jjctx;
-    console.log(jjctx);
     const { paymentsByMonth, expenseData, calculateExpenseByDate, calculateIncomeByDate, allMonthes} = jjctx;
-    const getInitTableData = () => ({
-        dateKeys: {},
-        monthes: [],
-        monthlyTotal: {},
-        categorieKeys: {},
-        categories: [],
-    });
 
     const [monthes, setMonthes] = useState([]);
 
