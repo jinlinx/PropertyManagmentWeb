@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import EditDropdown from '../paymentMatch/EditDropdown';
+import moment from 'moment';
 import { TOTALCOLNAME} from './rootData';
 export default function CashFlowReport(props) {
     const jjctx = props.jjctx;
@@ -10,6 +11,7 @@ export default function CashFlowReport(props) {
     const [curSelection, setCurSelection] = useState({label: ''});
     const [options, setOptions] = useState([]);
 
+    const [selectedMonths, setSelectedMonths] = useState({});
     //set month selection
     useEffect(() => {
         setMonthes(allMonthes);
@@ -20,12 +22,47 @@ export default function CashFlowReport(props) {
 
     //format data
     useEffect(() => {
-        setMonthes(allMonthes.filter(m => !curSelection || m >= curSelection.label));
+        setMonthes(allMonthes.filter(m => selectedMonths[m]));
         
-        calculateExpenseByDate(expenseData, curSelection);
-        calculateIncomeByDate(paymentsByMonth, curSelection);
-    }, [expenseData.originalData, paymentsByMonth.originalData, curSelection]);
+        calculateExpenseByDate(expenseData, selectedMonths);
+        calculateIncomeByDate(paymentsByMonth, selectedMonths);
+    }, [expenseData.originalData, paymentsByMonth.originalData, curSelection, selectedMonths]);
 
+    useEffect(() => {
+        allMonthes.forEach(m => selectedMonths[m] = false);
+        let lm;
+        switch (curSelection.value) {
+            case 'LastMonth':
+                lm = moment().subtract(1, 'month').format('YYYY-MM');
+                selectedMonths[lm] = true;
+                break;
+            case 'Last3Month':
+                lm = moment().subtract(3, 'month').format('YYYY-MM');
+                allMonthes.forEach(m => {
+                    if (m >= lm)
+                        selectedMonths[m] = true;
+                });
+                break;
+            case 'Y2D':
+                lm = moment().startOf('year').format('YYYY-MM');
+                allMonthes.forEach(m => {
+                    if (m >= lm)
+                        selectedMonths[m] = true;
+                });
+                break;
+            case 'LastYear':
+                lm = moment().startOf('year').format('YYYY-MM');
+                allMonthes.forEach(m => {
+                    if (m < lm)
+                        selectedMonths[m] = true;
+                });
+                break;
+            default:
+                allMonthes.forEach(m => selectedMonths[m] = true);
+                break;
+        }
+        setSelectedMonths({ ...selectedMonths });
+    },[curSelection]);
     const fMoneyformat = amt=> {
         if (!amt) return '-';
         const formatter = new Intl.NumberFormat('en-US', {
@@ -42,9 +79,22 @@ export default function CashFlowReport(props) {
         <EditDropdown context={{
             disabled: false,
             curSelection, setCurSelection, getCurSelectionText: x=>x.label || '',
-            options, setOptions,
+            options: ['LastMonth', 'Last3Month', 'Y2D', 'LastYear'].map(value => ({
+                value,
+                    label:value,
+            })), setOptions,
             loadOptions: ()=>null,
         }}></EditDropdown>
+        <div>
+            {
+                allMonthes.map(m => {
+                    return <div><input type='checkbox' checked={selectedMonths[m]} onClick={() => {
+                        selectedMonths[m] = !selectedMonths[m];
+                        setSelectedMonths({ ...selectedMonths });
+                    }}></input>{m}</div>
+                })
+            }
+        </div>
         <table className='tableReport'>
             <thead>
             

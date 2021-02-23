@@ -125,10 +125,10 @@ export function JJDataRoot(props) {
         })
     }, []);
     
-    function checkDate(mon, selectedDate) {
+    function checkDate(mon, selectedMonths) {
         if (mon === TOTALCOLNAME) return true;
-        if (!selectedDate) return true;
-        return mon >= selectedDate.label;
+        if (!selectedMonths) return true;
+        return selectedMonths[mon];
     }
     const calculateExpenseByDate = (expenseData, dateSel) => {
         const { monthes,
@@ -147,13 +147,13 @@ export function JJDataRoot(props) {
         })
     };
 
-    const calculateIncomeByDate = (incomeData, dateSel) => {
+    const calculateIncomeByDate = (incomeData, selectedMonths) => {
 
         console.log(incomeData);
         if (!incomeData[TOTALCOLNAME] ) return;
         incomeData[TOTALCOLNAME].total = 0;
         
-        incomeData[TOTALCOLNAME].total = sumBy(incomeData.monthNames.filter(n => checkDate(n, dateSel)).map(n=>incomeData[n]), 'total');
+        incomeData[TOTALCOLNAME].total = sumBy(incomeData.monthNames.filter(n => checkDate(n, selectedMonths)).map(n=>incomeData[n]), 'total');
         setPaymentsByMonth(incomeData)
     };
     return <IncomeExpensesContext.Provider value={
