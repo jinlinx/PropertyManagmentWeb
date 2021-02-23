@@ -22,8 +22,25 @@ export function JJDataRoot(props) {
     const [expenseData, setExpenseData] = useState(getInitExpenseTableData);
     const [payments, setPayments] = useState([]);
     const [paymentsByMonth, setPaymentsByMonth] = useState({
-        monthNames:[],
+        monthNames: [],
+        [TOTALCOLNAME]:{total:0}
     });
+    const [allMonthes, setAllMonths] = useState([]);
+    function addMonths(mons) {
+        setAllMonths(mons, orig => {
+            const r = orig.concat(mons).reduce((acc, m) => {
+                if (!acc.dict[m]) {
+                    acc.res.push(m);
+                }
+                return acc;
+            }, {
+                dict: {},
+                res: []
+            }).res;
+            r.sort();
+            return r;
+        });
+    }
     useEffect(() => {
         getMaintenanceReport().then(d => {
             const maintenceData = d.reduce((acc, r) => {
@@ -45,6 +62,7 @@ export function JJDataRoot(props) {
                 acc.monthlyTotal[month] = (acc.monthlyTotal[month] || 0) + r.amount;
                 return acc;
             }, getInitExpenseTableData());
+            addMonths(maintenceData.monthes);
             maintenceData.originalData = d;
             setExpenseData(maintenceData);
             calculateExpenseByDate(maintenceData)
@@ -101,6 +119,8 @@ export function JJDataRoot(props) {
                 monthNames: [],
             });
             pm.months.monthNames = pm.monthNames.sort();
+            pm.months.originalData = r.res;
+            addMonths(pm.monthNames);
             setPaymentsByMonth(pm.months);
         })
     }, []);
@@ -143,6 +163,7 @@ export function JJDataRoot(props) {
             paymentsByMonth,
             calculateExpenseByDate,
             calculateIncomeByDate,
+            allMonthes,
         }
     }>
         { props.children}

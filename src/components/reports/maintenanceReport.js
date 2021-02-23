@@ -7,7 +7,7 @@ import { TOTALCOLNAME} from './rootData';
 export default function MaintenanceReport(props) {
     const jjctx = props.jjctx;
     console.log(jjctx);
-    const { paymentsByMonth, expenseData, calculateExpenseByDate, calculateIncomeByDate} = jjctx;
+    const { paymentsByMonth, expenseData, calculateExpenseByDate, calculateIncomeByDate, allMonthes} = jjctx;
     const getInitTableData = () => ({
         dateKeys: {},
         monthes: [],
@@ -16,83 +16,18 @@ export default function MaintenanceReport(props) {
         categories: [],
     });
 
-    const [payments, setPayments] = useState([]);
-
-
-    const [allMonthes, setAllMonthes] = useState([]);
     const [monthes, setMonthes] = useState([]);
 
     const [curSelection, setCurSelection] = useState({label: ''});
     const [options, setOptions] = useState([]);
 
-    const formatData = (datas,curSelection) => datas.reduce((acc, r) => {
-        const month = moment(r.month).add(2,'days').format('YYYY-MM');
-        if (curSelection && month < curSelection.label) return acc;
-        if (!acc.dateKeys[month]) {
-            acc.dateKeys[month] = true;
-            acc.monthes.push(month);
-        }
-        let cats = acc.categorieKeys[r.category];
-        if (!cats) {
-            cats = { total: 0, order: r.displayOrder };
-            acc.categorieKeys[r.category] = cats;
-            acc.categories.push(r.category);
-        }
-        cats[month] = r.amount;
-        cats['total'] += r.amount;
-        acc.monthlyTotal[month] = (acc.monthlyTotal[month] || 0) + r.amount;
-        return acc;
-    }, getInitTableData());
-    useEffect(() => {
-
-        getPaymnents().then(r => {
-            r = r.map(r => {
-                return {
-                    ...r,
-                    date: moment(r.date).format('YYYY-MM-DD'),
-                    month: moment(r.date).format('YYYY-MM'),
-                }
-            }).sort((a, b) => {
-                if (a.date > b.date) return 1;
-                if (a.date < b.date) return -1;
-                return 0;
-            });
-            r = r.reduce((acc, r) => {
-                if (acc.curMon !== r.month) {
-                    acc.curMon = r.month;
-                    acc.total = 0;
-                }
-                acc.total += r.amount;
-                r.total = acc.total;
-                acc.res.push(r);
-                return acc;
-            }, {
-                    res: [],
-                    curMon: null,
-                total: 0,
-            });
-            setPayments(r.res);
-        })
-    }, []);
-    
     //set month selection
     useEffect(() => {
-        const monthes = uniq(payments.reduce((acc, p) => {
-            if (!acc.founds[p.month]) {
-                acc.founds[p.month] = true;
-                acc.monthes.push(p.month);
-            }
-            return acc; 
-        }, {
-            founds: {},
-            monthes: [],
-        }).monthes.concat(expenseData.monthes)).sort();
-        setAllMonthes(monthes);
-        setMonthes(monthes);
-        setOptions(monthes.map(label => ({
+        setMonthes(allMonthes);
+        setOptions(allMonthes.map(label => ({
             label
         })));
-    }, [expenseData.originalData, payments])
+    }, [allMonthes])
 
     //format data
     useEffect(() => {
@@ -100,7 +35,7 @@ export default function MaintenanceReport(props) {
         
         calculateExpenseByDate(expenseData, curSelection);
         calculateIncomeByDate(paymentsByMonth, curSelection);
-    }, [expenseData.originalData, payments, curSelection]);
+    }, [expenseData.originalData, paymentsByMonth.originalData, curSelection]);
 
     const fMoneyformat = amt=> {
         if (!amt) return '-';
