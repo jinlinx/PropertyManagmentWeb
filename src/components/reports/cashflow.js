@@ -1,7 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import EditDropdown from '../paymentMatch/EditDropdown';
 import moment from 'moment';
-import { TOTALCOLNAME} from './rootData';
+import { TOTALCOLNAME } from './rootData';
+import { MonthRange } from './monthRange';
 export default function CashFlowReport(props) {
     const jjctx = props.jjctx;
     const { paymentsByMonth, expenseData, calculateExpenseByDate, calculateIncomeByDate, allMonthes,
@@ -24,6 +25,7 @@ export default function CashFlowReport(props) {
         return formatter.format(amt);
     };
     return <>
+        <MonthRange jjctx={jjctx}></MonthRange>
         <EditDropdown context={{
             disabled: false,
             curSelection:curMonthSelection, setCurSelection:setCurMonthSelection, getCurSelectionText: x=>x.label || '',
