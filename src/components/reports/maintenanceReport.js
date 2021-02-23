@@ -1,9 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import moment from 'moment';
 import { getMaintenanceReport, getPaymnents } from '../aapi';
-import { Table } from 'react-bootstrap';
+import uniq from 'lodash/uniq';
 import EditDropdown from '../paymentMatch/EditDropdown';
-import { sumBy, uniq } from 'lodash';
 import { TOTALCOLNAME} from './rootData';
 export default function MaintenanceReport(props) {
     const jjctx = props.jjctx;
@@ -84,7 +83,6 @@ export default function MaintenanceReport(props) {
     
     //set month selection
     useEffect(() => {
-        const catToDate = formatData(origData);
         const monthes = uniq(payments.reduce((acc, p) => {
             if (!acc.founds[p.month]) {
                 acc.founds[p.month] = true;
@@ -94,13 +92,13 @@ export default function MaintenanceReport(props) {
         }, {
             founds: {},
             monthes: [],
-        }).monthes.concat(catToDate.monthes)).sort();
+        }).monthes.concat(expenseData.monthes)).sort();
         setAllMonthes(monthes);
         setMonthes(monthes);
         setOptions(monthes.map(label => ({
             label
         })));
-    }, [origData, payments])
+    }, [expenseData.originalData, payments])
 
     //format data
     useEffect(() => {
@@ -153,22 +151,11 @@ export default function MaintenanceReport(props) {
                     })
                 }</tr>
                 <tr><td className='tdLeftSubHeader' colSpan={monthes.length+2}>Expenses</td></tr>
-                {
-                    tableData.categories.map(cat => {
-                        return <tr>
-                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(tableData.categorieKeys[cat]['total'])}</td>
-                            {
-                                monthes.map(mon => {
-                                    return <td class='tdCenter'>{fMoneyformat(tableData.categorieKeys[cat][mon] || '' )}</td>  
-                                })
-                            }
-                        </tr>
-                    })
-                }
+            
                 
                 {
                     //new stuff
-                    [...expenseData.categoryNames,TOTALCOLNAME].map(cat => {
+                    [...expenseData.categoryNames].map(cat => {
                         return <tr>
                             <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(expenseData.categoriesByKey[cat][TOTALCOLNAME])}</td>
                             {
@@ -179,15 +166,12 @@ export default function MaintenanceReport(props) {
                         </tr>
                     })
                     }
-                    
                 <tr><td className='tdLeftSubCategoryHeader'>Total</td><td class='tdCenter  tdTotalItalic'>{
-                    fMoneyformat(tableData.categories.reduce((acc, c) => {
-                        return acc + (tableData.categorieKeys[c]['total'] || 0);
-                    },0))
+                    fMoneyformat(expenseData.categoriesByKey[TOTALCOLNAME].total)
                 }</td>
                     {
                         monthes.map(mon => {
-                            return <td class='tdCenter tdTotalItalic'>{ fMoneyformat((tableData.monthlyTotal[mon] || 0)) }</td>
+                            return <td class='tdCenter tdTotalItalic'>{ fMoneyformat((expenseData.monthlyTotal[mon] || 0)) }</td>
                         })
                     }
                 </tr>
@@ -196,15 +180,15 @@ export default function MaintenanceReport(props) {
                 </tr>
                 <tr>
                     <td className='tdLeftSubHeader tdButtomTotalCell'>Net Income</td>
-                    <td class='tdCenter tdTotalBold'>{ fMoneyformat((paymentsByMonth.total -tableData.categories.reduce((acc, c) => {
-                        return acc + (tableData.categorieKeys[c]['total'] || 0);
+                    <td class='tdCenter tdTotalBold'>{ fMoneyformat((paymentsByMonth.total -expenseData.categoryNames.reduce((acc, c) => {
+                        return acc + (expenseData.categoriesByKey[c]['total'] || 0);
                     },0)))}</td>
                     {
                         monthes.map(mon => {
                             const inc = paymentsByMonth[mon] || {};
                             const incTotal = inc.total || 0;
-                            const cost = tableData.monthlyTotal[mon] || 0;
-                            return <td className='tdButtomTotalCell tdTotalBold tdCenter t'>${fMoneyformat( (incTotal - cost))}</td>
+                            const cost = expenseData.monthlyTotal[mon] || 0;
+                            return <td className='tdButtomTotalCell tdTotalBold tdCenter t'>{fMoneyformat( (incTotal - cost))}</td>
                         })
                     }
                 </tr>

@@ -42,6 +42,7 @@ export function JJDataRoot(props) {
                 acc.monthlyTotal[month] = (acc.monthlyTotal[month] || 0) + r.amount;
                 return acc;
             }, getInitExpenseTableData());
+            maintenceData.originalData = d;
             setExpenseData(maintenceData);
             calculateExpenseByDate(maintenceData)
         });
