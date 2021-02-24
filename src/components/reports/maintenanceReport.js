@@ -1,30 +1,13 @@
 import React, {useState, useEffect} from 'react';
-import EditDropdown from '../paymentMatch/EditDropdown';
-import { TOTALCOLNAME} from './rootData';
+import { TOTALCOLNAME } from './rootData';
+import { MonthRange } from './monthRange';
+
 export default function MaintenanceReport(props) {
     const jjctx = props.jjctx;
-    const { paymentsByMonth, expenseData, calculateExpenseByDate, calculateIncomeByDate, allMonthes} = jjctx;
-
-    const [monthes, setMonthes] = useState([]);
-
-    const [curSelection, setCurSelection] = useState({label: ''});
-    const [options, setOptions] = useState([]);
-
-    //set month selection
-    useEffect(() => {
-        setMonthes(allMonthes);
-        setOptions(allMonthes.map(label => ({
-            label
-        })));
-    }, [allMonthes])
-
-    //format data
-    useEffect(() => {
-        setMonthes(allMonthes.filter(m => !curSelection || m >= curSelection.label));
-        
-        calculateExpenseByDate(expenseData, curSelection);
-        calculateIncomeByDate(paymentsByMonth, curSelection);
-    }, [expenseData.originalData, paymentsByMonth.originalData, curSelection]);
+    const {
+        expenseData,
+        monthes,
+    } = jjctx;
 
     const fMoneyformat = amt=> {
         if (!amt) return '-';
@@ -39,37 +22,17 @@ export default function MaintenanceReport(props) {
         return formatter.format(amt);
     };
     return <>
-        <EditDropdown context={{
-            disabled: false,
-            curSelection, setCurSelection, getCurSelectionText: x=>x.label || '',
-            options, setOptions,
-            loadOptions: ()=>null,
-        }}></EditDropdown>
+        <MonthRange jjctx={jjctx}></MonthRange>
         <table className='tableReport'>
             <thead>
-            
-                <th className='tdColumnHeader'></th><th className='tdColumnHeader'>Total</th>
+                <th className='tdColumnHeader'>Expenses</th><th className='tdColumnHeader'>Total</th>
                 {
                     monthes.map(mon => {
                         return <th className='tdColumnHeader'>{ mon}</th>
                     })
                 }
-                
             </thead>
-            <tbody><tr>
-                <td className='tdLeftSubHeader' colSpan={monthes.length+2}>Income</td></tr>
-                <tr><td>
-                </td><td >{fMoneyformat(paymentsByMonth[TOTALCOLNAME].total)}</td>
-                {
-                    monthes.map(name => {
-                        const mon = paymentsByMonth[name];
-                        if (!mon) return <td></td>;
-                        return <td>{ fMoneyformat(mon.total)}</td>
-                    })
-                }</tr>
-                <tr><td className='tdLeftSubHeader' colSpan={monthes.length+2}>Expenses</td></tr>
-            
-                
+            <tbody>
                 {
                     //expenses
                     [...expenseData.categoryNames].map(cat => {
@@ -92,21 +55,7 @@ export default function MaintenanceReport(props) {
                         })
                     }
                 </tr>
-                <tr>
-                    <td colSpan={monthes.length+2}></td>
-                </tr>
-                <tr>
-                    <td className='tdLeftSubHeader tdButtomTotalCell'>Net Income</td>
-                    <td class='tdCenter tdTotalBold'>{ fMoneyformat((paymentsByMonth[TOTALCOLNAME].total -expenseData.categoriesByKey[TOTALCOLNAME][TOTALCOLNAME]))}</td>
-                    {
-                        monthes.map(mon => {
-                            const inc = paymentsByMonth[mon] || {};
-                            const incTotal = inc.total || 0;
-                            const cost = expenseData.monthlyTotal[mon] || 0;
-                            return <td className='tdButtomTotalCell tdTotalBold tdCenter t'>{fMoneyformat( (incTotal - cost))}</td>
-                        })
-                    }
-                </tr>
+
             </tbody>
         </table>
     </>

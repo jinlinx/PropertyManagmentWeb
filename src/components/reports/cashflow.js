@@ -1,14 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import EditDropdown from '../paymentMatch/EditDropdown';
-import moment from 'moment';
 import { TOTALCOLNAME } from './rootData';
 import { MonthRange } from './monthRange';
 export default function CashFlowReport(props) {
     const jjctx = props.jjctx;
-    const { paymentsByMonth, expenseData, calculateExpenseByDate, calculateIncomeByDate, allMonthes,
-        monthes, setMonthes,
-        curMonthSelection, setCurMonthSelection,
-        selectedMonths, setSelectedMonths
+    const {
+        paymentsByMonth, expenseData,
+        monthes, 
     } = jjctx;
 
 
