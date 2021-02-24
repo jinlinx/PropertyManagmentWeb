@@ -46,42 +46,41 @@ function App() {
            
             <div id="topNav" className="topNav">
             
-            <table>
-                                <tr>
-                                    <td rowSpan='2'>
-                                        
-                            <ui>
-                                <img src={logo} style={{ width: 200, height: 150 }} /></ui></td>
-                                <td colSpan='2' className='TopTitleFont'>Property Management</td>
-                            <td colspan="3"></td>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td rowSpan='2'>
+                                    <img src={logo} style={{ width: 200, height: 150 }} /></td>
+                            <td colSpan='2' className='TopTitleFont'>Property Management</td>
+                            <td colSpan="3"></td>
                         </tr>
-                    <tr>
-                        <td colspan='2'></td>
-                            <td><Button className='btnTopButton' href="#reports" onClick={() => setCurPage('reports')}>Reports</Button> </td>                     
+                        <tr>
+                            <td colSpan='2'></td>
+                            <td><Button className='btnTopButton' href="#reports" onClick={() => setCurPage('reports')}>Reports</Button> </td>
                             <td><Button className='btnTopButton' href="#dateEntry" onClick={() => setCurPage('dataEntry')}>Data Entry</Button> </td>
-                            <td><Button className='btnTopButton' href="#adminTools" onClick={() => setCurPage('tools')}>Admin Tools</Button> </td> 
+                            <td><Button className='btnTopButton' href="#adminTools" onClick={() => setCurPage('tools')}>Admin Tools</Button> </td>
            
                             <td><NavDropdown title={"Owner:  " + ownerInfo.ownerName} id="basic-nav-dropdown">
-                                            {
-                                                owners.map((p, i) => {
-                                                    return <NavDropdown.Item key={i} onClick={() => {
-                                                        //setShowPage(i);
-                                                        setOwnerInfo(p);
-                                                    }}>{p.ownerName}</NavDropdown.Item>
-                                                })
-                                            }
+                                {
+                                    owners.map((p, i) => {
+                                        return <NavDropdown.Item key={i} onClick={() => {
+                                            //setShowPage(i);
+                                            setOwnerInfo(p);
+                                        }}>{p.ownerName}</NavDropdown.Item>
+                                    })
+                                }
  
-                                        </NavDropdown>       
+                            </NavDropdown>
                                        
                                        
-                                        </td>
-                                </tr>
-        
-                            </table>       
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
 
             </div>
-            <div id="mySidenav" class="sidenav">
-            <Container fluid='xl'  >
+            <div id="mySidenav" className="sidenav">
+                <Container fluid='xl'  >
                     <Row>
                         <Col>
                             <Container>
@@ -89,12 +88,12 @@ function App() {
                                     <Col>
                                         {
                                             curPage === 'reports' && <>
-                                                <ui>
-                                                    <Button className='btn-LeftMenuButton' onClick={()=>setCurView('cashFlowSummary')}>Cash Flow Summary Report</Button><br></br><br></br>
-                                                    <Button className='btn-LeftMenuButton' onClick={()=>setCurView('maintenanceReport')}>House Maintenance Report</Button><br></br><br></br>
-                                                    <Button className='btn-LeftMenuButton' onClick={()=>setCurView('paymentReport')}>Payment Report</Button><br></br><br></br>
+                                               
+                                                    <Button className='btn-LeftMenuButton' onClick={() => setCurView('cashFlowSummary')}>Cash Flow Summary Report</Button><br></br><br></br>
+                                                    <Button className='btn-LeftMenuButton' onClick={() => setCurView('maintenanceReport')}>House Maintenance Report</Button><br></br><br></br>
+                                                    <Button className='btn-LeftMenuButton' onClick={() => setCurView('paymentReport')}>Payment Report</Button><br></br><br></br>
                                                     <Button className='btn-LeftMenuButton' >Worker Compensation Report</Button><br></br>
-                                                </ui>
+                                  
                                             </>
                                         }
                                         {
@@ -124,24 +123,24 @@ function App() {
                     </Row>
                 </Container>
                 <NavDropdown title={"Owner:  " + ownerInfo.ownerName} id="basic-nav-dropdown">
-                                            {
-                                                owners.map((p, i) => {
-                                                    return <NavDropdown.Item key={i} onClick={() => {
-                                                        //setShowPage(i);
-                                                        setOwnerInfo(p);
-                                                    }}>{p.ownerName}</NavDropdown.Item>
-                                                })
-                                            }
-                                        </NavDropdown>
+                    {
+                        owners.map((p, i) => {
+                            return <NavDropdown.Item key={i} onClick={() => {
+                                //setShowPage(i);
+                                setOwnerInfo(p);
+                            }}>{p.ownerName}</NavDropdown.Item>
+                        })
+                    }
+                </NavDropdown>
             </div>
             <JJDataRoot>
 
             
-            <div className='divMain'>
+                <div className='divMain'>
                     <IncomeExpensesContext.Consumer>
                         {
                             value => {
-                                if (curView === 'cashFlowSummary') return <CashFlowReport jjctx={value}/>
+                                if (curView === 'cashFlowSummary') return <CashFlowReport jjctx={value} />
                                 if (curView === 'maintenanceReport') return <MaintenanceReport jjctx={value} />
                                 if (curView === 'developer') return <div><Developer /></div>
                                 if (curView === 'oldapp') return <div><AppOld /></div>
@@ -149,9 +148,9 @@ function App() {
                             }
                         }
                 
-                </IncomeExpensesContext.Consumer>
+                    </IncomeExpensesContext.Consumer>
                 </div>
-                </JJDataRoot>
+            </JJDataRoot>
         </>
     );
 }

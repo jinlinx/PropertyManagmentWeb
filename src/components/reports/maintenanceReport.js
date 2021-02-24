@@ -39,21 +39,21 @@ export default function MaintenanceReport(props) {
                     //expenses
                     [...expenseData.categoryNames].map((cat,key) => {
                         return <tr key={key}>
-                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(expenseData.categoriesByKey[cat][TOTALCOLNAME])}</td>
+                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td className='tdCenter  tdTotalItalic'>{fMoneyformat(expenseData.categoriesByKey[cat][TOTALCOLNAME])}</td>
                             {
                                 monthes.map((mon,key) => {
-                                    return <td class='tdCenter' key={key}>{fMoneyformat(expenseData.categoriesByKey[cat][mon] || '' )}</td>  
+                                    return <td className='tdCenter' key={key}>{fMoneyformat(expenseData.categoriesByKey[cat][mon] || '' )}</td>  
                                 })
                             }
                         </tr>
                     })
                     }
-                <tr><td className='tdLeftSubCategoryHeader'>Total</td><td class='tdCenter  tdTotalItalic'>{
+                <tr><td className='tdLeftSubCategoryHeader'>Total</td><td className='tdCenter  tdTotalItalic'>{
                     fMoneyformat(expenseData.categoriesByKey[TOTALCOLNAME][TOTALCOLNAME])
                 }</td>
                     {
                         monthes.map((mon,key) => {
-                            return <td class='tdCenter tdTotalItalic' key={key}>{ fMoneyformat((expenseData.monthlyTotal[mon] || 0)) }</td>
+                            return <td className='tdCenter tdTotalItalic' key={key}>{ fMoneyformat((expenseData.monthlyTotal[mon] || 0)) }</td>
                         })
                     }
                 </tr>

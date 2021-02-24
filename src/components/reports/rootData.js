@@ -36,7 +36,7 @@ export function JJDataRoot(props) {
 
 
     function addMonths(mons) {
-        setAllMonths(mons, orig => {
+        setAllMonths(orig => {
             const r = orig.concat(mons).reduce((acc, m) => {
                 if (!acc.dict[m]) {
                     acc.res.push(m);
