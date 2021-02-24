@@ -4,12 +4,15 @@ import EditDropdown from '../paymentMatch/EditDropdown';
 
 export function MonthRange(props) {
     const jjctx = props.jjctx;
-    const { paymentsByMonth, expenseData, calculateExpenseByDate, calculateIncomeByDate, allMonthes,
-        monthes, setMonthes,
+    const {
+        //paymentsByMonth, expenseData, calculateExpenseByDate, calculateIncomeByDate,
+        allMonthes,
+        //monthes, setMonthes,
         curMonthSelection, setCurMonthSelection,
         selectedMonths, setSelectedMonths
     } = jjctx;
 
+    const [showDetails, setShowDetails] = useState(false);
     useEffect(() => {
         setCurMonthSelection({
             value: 'All',
@@ -17,6 +20,7 @@ export function MonthRange(props) {
        }) 
     },[]);
     return <>
+        <div>
         <EditDropdown context={{
             disabled: false,
             curSelection:curMonthSelection, setCurSelection:setCurMonthSelection, getCurSelectionText: x=>x.label || '',
@@ -25,10 +29,15 @@ export function MonthRange(props) {
                     label:value,
             })), setOptions: () => { },
             loadOptions: ()=>null,
-        }}></EditDropdown>
+            }}></EditDropdown>
+
+            <input type='checkbox' checked={showDetails} onChange={() => {
+                setShowDetails(!showDetails);
+            }}></input> Show Details
+        </div>
         <div>
             {
-                allMonthes.map((m, key) => {
+                showDetails && allMonthes.map((m, key) => {
                     return <div key={key}><input type='checkbox' checked={!!selectedMonths[m]} onChange={() => {
                         selectedMonths[m] = !selectedMonths[m];
                         setSelectedMonths({ ...selectedMonths });
