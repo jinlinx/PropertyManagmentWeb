@@ -208,7 +208,7 @@ export function JJDataRoot(props) {
 
     const calculateIncomeByDate = (incomeData, selectedMonths) => {
 
-        console.log(incomeData);
+        //console.log(incomeData);
         if (!incomeData[TOTALCOLNAME] ) return;
         incomeData[TOTALCOLNAME].total = 0;
         

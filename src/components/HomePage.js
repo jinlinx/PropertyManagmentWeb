@@ -29,7 +29,7 @@ function App() {
     const [curView, setCurView] = useState('maintenanceReport')
     useEffect(() => {
         getOwners().then(owners => {
-            console.log(owners);
+            //console.log(owners);
             if (owners) {
                 setOwners(owners);
                 setOwnerInfo(owners[1] || {});
