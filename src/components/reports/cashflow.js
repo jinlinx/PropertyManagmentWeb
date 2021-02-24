@@ -26,25 +26,6 @@ export default function CashFlowReport(props) {
     };
     return <>
         <MonthRange jjctx={jjctx}></MonthRange>
-        <EditDropdown context={{
-            disabled: false,
-            curSelection:curMonthSelection, setCurSelection:setCurMonthSelection, getCurSelectionText: x=>x.label || '',
-            options: ['LastMonth', 'Last3Month', 'Y2D', 'LastYear'].map(value => ({
-                value,
-                    label:value,
-            })), setOptions: () => { },
-            loadOptions: ()=>null,
-        }}></EditDropdown>
-        <div>
-            {
-                allMonthes.map(m => {
-                    return <div><input type='checkbox' checked={selectedMonths[m]} onClick={() => {
-                        selectedMonths[m] = !selectedMonths[m];
-                        setSelectedMonths({ ...selectedMonths });
-                    }}></input>{m}</div>
-                })
-            }
-        </div>
         <table className='tableReport'>
             <thead>
             
