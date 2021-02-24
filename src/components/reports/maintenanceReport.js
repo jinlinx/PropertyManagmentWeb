@@ -25,22 +25,24 @@ export default function MaintenanceReport(props) {
         <MonthRange jjctx={jjctx}></MonthRange>
         <table className='tableReport'>
             <thead>
-                <th className='tdColumnHeader'>Expenses</th><th className='tdColumnHeader'>Total</th>
+                <tr>
+                <td className='tdColumnHeader'>Expenses</td><td className='tdColumnHeader'>Total</td>
                 {
-                    monthes.map(mon => {
-                        return <th className='tdColumnHeader'>{ mon}</th>
+                    monthes.map((mon,key) => {
+                        return <td className='tdColumnHeader' key={key}>{ mon}</td>
                     })
-                }
+                    }
+                </tr>
             </thead>
             <tbody>
                 {
                     //expenses
-                    [...expenseData.categoryNames].map(cat => {
-                        return <tr>
+                    [...expenseData.categoryNames].map((cat,key) => {
+                        return <tr key={key}>
                             <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(expenseData.categoriesByKey[cat][TOTALCOLNAME])}</td>
                             {
-                                monthes.map(mon => {
-                                    return <td class='tdCenter'>{fMoneyformat(expenseData.categoriesByKey[cat][mon] || '' )}</td>  
+                                monthes.map((mon,key) => {
+                                    return <td class='tdCenter' key={key}>{fMoneyformat(expenseData.categoriesByKey[cat][mon] || '' )}</td>  
                                 })
                             }
                         </tr>
@@ -50,8 +52,8 @@ export default function MaintenanceReport(props) {
                     fMoneyformat(expenseData.categoriesByKey[TOTALCOLNAME][TOTALCOLNAME])
                 }</td>
                     {
-                        monthes.map(mon => {
-                            return <td class='tdCenter tdTotalItalic'>{ fMoneyformat((expenseData.monthlyTotal[mon] || 0)) }</td>
+                        monthes.map((mon,key) => {
+                            return <td class='tdCenter tdTotalItalic' key={key}>{ fMoneyformat((expenseData.monthlyTotal[mon] || 0)) }</td>
                         })
                     }
                 </tr>

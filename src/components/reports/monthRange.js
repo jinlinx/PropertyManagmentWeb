@@ -28,8 +28,8 @@ export function MonthRange(props) {
         }}></EditDropdown>
         <div>
             {
-                allMonthes.map(m => {
-                    return <div><input type='checkbox' checked={selectedMonths[m]} onClick={() => {
+                allMonthes.map((m, key) => {
+                    return <div key={key}><input type='checkbox' checked={!!selectedMonths[m]} onChange={() => {
                         selectedMonths[m] = !selectedMonths[m];
                         setSelectedMonths({ ...selectedMonths });
                     }}></input>{m}</div>
