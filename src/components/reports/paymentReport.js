@@ -90,7 +90,10 @@ export default function PaymentReport(props) {
             <tr>
                 <td>Month</td><td>Total</td>
                 {
-                monAddr.houseNameAry.map(c => <td>{ c.address}</td>)
+                        monAddr.houseNameAry.map(h => {
+                            if (selectedHouses[h.addressId])
+                            return <td>{h.address}</td>
+                        })
             }</tr>
         </thead>
         <tbody>
@@ -102,6 +105,7 @@ export default function PaymentReport(props) {
                         <td>{ curMon[TOTALCOLNAME]}</td>
                         {
                             monAddr.houseNameAry.map(h => {
+                                if (selectedHouses[h.addressId])
                                 return < td > {
                                     (curMon[h.addressId] || {}).amount
 
