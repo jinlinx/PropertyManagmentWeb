@@ -18,55 +18,54 @@ export default function PaymentReport(props) {
         //console.log(d);
         if (!selectedMonths[d.month]) return acc;
         
-        let monData = acc.monthByKey[d.month];
-        if (!monData) {
-            monData = {
-                [TOTALCOLNAME]:0
-            };
-            acc.monthByKey[d.month] = monData;
-            acc.monthAry.push(d.month);
-        }
-        if (!acc.houseKeys[d.addressId]) {
-            const addr = {
-                addressId: d.addressId,
-                address: d.address,
-            };
-            acc.houseKeys[d.addressId] = addr;
-            acc.houseNameAry.push(addr);
-        }
-        let addData = monData[d.addressId];
+        let addData = acc.houseByKey[d.addressId];
         if (!addData) {
             addData = {
-                [TOTALCOLNAME]: 0,
-                originalData: [],
+                addressId: d.addressId,
+                address: d.address,
+                [TOTALCOLNAME]:0,
+            };
+            acc.houseByKey[d.addressId] = addData;
+            acc.houseAry.push(addData);
+        }
+
+        let monData = addData[d.month];
+        if (!monData) {
+            monData = {
                 amount: 0,
             };
-            monData[d.addressId] = addData;
+            addData[d.month] = monData;
         }
         if (selectedHouses[d.addressId]) {
             monData[TOTALCOLNAME] += d.amount;
             acc.total += d.amount;
         }
-        addData.originalData.push(d);
-        addData.amount += d.amount;
-        addData[TOTALCOLNAME] += d.amount;
-        acc.houseTotal[d.addressId] = (acc.houseTotal[d.addressId] || 0) + d.amount;
+        if (!acc.monthByKey[d.month]) {
+            acc.monthByKey[d.month] = true;
+            acc.monthAry.push(d.month);
+        }
+        monData.amount += d.amount;
+        if (selectedHouses[d.addressId]) {
+            addData[TOTALCOLNAME] += d.amount;
+            acc.monthTotal[d.month] = (acc.monthTotal[d.month] || 0) + d.amount;
+        }
         return acc;
     }, {
         monthAry: [],
         monthByKey: {},
-        houseNameAry: [],
-        houseKeys: {},
-        houseTotal: {},
+        houseAry: [],
+        houseByKey: {},
+        monthTotal: {},
         total: 0,
     });
 
     monAddr.monthAry.sort();
 
-    const goodHouses = monAddr.houseNameAry.map(h => h.address);
+    console.log(monAddr);
+    const goodHouses = monAddr.houseAry.map(h => h.address);
     goodHouses.sort();
     useEffect(() => {
-        const sh = monAddr.houseNameAry.reduce((acc, h) => {
+        const sh = monAddr.houseAry.reduce((acc, h) => {
             acc[h.addressId] = true;
             return acc;
         }, {});
@@ -78,7 +77,7 @@ export default function PaymentReport(props) {
         <MonthRange jjctx={jjctx} />
         <div>
             {
-                monAddr.houseNameAry.map((h,key) => {
+                monAddr.houseAry.map((h,key) => {
                     return <><input type='checkbox' key={key} checked={!!selectedHouses[h.addressId]} onChange={() => {
                         setSelectedHouses({ ...selectedHouses, [h.addressId]: !selectedHouses[h.addressId] });
                     }}></input>{h.address}<span></span></>
@@ -90,39 +89,38 @@ export default function PaymentReport(props) {
             <tr>
                 <td>Month</td><td>Total</td>
                 {
-                        monAddr.houseNameAry.map(h => {
-                            if (selectedHouses[h.addressId])
-                            return <td>{h.address}</td>
+                        monAddr.monthAry.map(m => {
+                            return <td>{m}</td>
                         })
             }</tr>
         </thead>
         <tbody>
             {
-                monAddr.monthAry.map(monName => {
-                    const curMon = monAddr.monthByKey[monName];
-                    return <tr>
-                        <td>{monName}</td>
-                        <td>{ curMon[TOTALCOLNAME]}</td>
-                        {
-                            monAddr.houseNameAry.map(h => {
-                                if (selectedHouses[h.addressId])
-                                return < td > {
-                                    (curMon[h.addressId] || {}).amount
+                    monAddr.houseAry.map(house => {
+                        if (!selectedHouses[house.addressId]) return null;
+                        const curHouse = monAddr.houseByKey[house.addressId];
+                        return <tr>
+                            <td>{house.address}</td>
+                            <td>{curHouse[TOTALCOLNAME]}</td>
+                            {
+                                monAddr.monthAry.map(mon => {
+                                    return < td > {
+                                        (curHouse[mon] || {}).amount
 
-                                }</td>
-                            })
-                        }
-                    </tr>
-                })
+                                    }</td>
+                                })
+                            }
+                        </tr>
+                    })
             }
             {
                 <tr>
                     <td>Total</td>
                     <td>{monAddr.total}</td>
                     {
-                        monAddr.houseNameAry.map(h => {
+                        monAddr.monthAry.map(m => {
                             return < td > {
-                                monAddr.houseTotal[h.addressId]
+                                monAddr.monthTotal[m]
                             }</td>
                         })
                     }
