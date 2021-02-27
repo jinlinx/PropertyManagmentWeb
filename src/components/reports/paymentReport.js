@@ -3,7 +3,7 @@ import moment from 'moment';
 import { getPaymnents } from '../aapi';
 import { Table } from 'react-bootstrap';
 import EditDropdown from '../paymentMatch/EditDropdown';
-import { TOTALCOLNAME } from './rootData';
+import { TOTALCOLNAME,fMoneyformat } from './rootData';
 import { MonthRange } from './monthRange';
 export default function PaymentReport(props) {
     const jjctx = props.jjctx;
@@ -84,28 +84,28 @@ export default function PaymentReport(props) {
                 })
             }
         </div>
-        <Table>
+        <table  className='tableReport'>
         <thead>
             <tr>
-                <td>Month</td><td>Total</td>
+                <td className='tdColumnHeader'>Address</td><td className='tdColumnHeader'>Total</td>
                 {
-                        monAddr.monthAry.map(m => {
-                            return <td>{m}</td>
+                        monAddr.monthAry.map((m,key) => {
+                            return <td  className='tdColumnHeader' key={key}>{m}</td>
                         })
             }</tr>
         </thead>
         <tbody>
             {
-                    monAddr.houseAry.map(house => {
+                    monAddr.houseAry.map((house,key) => {
                         if (!selectedHouses[house.addressId]) return null;
                         const curHouse = monAddr.houseByKey[house.addressId];
-                        return <tr>
-                            <td>{house.address}</td>
-                            <td>{curHouse[TOTALCOLNAME]}</td>
+                        return <tr key={key}>
+                            <td className='tdLeftSubCategoryHeader'>{house.address}</td>
+                            <td className='tdCenter  tdTotalItalic'>{fMoneyformat(curHouse[TOTALCOLNAME])}</td>
                             {
-                                monAddr.monthAry.map(mon => {
-                                    return < td > {
-                                        (curHouse[mon] || {}).amount
+                                monAddr.monthAry.map((mon,key) => {
+                                    return < td key={key} className='tdCenter  tdTotalItalic'> {
+                                        fMoneyformat((curHouse[mon] || {}).amount)
 
                                     }</td>
                                 })
@@ -115,17 +115,17 @@ export default function PaymentReport(props) {
             }
             {
                 <tr>
-                    <td>Total</td>
-                    <td>{monAddr.total}</td>
+                    <td className='tdLeftSubCategoryHeader'>Total</td>
+                    <td className='tdCenter  tdTotalItalic'>{fMoneyformat(monAddr.total)}</td>
                     {
-                        monAddr.monthAry.map(m => {
-                            return < td > {
-                                monAddr.monthTotal[m]
+                        monAddr.monthAry.map((m,key) => {
+                            return < td key={key} className='tdCenter  tdTotalItalic'> {
+                                fMoneyformat(monAddr.monthTotal[m])
                             }</td>
                         })
                     }
                 </tr>
             }
         </tbody>
-    </Table></>
+    </table></>
 }
