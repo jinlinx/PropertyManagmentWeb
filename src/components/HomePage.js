@@ -144,7 +144,7 @@ function App() {
                                 if (curView === 'maintenanceReport') return <MaintenanceReport jjctx={value} />
                                 if (curView === 'developer') return <div><Developer /></div>
                                 if (curView === 'oldapp') return <div><AppOld /></div>
-                                if (curView === 'paymentReport') return <PaymentRport />
+                                if (curView === 'paymentReport') return <PaymentRport jjctx={value} />
                             }
                         }
                 
