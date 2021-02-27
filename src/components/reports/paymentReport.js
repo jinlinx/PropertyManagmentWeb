@@ -12,10 +12,12 @@ export default function PaymentReport(props) {
         selectedMonths, 
     } = jjctx;
 
+    const [selectedHouses, setSelectedHouses] = useState({});
     
     const monAddr = paymentsByMonth.originalData.reduce((acc, d) => {
         //console.log(d);
         if (!selectedMonths[d.month]) return acc;
+        
         let monData = acc.monthByKey[d.month];
         if (!monData) {
             monData = {
@@ -41,11 +43,13 @@ export default function PaymentReport(props) {
             };
             monData[d.addressId] = addData;
         }
-        monData[TOTALCOLNAME] += d.amount;
+        if (selectedHouses[d.addressId]) {
+            monData[TOTALCOLNAME] += d.amount;
+            acc.total += d.amount;
+        }
         addData.originalData.push(d);
         addData.amount += d.amount;
         addData[TOTALCOLNAME] += d.amount;
-        acc.total += d.amount;
         acc.houseTotal[d.addressId] = (acc.houseTotal[d.addressId] || 0) + d.amount;
         return acc;
     }, {
@@ -59,9 +63,28 @@ export default function PaymentReport(props) {
 
     monAddr.monthAry.sort();
 
-    console.log(monAddr);
+    const goodHouses = monAddr.houseNameAry.map(h => h.address);
+    goodHouses.sort();
+    useEffect(() => {
+        const sh = monAddr.houseNameAry.reduce((acc, h) => {
+            acc[h.addressId] = true;
+            return acc;
+        }, {});
+        setSelectedHouses(sh);
+    }, [goodHouses.join(',')]);
+
+    //console.log(monAddr);
     return <>
-        <MonthRange jjctx={jjctx}/>
+        <MonthRange jjctx={jjctx} />
+        <div>
+            {
+                monAddr.houseNameAry.map((h,key) => {
+                    return <><input type='checkbox' key={key} checked={!!selectedHouses[h.addressId]} onChange={() => {
+                        setSelectedHouses({ ...selectedHouses, [h.addressId]: !selectedHouses[h.addressId] });
+                    }}></input>{h.address}<span></span></>
+                })
+            }
+        </div>
         <Table>
         <thead>
             <tr>
