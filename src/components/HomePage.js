@@ -26,7 +26,11 @@ function App() {
     const [owners, setOwners] = useState([]);
     const [curPage, setCurPage] = useState('reports');
     const [ownerInfo, setOwnerInfo] = useState({ ownerID: '', ownerName: '' });
-    const [curView, setCurView] = useState('maintenanceReport')
+    const [curView, setCurView] = useState('maintenanceReport');
+
+    const [pageProps, setPageProps] = useState({});
+    const pageState = { pageProps, setPageProps };
+    
     useEffect(() => {
         getOwners().then(owners => {
             //console.log(owners);
@@ -100,7 +104,7 @@ function App() {
                                             curPage === 'dataEntry' && <>
                                                 <Button className='btn-LeftMenuButton' >House Maintenance Data Entry</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' >Payment Data Entry</Button><br></br><br></br>
-                                                <Button className='btn-LeftMenuButton' >House Info Data Entry</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' onClick={() => setCurView('houseInfo')}>House Info Data Entry</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' >Lease Data Entry</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' >Tenants Data Entry</Button><br></br><br></br>
                                             </>
@@ -145,6 +149,7 @@ function App() {
                                 if (curView === 'developer') return <div><Developer /></div>
                                 if (curView === 'oldapp') return <div><AppOld /></div>
                                 if (curView === 'paymentReport') return <PaymentRport jjctx={value} />
+                                if (curView === 'houseInfo') return <Propertylist  pageState={pageState} />
                             }
                         }
                 
