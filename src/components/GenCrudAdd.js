@@ -20,6 +20,7 @@ const GenCrudAdd=(props) => {
     const getForeignKeyProcessor = fk => get(fkDefs, [fk, 'processForeignKey']);
     let id = '';
     let idName = '';
+    const addUpdateLabel = editItem ? 'Update' : 'Add';
     const onOK = props.onOK || onCancel;
     const internalCancel = () => onOK();
     const initData=columnInfo.reduce((acc, col) => {
@@ -242,7 +243,7 @@ const GenCrudAdd=(props) => {
                 <Modal.Footer>
                 <Row>
                     <Col>
-                        <Button className="btn-primary" type="submit" onClick={handleSubmit} >Add</Button>
+                            <Button className="btn-primary" type="submit" onClick={handleSubmit} >{ addUpdateLabel}</Button>
                     </Col>
                     <Col>
                             <Button className="btn-secondary" onClick={internalCancel} >Cancel</Button>
