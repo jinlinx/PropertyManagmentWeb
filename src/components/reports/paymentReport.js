@@ -5,6 +5,8 @@ import { Table } from 'react-bootstrap';
 import EditDropdown from '../paymentMatch/EditDropdown';
 import { TOTALCOLNAME,fMoneyformat } from './rootData';
 import { MonthRange } from './monthRange';
+import sortBy from 'lodash/sortBy';
+
 export default function PaymentReport(props) {
     const jjctx = props.jjctx;
     const {
@@ -60,6 +62,7 @@ export default function PaymentReport(props) {
     });
 
     monAddr.monthAry.sort();
+    monAddr.houseAry = sortBy(monAddr.houseAry, 'address');
 
     console.log(monAddr);
     const goodHouses = monAddr.houseAry.map(h => h.address);
