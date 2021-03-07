@@ -17,6 +17,7 @@ import LeftMenu from './leftMenu';
 import myStyles from './HomePage.css';
 import CashFlowReport from './reports/cashflow';
 import MaintenanceReport from './reports/maintenanceReport';
+import TenantPaymentMethodMapping from './reports/TenantPaymentMethodMapping';
 import AppOld from '../AppOld';
 import logo from '../images/Logo.png'
 import PaymentRport from './reports/paymentReport';
@@ -103,8 +104,9 @@ function App() {
                                         {
                                             curPage === 'dataEntry' && <>
                                                 <Button className='btn-LeftMenuButton' >House Maintenance Data Entry</Button><br></br><br></br>
-                                                <Button className='btn-LeftMenuButton' >Payment Data Entry</Button><br></br><br></br>
-                                                <Button className='btn-LeftMenuButton' onClick={() => setCurView('houseInfo')}>House Info Data Entry</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' onClick={() => setCurView('Paymentlist')}>Payment Data Entry</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' onClick={() => setCurView('Propertylist')}>House Info Data Entry</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' onClick={() => setCurView('TenantPaymentMethodMapping')}>Tenant Method</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' >Lease Data Entry</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' >Tenants Data Entry</Button><br></br><br></br>
                                             </>
@@ -149,7 +151,9 @@ function App() {
                                 if (curView === 'developer') return <div><Developer /></div>
                                 if (curView === 'oldapp') return <div><AppOld /></div>
                                 if (curView === 'paymentReport') return <PaymentRport jjctx={value} />
-                                if (curView === 'houseInfo') return <Propertylist  pageState={pageState} />
+                                if (curView === 'Propertylist') return <Propertylist pageState={pageState} />
+                                if (curView === 'Paymentlist') return <Paymentlist pageState={pageState} />
+                                if (curView === 'TenantPaymentMethodMapping') return <TenantPaymentMethodMapping/>
                             }
                         }
                 

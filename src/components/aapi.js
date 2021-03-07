@@ -112,3 +112,8 @@ export async function getPaymentSubTotalInfo() {
     order by paymentMonth,paymentYear, hi.address
     `); 
 }
+
+export async function getTenantPaymentMethodMapping() {
+    return sqlFreeForm(`select ptm.name, ptm.source , ti.firstName , ti.lastName , ti.tenantID
+    from payerTenantMapping ptm inner join tenantInfo ti on ti.tenantID  = ptm.tenantID `);
+}
