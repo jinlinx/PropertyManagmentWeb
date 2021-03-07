@@ -51,7 +51,7 @@ function GenList(props) {
     },[columnInfo, pageState.pageProps.reloadCount, paggingInfo.pos, paggingInfo.total]);
 
     const doAdd=(data,id) => {        
-        helper.saveData(data,id).then(res => {
+        return helper.saveData(data,id).then(res => {
             setLoading(true);            
             reload();
             return res;
