@@ -106,7 +106,7 @@ function App() {
                                         }
                                         {
                                             curPage === 'tools' && <>
-                                                <Button className='btn-LeftMenuButton' >Owners Info</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' onClick={()=>setCurView('OwnerList')}>Owners Info</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' >Workers Info</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' >Expanse Category List</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('developer')}>Developer Tools</Button><br></br><br></br>
@@ -148,6 +148,7 @@ function App() {
                                 if (curView === 'Paymentlist') return <Paymentlist pageState={pageState} />
                                 if (curView === 'TenantPaymentMethodMapping') return <TenantPaymentMethodMapping />
                                 if (curView === 'Leaselist') return <Leaselist pageState={pageState} />
+                                if (curView === 'OwnerList') return <OwnerList pageState={pageState} />
                             }
                         }
                 
