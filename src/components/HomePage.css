@@ -179,9 +179,9 @@
  }
 .divMain{
   width: 100%;
-  left: 200px;
-  top: 80px;
-  position: fixed;
+  margin-left: 200px;
+  margin-top: 80px;
+  position1: fixed;
   overflow-y: scroll;
   overflow-x: scroll;
 }
