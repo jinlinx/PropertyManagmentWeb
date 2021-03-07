@@ -131,7 +131,7 @@ function Developer(props) {
             <Col>
                 <Button disabled={ !!message } onClick={() => {
                     setMessage('Starting imports, please wait');
-                    getData('misc/gsimport').then(res => {
+                    getData('misc/gsimport?who=tenant').then(res => {
                         setMessage('import done');
                         setMessages(res.map(m=>`${m.address} ${m.firstName} ${m.lastName}`))
                     });
@@ -140,7 +140,7 @@ function Developer(props) {
             <Col>
                 <Button disabled={ !!message } onClick={() => {
                     setMessage('Starting imports, please wait');
-                    getData('misc/gsimport').then(res => {
+                    getData('misc/gsimport?who=maintence').then(res => {
                         setMessage('import done');
                         setMessages([res.message]);
                     });
