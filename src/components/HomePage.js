@@ -47,20 +47,13 @@ function App() {
     /*return <HomePage/>*/
     return (
         <>
-          
-           
             <div id="topNav" className="topNav">
-            
                 <table>
                     <tbody>
                         <tr>
-                            <td rowSpan='2'>
-                                    <img src={logo} style={{ width: 200, height: 150 }} /></td>
+                            <td rowSpan='1'>
+                                    <img src={logo} style={{ width: 200, height: 50 }} /></td>
                             <td colSpan='2' className='TopTitleFont'>Property Management</td>
-                            <td colSpan="3"></td>
-                        </tr>
-                        <tr>
-                            <td colSpan='2'></td>
                             <td><Button className='btnTopButton' href="#reports" onClick={() => setCurPage('reports')}>Reports</Button> </td>
                             <td><Button className='btnTopButton' href="#dateEntry" onClick={() => setCurPage('dataEntry')}>Data Entry</Button> </td>
                             <td><Button className='btnTopButton' href="#adminTools" onClick={() => setCurPage('tools')}>Admin Tools</Button> </td>
@@ -107,7 +100,7 @@ function App() {
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('Paymentlist')}>Payment Data Entry</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('Propertylist')}>House Info Data Entry</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('TenantPaymentMethodMapping')}>Tenant Method</Button><br></br><br></br>
-                                                <Button className='btn-LeftMenuButton' >Lease Data Entry</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' onClick={() => setCurView('Leaselist')}>Lease Data Entry</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' >Tenants Data Entry</Button><br></br><br></br>
                                             </>
                                         }
@@ -153,7 +146,8 @@ function App() {
                                 if (curView === 'paymentReport') return <PaymentRport jjctx={value} />
                                 if (curView === 'Propertylist') return <Propertylist pageState={pageState} />
                                 if (curView === 'Paymentlist') return <Paymentlist pageState={pageState} />
-                                if (curView === 'TenantPaymentMethodMapping') return <TenantPaymentMethodMapping/>
+                                if (curView === 'TenantPaymentMethodMapping') return <TenantPaymentMethodMapping />
+                                if (curView === 'Leaselist') return <Leaselist pageState={pageState} />
                             }
                         }
                 

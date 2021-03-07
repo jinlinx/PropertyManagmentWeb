@@ -14,7 +14,7 @@
 
  
 .topNav {
-    height: 150px; /* 100% Full-height */
+    height: 80px; /* 100% Full-height */
     width: 100%; /* 100% full width */
     position: fixed; /* Stay in place */
     z-index: 1; /* Stay on top */
@@ -37,9 +37,9 @@
     width: 200px; /* 0 width - change this with JavaScript */
     position: fixed; /* Stay in place */
     z-index: 1; /* Stay on top */
-    top: 150px; /* Stay at the top */
+    top: 80px; /* Stay at the top */
     left: 0;
-    padding-top: 60px; /* Place content 60px from the top */
+    padding-top: 3px; /* Place content 60px from the top */
     
   }
 
@@ -84,7 +84,7 @@
   .btn-LeftMenuButton {
     padding: 16px 31px;
     width: 150px;
-    border-radius:28px;
+    border-radius:8px;
   }
 
 
@@ -179,12 +179,9 @@
  }
 .divMain{
   width: 100%;
-  left: 255px;
-  top: 255px;
+  left: 200px;
+  top: 80px;
   position: fixed;
   overflow-y: scroll;
-  top: 255; 
-  left: 255; 
-  top: 255; 
-  bottom: 0;
+  overflow-x: scroll;
 }

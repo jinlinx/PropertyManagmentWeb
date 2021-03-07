@@ -3,11 +3,21 @@ import GenList from './GenList';
 import {fmtDate} from './util';
 import LeaseEmail from './leaseEmail/leaseEmail';
 const { parseCsv } = require('./utils');
-function LeaseList(props) {  
-    return <div>
-        <LeaseEmail/>
-        
-        <GenList 
+function LeaseList(props) {
+    //<LeaseEmail/>
+    /*
+     <input type='file' onChange={e => {
+            const file = e.target.files[0];
+            console.log(file);
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                // Use reader.result
+                console.log(parseCsv(reader.result.toString()));
+            }
+            reader.readAsText(file);
+        }}></input>  
+    */
+    return <GenList 
     {...props}
     table={'leaseInfo'}
 
@@ -35,17 +45,6 @@ displayFields={
             }
         }
         title={'Lease List'} />
-        <input type='file' onChange={e => {
-            const file = e.target.files[0];
-            console.log(file);
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                // Use reader.result
-                console.log(parseCsv(reader.result.toString()));
-            }
-            reader.readAsText(file);
-        }}></input>        
-        </div>
 }
 
 export default LeaseList;
