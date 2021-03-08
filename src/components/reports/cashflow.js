@@ -1,13 +1,19 @@
 import React, {useState, useEffect} from 'react';
 import { TOTALCOLNAME,fMoneyformat } from './rootData';
 import { MonthRange } from './monthRange';
+import { getPaymentsByMonthAddress } from './reportUtil';
 export default function CashFlowReport(props) {
     const jjctx = props.jjctx;
     const {
         paymentsByMonth, expenseData,
+        selectedMonths,
         monthes, 
     } = jjctx;
 
+    const monAddr = getPaymentsByMonthAddress(paymentsByMonth.originalData, {
+        isGoodMonth: m => selectedMonths[m],
+        isGoodHouseId: ()=>true,
+    });
     return <>
         <MonthRange jjctx={jjctx}></MonthRange>
         <table className='tableReport'>
@@ -22,7 +28,24 @@ export default function CashFlowReport(props) {
                 
             </thead>
             <tbody><tr>
-                <td className='tdLeftSubHeader' colSpan={monthes.length+2}>Income</td></tr>
+                <td className='tdLeftSubHeader' colSpan={monthes.length + 2}>Income</td></tr>
+                {
+                    monAddr.houseAry.map((house,key) => {
+                        const curHouse = monAddr.houseByKey[house.addressId];
+                        return <tr key={key}>
+                            <td className='tdLeftSubCategoryHeader'>{house.address}</td>
+                            <td className='tdCenter  tdTotalItalic'>{fMoneyformat(curHouse[TOTALCOLNAME])}</td>
+                            {
+                                monAddr.monthAry.map((mon,key) => {
+                                    return < td key={key} className='tdCenter  tdTotalItalic'> {
+                                        fMoneyformat((curHouse[mon] || {}).amount)
+
+                                    }</td>
+                                })
+                            }
+                        </tr>
+                    })
+            }
                 <tr><td>
                 </td><td >{fMoneyformat(paymentsByMonth[TOTALCOLNAME].total)}</td>
                 {
@@ -31,7 +54,8 @@ export default function CashFlowReport(props) {
                         if (!mon) return <td key={key}></td>;
                         return <td key={key}>{ fMoneyformat(mon.total)}</td>
                     })
-                }</tr>
+                    }</tr>
+                
                 <tr><td className='tdLeftSubHeader' colSpan={monthes.length+2}>Expenses</td></tr>
             
                 

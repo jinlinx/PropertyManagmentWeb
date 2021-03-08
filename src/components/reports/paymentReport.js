@@ -7,6 +7,8 @@ import { TOTALCOLNAME,fMoneyformat } from './rootData';
 import { MonthRange } from './monthRange';
 import sortBy from 'lodash/sortBy';
 
+import { getPaymentsByMonthAddress } from './reportUtil';
+
 export default function PaymentReport(props) {
     const jjctx = props.jjctx;
     const {
@@ -16,55 +18,10 @@ export default function PaymentReport(props) {
 
     const [selectedHouses, setSelectedHouses] = useState({});
     
-    const monAddr = paymentsByMonth.originalData.reduce((acc, d) => {
-        //console.log(d);
-        if (!selectedMonths[d.month]) return acc;
-        
-        let addData = acc.houseByKey[d.addressId];
-        if (!addData) {
-            addData = {
-                addressId: d.addressId,
-                address: d.address,
-                [TOTALCOLNAME]:0,
-            };
-            acc.houseByKey[d.addressId] = addData;
-            acc.houseAry.push(addData);
-        }
-
-        let monData = addData[d.month];
-        if (!monData) {
-            monData = {
-                amount: 0,
-            };
-            addData[d.month] = monData;
-        }
-        if (selectedHouses[d.addressId]) {
-            monData[TOTALCOLNAME] += d.amount;
-            acc.total += d.amount;
-        }
-        if (!acc.monthByKey[d.month]) {
-            acc.monthByKey[d.month] = true;
-            acc.monthAry.push(d.month);
-        }
-        monData.amount += d.amount;
-        if (selectedHouses[d.addressId]) {
-            addData[TOTALCOLNAME] += d.amount;
-            acc.monthTotal[d.month] = (acc.monthTotal[d.month] || 0) + d.amount;
-        }
-        return acc;
-    }, {
-        monthAry: [],
-        monthByKey: {},
-        houseAry: [],
-        houseByKey: {},
-        monthTotal: {},
-        total: 0,
+    const monAddr = getPaymentsByMonthAddress(paymentsByMonth.originalData, {
+        isGoodMonth: m => selectedMonths[m],
+        isGoodHouseId: id=>selectedHouses[id],
     });
-
-    monAddr.monthAry.sort();
-    monAddr.houseAry = sortBy(monAddr.houseAry, 'address');
-
-    console.log(monAddr);
     const goodHouses = monAddr.houseAry.map(h => h.address);
     goodHouses.sort();
     useEffect(() => {
