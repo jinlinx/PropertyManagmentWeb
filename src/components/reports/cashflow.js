@@ -36,7 +36,7 @@ export default function CashFlowReport(props) {
                             <td className='tdLeftSubCategoryHeader'>{house.address}</td>
                             <td className='tdCenter  tdTotalItalic'>{fMoneyformat(curHouse[TOTALCOLNAME])}</td>
                             {
-                                monAddr.monthAry.map((mon,key) => {
+                                monthes.map((mon,key) => {
                                     return < td key={key} className='tdCenter  tdTotalItalic'> {
                                         fMoneyformat((curHouse[mon] || {}).amount)
 
