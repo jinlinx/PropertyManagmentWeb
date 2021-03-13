@@ -21,6 +21,7 @@ import TenantPaymentMethodMapping from './reports/TenantPaymentMethodMapping';
 import AppOld from '../AppOld';
 import logo from '../images/Logo.png'
 import PaymentRport from './reports/paymentReport';
+import ExepenseCategory from './dataEntry/expenseCategory';
 
 import { JJDataRoot, IncomeExpensesContext} from './reports/rootData';
 function App() {
@@ -108,7 +109,7 @@ function App() {
                                             curPage === 'tools' && <>
                                                 <Button className='btn-LeftMenuButton' onClick={()=>setCurView('OwnerList')}>Owners Info</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' >Workers Info</Button><br></br><br></br>
-                                                <Button className='btn-LeftMenuButton' >Expanse Category List</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' onClick={()=>setCurView('expenseCategory')}>Expanse Category List</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('developer')}>Developer Tools</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('oldapp')}>OldApp</Button><br></br><br></br>
                                             </>
@@ -149,6 +150,7 @@ function App() {
                                 if (curView === 'TenantPaymentMethodMapping') return <TenantPaymentMethodMapping />
                                 if (curView === 'Leaselist') return <Leaselist pageState={pageState} />
                                 if (curView === 'OwnerList') return <OwnerList pageState={pageState} />
+                                if (curView === 'expenseCategory') return <ExepenseCategory pageState={pageState}></ExepenseCategory>
                             }
                         }
                 
