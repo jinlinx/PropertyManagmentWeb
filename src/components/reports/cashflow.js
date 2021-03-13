@@ -37,7 +37,7 @@ export default function CashFlowReport(props) {
                             <td className='tdCenter  tdTotalItalic'>{fMoneyformat(curHouse[TOTALCOLNAME])}</td>
                             {
                                 monthes.map((mon,key) => {
-                                    return < td key={key} className='tdCenter  tdTotalItalic'> {
+                                    return < td key={key} className='tdCenter'> {
                                         fMoneyformat((curHouse[mon] || {}).amount)
 
                                     }</td>
@@ -45,14 +45,16 @@ export default function CashFlowReport(props) {
                             }
                         </tr>
                     })
-            }
-                <tr><td>
-                </td><td >{fMoneyformat(paymentsByMonth[TOTALCOLNAME].total)}</td>
+                }
+                <tr>
+
+                <td className='tdLeftSubCategoryHeader'>Sub Total:
+                </td><td className='tdCenter  tdTotalItalic'>{fMoneyformat(paymentsByMonth[TOTALCOLNAME].total)}</td>
                 {
                     monthes.map((name,key) => {
                         const mon = paymentsByMonth[name];
-                        if (!mon) return <td key={key}></td>;
-                        return <td key={key}>{ fMoneyformat(mon.total)}</td>
+                        if (!mon) return <td className='tdCenter  tdTotalItalic' key={key}></td>;
+                        return <td className='tdCenter  tdTotalItalic' key={key}>{ fMoneyformat(mon.total)}</td>
                     })
                     }</tr>
                 
@@ -72,7 +74,7 @@ export default function CashFlowReport(props) {
                         </tr>
                     })
                     }
-                <tr><td className='tdLeftSubCategoryHeader'>Total</td><td class='tdCenter  tdTotalItalic'>{
+                <tr><td className='tdLeftSubCategoryHeader'>Sub Total</td><td class='tdCenter  tdTotalItalic'>{
                     fMoneyformat(expenseData.categoriesByKey[TOTALCOLNAME][TOTALCOLNAME])
                 }</td>
                     {
