@@ -12,12 +12,11 @@ function ExpenseCategoryList(props) {
                     {
                         name: 'displayOrder',
                         op: 'asc',
-                        shortDesc:'AS',
+                        shortDesc: 'AS',
                     }
                 ]
             }
-        }))
-        console.log(pageState);
+        }));
     }, []);
     const tableName = 'expenseCategories';
     const pageProps = props?.pageState?.pageProps[tableName];

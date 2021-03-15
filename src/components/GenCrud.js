@@ -58,6 +58,7 @@ const GenCrud = (props) => {
             needRear3dots,
             frontPageInds,
             rearPageInds,
+            needsPagging: lastPage*paggingInfo.PageSize > paggingInfo.total
         }
     };
     const paggingCalced = calcPage();
@@ -137,15 +138,17 @@ const GenCrud = (props) => {
             {
                 dspState === 'dsp' &&
                 <div>
-                    <div>
-                        {makePageButtons([0],'<<')}
-                        {paggingCalced.needFront3dots?'...':''}
-                        {makePageButtons(paggingCalced.frontPageInds)}
-                        {paggingInfo.pos + 1}
-                         {makePageButtons(paggingCalced.rearPageInds)}
-                        {paggingCalced.needRear3dots ? '...' : ''}
-                        {makePageButtons([paggingInfo.lastPage],'>>')}
-                    </div>
+                    {
+                        paggingCalced.needsPagging && <div>
+                            {makePageButtons([0], '<<')}
+                            {paggingCalced.needFront3dots ? '...' : ''}
+                            {makePageButtons(paggingCalced.frontPageInds)}
+                            {paggingInfo.pos + 1}
+                            {makePageButtons(paggingCalced.rearPageInds)}
+                            {paggingCalced.needRear3dots ? '...' : ''}
+                            {makePageButtons([paggingInfo.lastPage], '>>')}
+                        </div>
+                    }
                     <div>
                         <a href="" onClick={filterClick}>{showFilter ? 'Hide' : 'Filter'}</a>
                         {
