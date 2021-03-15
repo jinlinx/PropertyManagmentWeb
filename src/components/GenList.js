@@ -6,9 +6,9 @@ import { getFKDefs } from './GenCrudTableFkTrans';
 
 //props: table and displayFields [fieldNames]
 function GenList(props) {
-    const {table, columnInfo, loadMapper, pageState , fkDefs} = props;
+    const {table, columnInfo, loadMapper, pageState , fkDefs, initialPageSize} = props;
     const [paggingInfo, setPaggingInfo] = useState({
-        PageSize: 10,        
+        PageSize: initialPageSize|| 10,        
         pos: 0,
         total: 0,
     });
