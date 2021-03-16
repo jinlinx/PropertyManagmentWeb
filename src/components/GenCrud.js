@@ -58,7 +58,7 @@ const GenCrud = (props) => {
             needRear3dots,
             frontPageInds,
             rearPageInds,
-            needsPagging: lastPage*paggingInfo.PageSize > paggingInfo.total
+            needsPagging: lastPage > 0,
         }
     };
     const paggingCalced = calcPage();
