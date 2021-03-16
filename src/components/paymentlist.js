@@ -13,8 +13,10 @@ function PaymentList(props) {
                     field: 'receivedDate', desc: 'Date Received', dspFunc: fmtDate
                 },
                 {field: 'receivedAmount',desc: 'Received Amount',},
-                {field: 'paidBy',desc: 'Paid By',},
-                {field:'comment', desc:'Lease'}
+                { field: 'paidBy', desc: 'Paid By', },
+                //{field: 'paymentType',desc: 'Payment Type',},
+                { field: 'comment', desc: 'Lease' },
+                {field:'paymentTypeName', desc:'PaymentType'}
                 //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
             ]
         }
