@@ -40,5 +40,15 @@ export function getFKDefs() {
                 });
             },
         },
+        paymentType: {
+            processForeignKey: (fk,datas) => {
+                return datas.map(data => {
+                    return {
+                        value: data[fk.field],
+                        label: data['paymentTypeName'],
+                    }
+                });
+            },
+        },
     };
 }
