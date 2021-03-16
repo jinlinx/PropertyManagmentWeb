@@ -59,20 +59,22 @@ function App() {
                             <td><Button className='btnTopButton' href="#dateEntry" onClick={() => setCurPage('dataEntry')}>Data Entry</Button> </td>
                             <td><Button className='btnTopButton' href="#adminTools" onClick={() => setCurPage('tools')}>Admin Tools</Button> </td>
            
-                            <td><NavDropdown title={"Owner:  " + ownerInfo.ownerName} id="basic-nav-dropdown">
-                                {
-                                    owners.map((p, i) => {
-                                        return <NavDropdown.Item key={i} onClick={() => {
-                                            //setShowPage(i);
-                                            setOwnerInfo(p);
-                                        }}>{p.ownerName}</NavDropdown.Item>
-                                    })
-                                }
+                            {
+                                false && <td><NavDropdown title={"Owner:  " + ownerInfo.ownerName} id="basic-nav-dropdown">
+                                    {
+                                        owners.map((p, i) => {
+                                            return <NavDropdown.Item key={i} onClick={() => {
+                                                //setShowPage(i);
+                                                setOwnerInfo(p);
+                                            }}>{p.ownerName}</NavDropdown.Item>
+                                        })
+                                    }
  
-                            </NavDropdown>
+                                </NavDropdown>
                                        
                                        
-                            </td>
+                                </td>
+                            }
                         </tr>
                     </tbody>
                 </table>
@@ -122,16 +124,6 @@ function App() {
                         <Col md="auto"></Col>
                     </Row>
                 </Container>
-                <NavDropdown title={"Owner:  " + ownerInfo.ownerName} id="basic-nav-dropdown">
-                    {
-                        owners.map((p, i) => {
-                            return <NavDropdown.Item key={i} onClick={() => {
-                                //setShowPage(i);
-                                setOwnerInfo(p);
-                            }}>{p.ownerName}</NavDropdown.Item>
-                        })
-                    }
-                </NavDropdown>
             </div>
             <JJDataRoot>
 
