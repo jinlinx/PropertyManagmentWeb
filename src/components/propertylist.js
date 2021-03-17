@@ -23,7 +23,6 @@ function HouseList(props) {
                 {field: 'city',desc: 'City',},
                 {field: 'state',desc: 'State',},
             { field: 'zip', desc: 'Zip', },
-            {field: 'ownerName',desc: 'Owner',},
                 //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
             ]
         }        

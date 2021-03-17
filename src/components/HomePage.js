@@ -93,7 +93,7 @@ function App() {
                                                     <Button className='btn-LeftMenuButton' onClick={() => setCurView('cashFlowSummary')}>Cash Flow Summary Report</Button><br></br><br></br>
                                                     <Button className='btn-LeftMenuButton' onClick={() => setCurView('maintenanceReport')}>House Maintenance Report</Button><br></br><br></br>
                                                     <Button className='btn-LeftMenuButton' onClick={() => setCurView('paymentReport')}>Payment Report</Button><br></br><br></br>
-                                                    <Button className='btn-LeftMenuButton' >Worker Compensation Report</Button><br></br>
+                                                    <Button className='btn-LeftMenuButton' onClick={() => setCurView('workerCompensationReport')}>Worker Compensation Report</Button><br></br>
                                   
                                             </>
                                         }
@@ -143,6 +143,8 @@ function App() {
                                 if (curView === 'Leaselist') return <Leaselist pageState={pageState} />
                                 if (curView === 'OwnerList') return <OwnerList pageState={pageState} />
                                 if (curView === 'expenseCategory') return <ExepenseCategory pageState={pageState}></ExepenseCategory>
+                                if (curView === 'workerCompensationReport') return <span>Not Implemented workerCompensationReport</span>
+                                return <span>Not implemented {curView}</span>
                             }
                         }
                 
