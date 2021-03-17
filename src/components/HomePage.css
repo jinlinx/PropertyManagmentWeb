@@ -16,11 +16,11 @@
 .topNav {
     height: 80px; /* 100% Full-height */
     width: 100%; /* 100% full width */
-    position: fixed; /* Stay in place */
+    position: sticky; /* Stay in place */
     z-index: 1; /* Stay on top */
     top: 0; /* Stay at the top */
     left: 0;
-    overflow: hidden;
+    /*overflow: hidden;*/
     
   }
 
@@ -43,9 +43,7 @@
     
   }
 
-  .sidenav, .topNav {
-    
-    position: fixed; /* Stay in place */
+  .sidenav, .topNav {    
     z-index: 1; /* Stay on top */
     background-color:rgba(12, 169, 180, 0.822); /* Black*/
     overflow-x: hidden; /* Disable horizontal scroll */
@@ -59,7 +57,7 @@
     color: #818181;
     display: block;
     transition: 0.3s;
-    padding: 8px 8px 8px 32px;
+    padding: 8px 8px 8px 8px;
   }
   .sidenav a {
     font-size: 25px;
@@ -72,14 +70,6 @@
     color: #f1f1f1;
   }
   
-  /* Position and style the close button (top right corner) */
-  .sidenav .closebtn, .topNav .closebtn {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px;
-    margin-left: 50px;
-  }
   
   .btn-LeftMenuButton {
     padding: 16px 31px;
@@ -178,10 +168,8 @@
   
  }
 .divMain{
-  width: 100%;
-  margin-left: 200px;
-  margin-top: 80px;
-  position1: fixed;
+  left: 200px;
+  position: relative;
   overflow-y: scroll;
-  overflow-x: scroll;
+  overflow-x: hidden;
 }

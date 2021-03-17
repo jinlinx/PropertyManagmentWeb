@@ -216,6 +216,7 @@ const GenCrud = (props) => {
                                         </th>
                                     })
                                 }
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
