@@ -15,7 +15,8 @@ function PaymentList(props) {
                 {field: 'receivedAmount',desc: 'Received Amount',},
                 { field: 'paidBy', desc: 'Paid By', },
                 //{field: 'paymentType',desc: 'Payment Type',},
-                { field: 'comment', desc: 'Lease' },
+                //{ field: 'comment', desc: 'Lease' },
+                { field: 'address', desc: 'Address' },
                 {field:'paymentTypeName', desc:'PaymentType'}
                 //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
             ]
