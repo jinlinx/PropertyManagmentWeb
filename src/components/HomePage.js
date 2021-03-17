@@ -104,7 +104,7 @@ function App() {
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('Propertylist')}>House Info Data Entry</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('TenantPaymentMethodMapping')}>Tenant Method</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('Leaselist')}>Lease Data Entry</Button><br></br><br></br>
-                                                <Button className='btn-LeftMenuButton' >Tenants Data Entry</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' onClick={() => setCurView('tenantlist')}>Tenants Data Entry</Button><br></br><br></br>
                                             </>
                                         }
                                         {
@@ -144,6 +144,7 @@ function App() {
                                 if (curView === 'OwnerList') return <OwnerList pageState={pageState} />
                                 if (curView === 'expenseCategory') return <ExepenseCategory pageState={pageState}></ExepenseCategory>
                                 if (curView === 'workerCompensationReport') return <span>Not Implemented workerCompensationReport</span>
+                                if (curView === 'tenantlist') return <Tenantlist pageState={pageState} ></Tenantlist>
                                 return <span>Not implemented {curView}</span>
                             }
                         }
