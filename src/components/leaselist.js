@@ -24,12 +24,12 @@ function LeaseList(props) {
 displayFields={
         //actualy don't need to do this
         [
-            { field: 'deposit', desc: 'Deposit',  },
-        { field: 'endDate', desc: 'End Date', dspFunc: fmtDate },
-        { field: 'startDate', desc: 'Start Date', dspFunc: fmtDate },
-            { field: 'houseAddress', desc: 'House'},
-            { field: 'comment', desc: 'Comment' },
+            { field: 'houseAddress', desc: 'House'},            
+            { field: 'startDate', desc: 'Start Date', dspFunc: fmtDate },
+        { field: 'endDate', desc: 'End Date', dspFunc: fmtDate },        
         { field: 'monthlyRent', desc: 'Monthly Rent' },
+        { field: 'deposit', desc: 'Deposit',  },
+            { field: 'comment', desc: 'Comment' },        
             //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
         ]
     }
