@@ -168,7 +168,7 @@
   
  }
 .divMain{
-  left: 200px;
+  margin-left: 200px;
   position: relative;
   overflow-y: scroll;
   overflow-x: hidden;

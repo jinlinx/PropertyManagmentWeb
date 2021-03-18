@@ -216,7 +216,7 @@ const GenCrud = (props) => {
                                         </th>
                                     })
                                 }
-                                <th></th>
+                                <th><Button onClick={addNew}>Add</Button></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -247,13 +247,14 @@ const GenCrud = (props) => {
                                                     return <td key={find}>{dsp}</td>
                                                 } )
                                             }
-                                            <td>
-                                                {idCol && <Button onClick={() => props.doDelete(idCol.field, row[idCol.field])}>Delete</Button>}
-                                                {idCol&&<Button onClick={() => {
+                                            <td>                                                
+                                                {idCol&&<Button variant="outline-primary" onClick={() => {
                                                     setEditItem(row);
                                                     setDspState('edit');
                                                 }}>Edit</Button>
                                                 }
+                                                {' '}
+                                                {idCol && <Button variant="outline-danger" size="sm" className="btn-xs" onClick={() => props.doDelete(idCol.field, row[idCol.field])}>Delete</Button>}
                                             </td>
                                         </tr>
                                     )
@@ -266,8 +267,7 @@ const GenCrud = (props) => {
                             }
                         
                         </tbody>
-                    </Table>
-                    <Button onClick={addNew}>Add</Button>
+                    </Table>                    
                 </div>
             }
 
