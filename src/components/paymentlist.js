@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import GenList from './GenList';
 import { fmtDate } from './util';
-import {Modal, Button} from 'react-bootstrap';
+import {Modal, Button, Table, InputGroup} from 'react-bootstrap';
 import {sqlGet} from './api';
+import EmailTemplate from './leaseEmail/emailTemplate';
 function PaymentList(props) {
 
     const [pageState, setPageState] = useState({
@@ -11,6 +12,8 @@ function PaymentList(props) {
         leaseIDToSearch: null,
         tenants:[],
     });
+
+    const [selectedEmails, setSelectedEmails] = useState([]);
 
     useEffect(()=>{
         if (!pageState.leaseIDToSearch) return;
@@ -21,10 +24,15 @@ function PaymentList(props) {
             console.log(res);
             setPageState(state=>({
                 ...state,
-                leaseIDToSearch: null,
                 retrivingData: state.retrivingData-1,
                 operationText: ``,
                 tenants: res.rows,
+            }));
+            setSelectedEmails(res.rows.map(r=>{
+                return {
+                    email: r.email,
+                    origEmail: r.email.toLowerCase(),
+                }
             }));
         })
     },[pageState.leaseIDToSearch]);
@@ -37,7 +45,7 @@ function PaymentList(props) {
             leaseIDToSearch: row.leaseID,
             retrivingData: state.retrivingData+2,
             operationText: `Getting email list for ${name}`,
-        }));
+        }));        
     };
     const handleClose = ()=>{
         setPageState(state=>({
@@ -45,20 +53,67 @@ function PaymentList(props) {
             retrivingData: state.retrivingData-1,
         }));
     };
+    const selectedEmailMap = selectedEmails.reduce((acc, email) => {
+        acc[email.email.toLowerCase()] = true;
+        return acc;
+    }, {});
+    function addEmail(email) {
+        if (!email) return;
+        if (selectedEmailMap[email.toLowerCase()]) return;
+        setSelectedEmails(state=>([
+            ...state,
+            {
+                origEmail: email.toLowerCase(),
+                email,
+            }
+        ]));
+    }
+    function deleteEmail(email) {
+        email = email || '';
+        if (!selectedEmailMap[email.toLowerCase()]) return;
+        setSelectedEmails(state=>{
+            return state.filter(s=>s.origEmail!== email.toLowerCase());
+        });
+    }
     return <>
     <Modal show={!!pageState.retrivingData} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Please Wait</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-            <div>{pageState.operationText}</div>
-            <ul>
-            {                
-                pageState.tenants.map(tenant=>{
-                    return <li>{tenant.firstName} {tenant.lastName} email={tenant.email}</li>
-                })
-            }
-            </ul>
+            <div>{pageState.operationText}</div>            
+            <Table>
+            <tbody>
+                <tr><td></td><td>firstName</td><td>Last Name</td><td>Email</td></tr>
+                {
+                    pageState.tenants.map((l,ind) => {
+                        return <tr key={ind}><td>
+                            {l.email && <InputGroup.Checkbox aria-label="Select for email" checked={selectedEmailMap[l.email.toLowerCase()] || false} onChange={e => {
+
+                                console.log('val=' + e.target.checked);
+                                if (e.target.checked) {
+                                    const eml = l.email.toLowerCase();
+                                    if (!selectedEmailMap[eml]) {
+                                        //setSelectedEmails([...selectedEmails, eml]);
+                                        addEmail(l.email);
+                                    }
+                                } else {
+                                    //setSelectedEmails(selectedEmails.filter(e => e.toLowerCase() !== l.email.toLowerCase()));
+                                    deleteEmail(l.email);
+                                }
+                            }} />
+                            }
+                        </td><td>{l.firstName}</td><td>{l.lastName}</td><td>{l.email}</td><td>{l.phone}</td></tr>
+                    })
+                }
+            </tbody>
+        </Table>
+            <EmailTemplate leaseID={pageState.leaseIDToSearch} context={{
+            selectedEmails, setSelectedEmails,
+            addEmail,
+            deleteEmail,
+            updateEmail: ()=>{},
+        }} />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

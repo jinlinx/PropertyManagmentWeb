@@ -21,10 +21,12 @@ export default function EmailTemplate(props) {
         sqlFreeForm(`select leaseID, subject, data
         from leaseEmailTemplate where leaseID=?`,[leaseID]).then(res => {
             setTemplate(res[0] || getEmptyTemplate());
+        }).catch(err=>{
+            console.log('emailTemplatejs template error')
         })
     }
     useEffect(() => {
-        load();
+        if (leaseID) load();
     }, [leaseID]);    
     
     return <div>    
@@ -56,14 +58,13 @@ export default function EmailTemplate(props) {
                 }
                 <tr><td>< Form.Control as="input" value={newEmail} name={'newEmail'} onChange={e => {
                     setNewEmail(e.target.value);
-                }} /> </td><td><Button onClick={() => {
-                        if (selectedEmails.filter(e => e.email.toLowerCase() === newEmail.toLowerCase().trim())) {
+                }} /> </td><td><Button onClick={async () => {
+                        if (selectedEmails.filter(e => e.email.toLowerCase() === newEmail.toLowerCase().trim()).length) {
                             setNewEmail('');
                             return;
                         }
-                        addEmail(newEmail.trim()).then(() => {
-                            setNewEmail('');
-                        })                        
+                        await addEmail(newEmail.trim());
+                        setNewEmail('');
                 }}>Add</Button></td></tr>
             </tbody>
         </Table>
