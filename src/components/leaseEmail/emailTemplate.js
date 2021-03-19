@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup, Tab } from 'react-bootstrap';
+import { Table, Form, Modal, Dropdown, Button, Toast, InputGroup, Tab } from 'react-bootstrap';
 const { sqlFreeForm, sendEmail } = require('../api');
 export default function EmailTemplate(props) {
     const { leaseID,
@@ -16,6 +16,7 @@ export default function EmailTemplate(props) {
         data: '',})
     const [newEmail, setNewEmail] = useState('');
     const [template, setTemplate] = useState(getEmptyTemplate());
+    const [errorTxt, setErrorText] = useState('');
     
     const load = () => {
         sqlFreeForm(`select leaseID, subject, data
@@ -29,7 +30,20 @@ export default function EmailTemplate(props) {
         if (leaseID) load();
     }, [leaseID]);    
     
-    return <div>    
+    return <div>
+        <Modal show={!!errorTxt}>
+  <Modal.Header closeButton>
+    <Modal.Title>Error</Modal.Title>
+  </Modal.Header>
+
+  <Modal.Body>
+                <p>{ errorTxt}</p>
+  </Modal.Body>
+
+  <Modal.Footer>
+    <Button variant="secondary" onClick={()=>setErrorText('')}>Close</Button>
+  </Modal.Footer>
+</Modal>
         <Table>
             <tbody>                
                 {
@@ -97,6 +111,10 @@ export default function EmailTemplate(props) {
                     console.log(`${subject} ${text}`);
                     sendEmail({ from: '"Jinlin" <jinlinx@hotmail.com>', to, subject, text }).then(r => {
                         console.log(r);
+                    }).catch(err => {
+                        console.log('send email error');
+                        console.log(err);
+                        setErrorText(err.message);
                     })
                 }}>
                     Send email
