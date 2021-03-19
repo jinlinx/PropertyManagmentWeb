@@ -11,7 +11,8 @@ function PaymentList(props) {
         retrivingData: 0,
         operationText: '',
         leaseIDToSearch: null,
-        tenants:[],
+        tenants: [],
+        row: {},
     });
 
     const [selectedEmails, setSelectedEmails] = useState([]);
@@ -37,27 +38,44 @@ function PaymentList(props) {
                     origEmail: r.email.toLowerCase(),
                 }
             }));
+            setTemplate(state => {
+                const row = pageState.row;
+                const part2 = (row && row.address)?`of ${row.address} ${moment(row.receivedDate).format('YYYY-MM-DD')} Amount: ${row.receivedAmount}`:'';
+                return {
+                    ...state,
+                    data: `For ${res.rows.map(r => `${r.firstName} ${r.lastName}`).join(',')} ${part2}`,
+                }
+            });
         })
     },[pageState.leaseIDToSearch]);
     const emailClick = (name, row)=>{
         //console.log('val is onemail click ' + val);
         console.log(row.leaseID);
-        setPageState(state=>({
-            ...state,
-            tenants:[],
-            leaseIDToSearch: row.leaseID,
-            retrivingData: state.retrivingData+2,
-            operationText: `Getting email list for ${name}`,
-        }));
-        setTemplate({
-            subject: `Invoice for ${row.address} ${moment(row.receivedDate).format('YYYY-MM-DD')}`,
-            data: `Invoice for ${row.address} ${moment(row.receivedDate).format('YYYY-MM-DD')} Amount: ${row.receivedAmount}`,
+        setPageState(state => {
+            return ({
+                ...state,
+                leaseIDToSearch: row.leaseID,
+                retrivingData: state.retrivingData + 2,
+                row,
+                operationText: `Getting email list for ${name}`,
+            })
+        });
+        
+        setTemplate(() => {
+            let part1 = '';
+            if (pageState.tenants) {
+                part1 = 'For ' + pageState.tenants.map(t => `${t.firstName} ${t.lastName}`).join(',') + ':'
+            }
+            return {
+                subject: `Invoice for ${row.address} ${moment(row.receivedDate).format('YYYY-MM-DD')}`,
+                data: part1 + `Invoice for ${row.address} ${moment(row.receivedDate).format('YYYY-MM-DD')} Amount: ${row.receivedAmount}`,
+            };
         })
     };
     const handleClose = ()=>{
         setPageState(state=>({
             ...state,
-            retrivingData: state.retrivingData-1,
+            retrivingData: 0,
         }));
     };
     const selectedEmailMap = selectedEmails.reduce((acc, email) => {
