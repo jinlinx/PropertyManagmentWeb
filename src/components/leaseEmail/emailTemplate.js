@@ -10,25 +10,11 @@ export default function EmailTemplate(props) {
         setSelectedEmails,
         deleteEmail,
         updateEmail,
+        template, setTemplate,
     } = context;
-    const getEmptyTemplate = () => ({
-        subject: '',
-        data: '',})
     const [newEmail, setNewEmail] = useState('');
-    const [template, setTemplate] = useState(getEmptyTemplate());
-    const [errorTxt, setErrorText] = useState('');
     
-    const load = () => {
-        sqlFreeForm(`select leaseID, subject, data
-        from leaseEmailTemplate where leaseID=?`,[leaseID]).then(res => {
-            setTemplate(res[0] || getEmptyTemplate());
-        }).catch(err=>{
-            console.log('emailTemplatejs template error')
-        })
-    }
-    useEffect(() => {
-        if (leaseID) load();
-    }, [leaseID]);    
+    const [errorTxt, setErrorText] = useState('');  
     
     return <div>
         <Modal show={!!errorTxt}>

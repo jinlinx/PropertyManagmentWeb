@@ -4,6 +4,7 @@ import { fmtDate } from './util';
 import {Modal, Button, Table, InputGroup} from 'react-bootstrap';
 import {sqlGet} from './api';
 import EmailTemplate from './leaseEmail/emailTemplate';
+import moment from 'moment';
 function PaymentList(props) {
 
     const [pageState, setPageState] = useState({
@@ -14,7 +15,9 @@ function PaymentList(props) {
     });
 
     const [selectedEmails, setSelectedEmails] = useState([]);
-
+    const [template, setTemplate] = useState({
+        subject: '',
+        data: '',});
     useEffect(()=>{
         if (!pageState.leaseIDToSearch) return;
         sqlGet({
@@ -45,7 +48,11 @@ function PaymentList(props) {
             leaseIDToSearch: row.leaseID,
             retrivingData: state.retrivingData+2,
             operationText: `Getting email list for ${name}`,
-        }));        
+        }));
+        setTemplate({
+            subject: `Invoice for ${row.address} ${moment(row.receivedDate).format('YYYY-MM-DD')}`,
+            data: `Invoice for ${row.address} ${moment(row.receivedDate).format('YYYY-MM-DD')} Amount: ${row.receivedAmount}`,
+        })
     };
     const handleClose = ()=>{
         setPageState(state=>({
@@ -112,7 +119,8 @@ function PaymentList(props) {
             selectedEmails, setSelectedEmails,
             addEmail,
             deleteEmail,
-            updateEmail: ()=>{},
+                    updateEmail: () => { },
+                    template, setTemplate,
         }} />
         </Modal.Body>
         <Modal.Footer>
