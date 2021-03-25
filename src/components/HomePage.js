@@ -22,7 +22,8 @@ import AppOld from '../AppOld';
 import logo from '../images/Logo.png'
 import PaymentRport from './reports/paymentReport';
 import ExepenseCategory from './dataEntry/expenseCategory';
-
+import MaintanceList from './maintenanceList';
+    
 import { JJDataRoot, IncomeExpensesContext} from './reports/rootData';
 function App() {
     const [owners, setOwners] = useState([]);
@@ -99,7 +100,7 @@ function App() {
                                         }
                                         {
                                             curPage === 'dataEntry' && <>
-                                                <Button className='btn-LeftMenuButton' >House Maintenance Data Entry</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' onClick={() => setCurView('maintenanceList')}>House Maintenance Data Entry</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('Paymentlist')}>Payment Data Entry</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('Propertylist')}>House Info Data Entry</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('TenantPaymentMethodMapping')}>Tenant Method</Button><br></br><br></br>
@@ -145,6 +146,7 @@ function App() {
                                 if (curView === 'expenseCategory') return <ExepenseCategory pageState={pageState}></ExepenseCategory>
                                 if (curView === 'workerCompensationReport') return <span>Not Implemented workerCompensationReport</span>
                                 if (curView === 'tenantlist') return <Tenantlist pageState={pageState} ></Tenantlist>
+                                if (curView === 'maintenanceList') return <MaintanceList pageState={pageState} ></MaintanceList>
                                 return <span>Not implemented {curView}</span>
                             }
                         }
