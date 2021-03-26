@@ -111,7 +111,7 @@ function App() {
                                         {
                                             curPage === 'tools' && <>
                                                 <Button className='btn-LeftMenuButton' onClick={()=>setCurView('OwnerList')}>Owners Info</Button><br></br><br></br>
-                                                <Button className='btn-LeftMenuButton' >Workers Info</Button><br></br><br></br>
+                                                <Button className='btn-LeftMenuButton' onClick={()=>setCurView('workerCompList')}>Worker Compensiation</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={()=>setCurView('expenseCategory')}>Expanse Category List</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('developer')}>Developer Tools</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('oldapp')}>OldApp</Button><br></br><br></br>
@@ -147,6 +147,7 @@ function App() {
                                 if (curView === 'workerCompensationReport') return <span>Not Implemented workerCompensationReport</span>
                                 if (curView === 'tenantlist') return <Tenantlist pageState={pageState} ></Tenantlist>
                                 if (curView === 'maintenanceList') return <MaintanceList pageState={pageState} ></MaintanceList>
+                                if (curView === 'workerCompList') return <WorkerCompList  pageState={pageState}></WorkerCompList>
                                 return <span>Not implemented {curView}</span>
                             }
                         }
