@@ -14,10 +14,12 @@ export default function MonthlyComp() {
     const [monthes, setMonthes] = useState([]);
     const [curMonth, setCurMonth] = useState({});
     const [payments, setPayments] = useState([]);
+    const [maintenanceRecords, setMaintenanceRecords] = useState([]);
     const workerToOptin = w => ({
         value: w.workerID,
         label: `${w.firstName} ${w.lastName}`,
     });
+    //load comp params
     useEffect(() => {
         sqlGet({
             table: 'workerComp',
@@ -43,6 +45,7 @@ export default function MonthlyComp() {
         });       
         
     }, []);
+    //load aggregated months
     useEffect(() => {
         if (!curWorker.value) return;
         sqlGet({
@@ -52,32 +55,18 @@ export default function MonthlyComp() {
                 field: 'workerID',
                 op: '=',
                 val: curWorker.value,
-            }],
+            }            
+        ],
             groupByArray: [{ 'field': 'month' }]
         }).then(res => {
-            const rows = res.rows.map(r=>r.month).map(m=>m.substr(0,7));
-            rows.sort((a, b) => {
-                if (a > b) return -1;
-                if (a < b) return 1;
-                return 0;
-            });
+            let rows = res.rows.map(r=>r.month).map(m=>m.substr(0,7));
+            rows = orderBy(rows,[x=>x],['desc']);
             const m = rows.map(value => ({
                 value,
                 label: value,
             }));
             setMonthes(m);
             if (m.length) setCurMonth(m[0]);
-        });
-
-        sqlGet({
-            table:'maintenanceRecords',
-            whereArray: [{
-                field: 'workerID',
-                op: '=',
-                val: curWorker.value,
-            }],
-        }).then(res=>{
-            
         });
     }, [curWorker]);
     
@@ -90,6 +79,18 @@ export default function MonthlyComp() {
             whereArray:[{field:'workerID', op:'=',val: curWorker.value},{field:'month',op:'=',val:curMonth.value}],
         }).then(res => {
             setPayments(res.rows);
+        })
+
+        sqlGet({
+            table:'maintenanceRecords',
+            whereArray: [{
+                field: 'workerID',
+                op: '=',
+                val: curWorker.value,
+            },{field:'month',op:'=',val:curMonth.value}],
+        }).then(res=>{
+            const rows = orderBy(res.rows,['date']);
+            setMaintenanceRecords(rows);
         })
     }, [curMonth.value]);
 
@@ -114,7 +115,8 @@ export default function MonthlyComp() {
         return cmp.amount;
     }
     
-    const totalToBePaid = sumBy(curWorkerComp.map(getCmpAmt),x=>x);
+    const totalEarned = sumBy(curWorkerComp.map(getCmpAmt),x=>x);
+    const totalReimburseAmunt = sumBy(maintenanceRecords,'amount');
     return <div style={{display:'flex', height:'100%', flexDirection:'column', boxSizing:'border-box'}}>
         <Modal show={!!errorTxt}>
             <Modal.Header closeButton>
@@ -160,22 +162,45 @@ export default function MonthlyComp() {
                         curWorkerComp.map(cmp => {
                             const lt = cmpToLease(cmp);
                             return <tr><td>{cmp.amount}</td><td>{cmp.type}</td><td>{cmp.address}</td>
-                                <td>{lt.total}</td><td>{ totalToBePaid}</td>
+                                <td>{lt.total}</td><td>{ totalEarned.toFixed(2)}</td>
                             </tr>
                         })
                     }
                     {
                         <tr><td>Total</td><td></td><td></td>
                             <td>{
-                                sumBy(curWorkerComp.map(cmpToLease),'total')
+                                sumBy(curWorkerComp.map(cmpToLease),'total').toFixed(2)
                             }</td><td>
                                 {
-                                    totalToBePaid
+                                    totalEarned.toFixed(2)
                                 }
                             </td></tr>
                     }
                 </tbody>
             </Table>
+            <Table>
+                <thead>                
+                </thead>
+                <tbody>
+                    {
+                        maintenanceRecords.map(mr => {                            
+                            return <tr>
+                                <td>{mr.expenseCategoryName}</td><td>{mr.amount}</td><td>{mr.date}</td><td>{mr.description}</td>
+                            </tr>
+                        })
+                    }
+                    {
+                        <tr><td>Total</td>
+                            <td>{
+                                totalReimburseAmunt.toFixed(2)
+                            }</td>
+                            </tr>
+                    }
+                </tbody>
+            </Table>
+            <span>
+                Total to be paied: {(totalEarned + totalReimburseAmunt).toFixed(2)}
+            </span>
         </div>
     </div>
 }
