@@ -194,7 +194,8 @@ const GenCrudAdd=(props) => {
                 columnInfo.map( ( c, cind ) => {
                     if(!editItem) {
                         if(c.isId) return null;
-                    }                    
+                    }
+                    if (c.dontShowOnEdit) return null;
 
                     const createSelection=( optName, colField ) => {                        
                         const selOptions = optsData[ optName ];

@@ -40,10 +40,11 @@ export default function MonthlyComp() {
             }
         }).catch(err => {
             
-        });
+        });       
         
     }, []);
     useEffect(() => {
+        if (!curWorker.value) return;
         sqlGet({
             table: 'maintenanceRecords',
             fields: ['month'],
@@ -66,7 +67,18 @@ export default function MonthlyComp() {
             }));
             setMonthes(m);
             if (m.length) setCurMonth(m[0]);
-        })
+        });
+
+        sqlGet({
+            table:'maintenanceRecords',
+            whereArray: [{
+                field: 'workerID',
+                op: '=',
+                val: curWorker.value,
+            }],
+        }).then(res=>{
+            
+        });
     }, [curWorker]);
     
     
