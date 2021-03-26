@@ -1,6 +1,7 @@
+import moment from 'moment';
 import React from 'react';
 import GenList from './GenList';
-
+import { fmtDate } from './util';
 function MaintenanceList(props) {   
     //const {pageProps, setPageProps} = props.pageState;
     return <GenList table={'maintenanceRecords'}
@@ -15,13 +16,20 @@ function MaintenanceList(props) {
             })
         }
     }
+    treatData = {
+        {
+            date: (name, row)=>{
+                return fmtDate(row[name]);
+            }
+        }
+    }
     displayFields={
             //actualy don't need to do this
             [
                 /*{field: 'houseID',desc: 'Id',type: 'uuid',required: true,isId: true},*/
                 {field:'workerID', desc:'Worker', dspFunc:(name,row)=>`${row['workerFirstName']} ${row['workerLastName']}`},
                 {field: 'address',desc: 'Address',required: true},
-                {field: 'date',desc: 'date',},
+                {field: 'date',desc: 'date', dspFunc: fmtDate},
                 {field: 'amount',desc: 'Amount',},
             { field: 'comment', desc: 'Comment', },
                 //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},

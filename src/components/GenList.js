@@ -6,7 +6,7 @@ import { getFKDefs } from './GenCrudTableFkTrans';
 
 //props: table and displayFields [fieldNames]
 function GenList(props) {
-    const {table, columnInfo, loadMapper, pageState , fkDefs, initialPageSize} = props;
+    const {table, columnInfo, loadMapper, pageState , fkDefs, initialPageSize, treatData = {}} = props;
     const [paggingInfo, setPaggingInfo] = useState({
         PageSize: initialPageSize|| 10,        
         pos: 0,
@@ -17,7 +17,7 @@ function GenList(props) {
     //     { field: 'tenantID', desc: 'Id', type: 'uuid', required: true, isId: true },
     //     { field: 'dadPhone', desc: 'Dad Phone', },
     // ];
-    const [tenants,setTenants]=useState([]);
+    const [mainDataRows,setMainData]=useState([]);
     const [loading,setLoading]=useState(true);
     const [columnInf,setColumnInf]=useState(columnInfo || []);
     const reload = () => {
@@ -31,7 +31,15 @@ function GenList(props) {
         }).then(res => {
             const {rows, total} = res;
             setPaggingInfo({...paggingInfo, total,})
-            setTenants(rows);
+            setMainData(rows.map(r=>{
+                const minf = helper.getModelFields();
+                return minf.reduce((acc,c)=>{
+                    const tdata = treatData[c.field];
+                    if (tdata)
+                        acc[c.field] = tdata(c.field, r);
+                    return acc;
+                    },r);      
+                }));
             setLoading(false);
         });
     }
@@ -41,9 +49,9 @@ function GenList(props) {
         const ld=async () => {                        
             await helper.loadModel();
             setColumnInf(helper.getModelFields());
-            if(columnInfo) {
-                setColumnInf(columnInfo);
-            }
+            //if(columnInfo) {
+            //    setColumnInf(columnInfo);
+            //}
             reload();
         }
         
@@ -84,7 +92,7 @@ function GenList(props) {
                         }
                         doAdd={doAdd}
                         doDelete={doDelete}
-                        rows={tenants}
+                        rows={mainDataRows}
                     ></GenCrud>
                 </div>
         }
