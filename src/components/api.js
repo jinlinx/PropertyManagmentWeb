@@ -22,7 +22,7 @@ export async function getModel(name) {
     return doGetOp(`${apiBase}/getModel?name=${name}`);
 }
 
-export async function sqlGet({table, field, joins, whereArray, order, rowCount, offset}) {
+export async function sqlGet({table, field, joins, whereArray, groupByArray, order, rowCount, offset}) {
     // "table":"tenantInfo",
     // "field":["tenantID", "firstName"],
     // joins:[{ table:{col:als}}]
@@ -31,6 +31,7 @@ export async function sqlGet({table, field, joins, whereArray, order, rowCount, 
         table,
         field,
         whereArray,
+        groupByArray,
         joins,
         order,
         rowCount,

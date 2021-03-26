@@ -172,4 +172,5 @@
   position: relative;
   overflow-y: scroll;
   overflow-x: hidden;
+  min-height: 500px; 
 }

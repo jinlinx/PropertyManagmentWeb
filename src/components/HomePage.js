@@ -23,6 +23,7 @@ import logo from '../images/Logo.png'
 import PaymentRport from './reports/paymentReport';
 import ExepenseCategory from './dataEntry/expenseCategory';
 import MaintanceList from './maintenanceList';
+import MonthlyComp from './reports/monthlyComp';
     
 import { JJDataRoot, IncomeExpensesContext} from './reports/rootData';
 function App() {
@@ -144,7 +145,7 @@ function App() {
                                 if (curView === 'Leaselist') return <Leaselist pageState={pageState} />
                                 if (curView === 'OwnerList') return <OwnerList pageState={pageState} />
                                 if (curView === 'expenseCategory') return <ExepenseCategory pageState={pageState}></ExepenseCategory>
-                                if (curView === 'workerCompensationReport') return <span>Not Implemented workerCompensationReport</span>
+                                if (curView === 'workerCompensationReport') return <MonthlyComp></MonthlyComp>
                                 if (curView === 'tenantlist') return <Tenantlist pageState={pageState} ></Tenantlist>
                                 if (curView === 'maintenanceList') return <MaintanceList pageState={pageState} ></MaintanceList>
                                 if (curView === 'workerCompList') return <WorkerCompList  pageState={pageState}></WorkerCompList>
