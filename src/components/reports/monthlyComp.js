@@ -54,7 +54,7 @@ export default function MonthlyComp() {
             }],
             groupByArray: [{ 'field': 'month' }]
         }).then(res => {
-            const rows = res.rows.map(r=>r.month).map(m=>m.substr(0,10));
+            const rows = res.rows.map(r=>r.month).map(m=>m.substr(0,7));
             rows.sort((a, b) => {
                 if (a > b) return -1;
                 if (a < b) return 1;
@@ -98,9 +98,13 @@ export default function MonthlyComp() {
         return acc;
     }, {});
     const cmpToLease = cmp => paymentsByLease[cmp.leaseID] || { total: 0 };
-    const getCmpAmt = cmp => cmpToLease(cmp).total*cmp.amount/100;
+    const getCmpAmt = cmp => {
+        if (cmp.type === 'percent')
+            return cmpToLease(cmp).total*cmp.amount/100;
+        return cmp.amount;
+    }
     
-    //console.log(workerComps);
+    const totalToBePaid = sumBy(curWorkerComp.map(getCmpAmt),x=>x);
     return <div style={{display:'flex', height:'100%', flexDirection:'column', boxSizing:'border-box'}}>
         <Modal show={!!errorTxt}>
             <Modal.Header closeButton>
@@ -136,23 +140,27 @@ export default function MonthlyComp() {
         
         <div style={{flexGrow:1, overflowY:'auto'}}>
             <Table>
-                <thead></thead>
+                <thead>
+                    <tr><td></td><td>Type</td><td>Address</td>
+                    <td>Rent</td><td>Comp</td>
+                    </tr>
+                </thead>
                 <tbody>
                     {
                         curWorkerComp.map(cmp => {
                             const lt = cmpToLease(cmp);
-                            return <tr><td>{cmp.amount}</td><td>{cmp.type}</td><td>{cmp.leaseID}</td>
-                                <td>{lt.total}</td><td>{ lt.total*cmp.amount/100}</td>
+                            return <tr><td>{cmp.amount}</td><td>{cmp.type}</td><td>{cmp.address}</td>
+                                <td>{lt.total}</td><td>{ totalToBePaid}</td>
                             </tr>
                         })
                     }
                     {
-                        <tr><td></td><td></td><td></td>
+                        <tr><td>Total</td><td></td><td></td>
                             <td>{
                                 sumBy(curWorkerComp.map(cmpToLease),'total')
                             }</td><td>
                                 {
-                                    sumBy(curWorkerComp.map(getCmpAmt),x=>x)
+                                    totalToBePaid
                                 }
                             </td></tr>
                     }
