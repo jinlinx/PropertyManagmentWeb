@@ -3,8 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { Table, Form, Modal, Dropdown, Button, Toast, InputGroup, Tab } from 'react-bootstrap';
 import { sqlGet } from '../api';
 import EditDropdown from '../paymentMatch/EditDropdown';
+
+import { orderBy, sumBy } from 'lodash';
+
 export default function MonthlyComp() {
     const [workers, setWorkers] = useState([]);
+    const [workerComps, setWorkerComps] = useState({});
     const [errorTxt, setErrorText] = useState('');
     const [curWorker, setCurWorker] = useState({});
     const [monthes, setMonthes] = useState([]);
@@ -17,9 +21,18 @@ export default function MonthlyComp() {
     useEffect(() => {
         sqlGet({
             table: 'workerComp',
-            fields: ['workerID', 'firstName', 'lastName'],
-            groupByArray: [{ 'field': 'workerID' }]
+            //fields: ['workerID', 'firstName', 'lastName'],
+            //groupByArray: [{ 'field': 'workerID' }]
         }).then(res => {
+            setWorkerComps(res.rows.reduce((acc, wc) => {
+                let cmp = acc[wc.workerID];
+                if (!cmp) {
+                    cmp = [];
+                    acc[wc.workerID] = cmp;
+                }
+                cmp.push(wc);
+                return acc;
+            }, {}));
             setWorkers(res.rows);
             if (res.rows.length) {
                 const w = res.rows[0];
@@ -56,9 +69,8 @@ export default function MonthlyComp() {
         })
     }, [curWorker]);
     
-    console.log(curMonth);
+    
     useEffect(() => {
-        console.log('chaing curmonth ' + curWorker?.value)
         if (!curWorker?.value) return;
         if (!curMonth?.value) return;
         sqlGet({
@@ -66,10 +78,30 @@ export default function MonthlyComp() {
             whereArray:[{field:'workerID', op:'=',val: curWorker.value},{field:'month',op:'=',val:curMonth.value}],
         }).then(res => {
             console.log('allPayments');
-            console.log(res);
+            console.log(res.rows);
+            setPayments(res.rows);
         })
     }, [curMonth.value]);
-    return <div style={{display:'flex', flexFlow:'row'}}>
+
+    const curWorkerComp = orderBy(workerComps[curWorker.value] || [], ['address'], ['asc']);
+    const paymentsByLease = payments.reduce((acc, p) => {
+        let lp = acc[p.leaseID];
+        if (!lp) {
+            lp = {
+                total: 0,
+                payments: [],
+            };
+            acc[p.leaseID] = lp;
+        }
+        lp.total += p.receivedAmount;
+        lp.payments.push(p);
+        return acc;
+    }, {});
+    const cmpToLease = cmp => paymentsByLease[cmp.leaseID] || { total: 0 };
+    const getCmpAmt = cmp => cmpToLease(cmp).total*cmp.amount/100;
+    
+    //console.log(workerComps);
+    return <div style={{display:'flex', height:'100%', flexDirection:'column', boxSizing:'border-box'}}>
         <Modal show={!!errorTxt}>
             <Modal.Header closeButton>
                 <Modal.Title>Error</Modal.Title>
@@ -83,21 +115,49 @@ export default function MonthlyComp() {
                 <Button variant="secondary" onClick={() => setErrorText('')}>Close</Button>
             </Modal.Footer>
         </Modal>
-        <div style={{ flex:'1 0 0', order:1}}>
-        <EditDropdown context={{
-            disabled: false,
-            curSelection: curWorker, setCurSelection: setCurWorker, getCurSelectionText: x => x.label || '',
-            options: workers.map(workerToOptin), setOptions: () => { },
-            loadOptions: () => null,
-            }}></EditDropdown>
+        <div style={{ display: 'inline-flex', flexShrink:0 }}>
+            <div style={{ flex: '1 0 0', order: 1 }}>
+                <EditDropdown context={{
+                    disabled: false,
+                    curSelection: curWorker, setCurSelection: setCurWorker, getCurSelectionText: x => x.label || '',
+                    options: workers.map(workerToOptin), setOptions: () => { },
+                    loadOptions: () => null,
+                }}></EditDropdown>
+            </div>
+            <div style={{ flexFlow: 'row', flex: '1 0 0', order: 1 }}>
+                <EditDropdown context={{
+                    disabled: false,
+                    curSelection: curMonth, setCurSelection: setCurMonth, getCurSelectionText: x => x.label || '',
+                    options: monthes, setOptions: () => { },
+                    loadOptions: () => null,
+                }}></EditDropdown>
+            </div>
         </div>
-        <div style={{ flexFlow: 'row', flex: '1 0 0', order:1 }}>
-        <EditDropdown context={{
-            disabled: false,
-            curSelection: curMonth, setCurSelection: setCurMonth, getCurSelectionText: x => x.label || '',
-            options: monthes, setOptions: () => { },
-            loadOptions: () => null,
-            }}></EditDropdown>
+        
+        <div style={{flexGrow:1, overflowY:'auto'}}>
+            <Table>
+                <thead></thead>
+                <tbody>
+                    {
+                        curWorkerComp.map(cmp => {
+                            const lt = cmpToLease(cmp);
+                            return <tr><td>{cmp.amount}</td><td>{cmp.type}</td><td>{cmp.leaseID}</td>
+                                <td>{lt.total}</td><td>{ lt.total*cmp.amount/100}</td>
+                            </tr>
+                        })
+                    }
+                    {
+                        <tr><td></td><td></td><td></td>
+                            <td>{
+                                sumBy(curWorkerComp.map(cmpToLease),'total')
+                            }</td><td>
+                                {
+                                    sumBy(curWorkerComp.map(getCmpAmt),x=>x)
+                                }
+                            </td></tr>
+                    }
+                </tbody>
+            </Table>
         </div>
     </div>
 }
