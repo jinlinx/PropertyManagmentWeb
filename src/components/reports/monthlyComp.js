@@ -16,6 +16,7 @@ export default function MonthlyComp() {
     const [curMonth, setCurMonth] = useState({});
     const [payments, setPayments] = useState([]);
     const [maintenanceRecords, setMaintenanceRecords] = useState([]);
+    const [showDetails, setShowDetails] = useState({});
     const workerToOptin = w => ({
         value: w.workerID,
         label: `${w.firstName} ${w.lastName}`,
@@ -121,6 +122,7 @@ export default function MonthlyComp() {
         let cat = acc.byCat[r.expenseCategoryName];
         if (!cat) {
             cat = {
+                id: r.expenseCategoryId,
                 name: r.expenseCategoryName,
                 reimburse: r.expenseCategoryName !== 'Commission Fee',
                 total: 0,
@@ -185,9 +187,24 @@ export default function MonthlyComp() {
                     {
                         curWorkerComp.map(cmp => {
                             const lt = cmpToLease(cmp);
-                            return <tr><td>{cmp.amount}</td><td>{cmp.type}</td><td>{cmp.address}</td>
-                                <td>{lt.total}</td><td>{ totalEarned.toFixed(2)}</td>
+                            return <><tr><td>{cmp.amount}</td><td>{cmp.type}</td><td>{cmp.address}</td>
+                                <td>{lt.total}</td><td>{ getCmpAmt(cmp).toFixed(2)}</td>
+                                <td><div style={{cursor:'pointer'}} onClick={()=>{
+                                    setShowDetails(state=>{
+                                        return {
+                                            ...state,
+                                            [cmp.leaseID]: !state[cmp.leaseID],
+                                        }
+                                    });
+
+                                }}>+</div></td>
                             </tr>
+                            {
+                                showDetails[cmp.leaseID] && lt.payments.map(pmt=>{
+                                    return <tr><td>{moment(pmt.receivedDate).format('YYYY-MM-DD')}</td><td>{pmt.paidBy}</td><td>{pmt.notes}</td><td>{pmt.receivedAmount}</td></tr>
+                                })
+                            }
+                            </>
                         })
                     }
                     {
@@ -208,9 +225,24 @@ export default function MonthlyComp() {
                 <tbody>
                     {
                         maintenanceRecordsByExpCat.cats.map(mr => {                            
-                            return <tr>
+                            return <><tr>
                                 <td style={{textDecoration:mr.reimburse?'none':'line-through'}}>{mr.name}</td><td>{mr.total}</td>
+                                <td></td><td></td>
+                                <td><div style={{cursor:'pointer'}} onClick={()=>{
+                                    setShowDetails(state=>{
+                                        return {
+                                            ...state,
+                                            [mr.id]: !state[mr.id],
+                                        }
+                                    });
+
+                                }}>+</div></td>
                                 </tr>
+                                {
+                                    showDetails[mr.id] && mr.items.map(itm=><tr><td></td><td>{itm.amount}</td><td>{itm.address}</td><td>{moment(itm.date).format('YYYY-MM-DD')}</td><td>{itm.description}</td></tr>)
+                                    
+                                }
+                                </>
                         })
                     }
                     {
