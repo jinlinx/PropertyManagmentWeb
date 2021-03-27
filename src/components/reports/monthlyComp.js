@@ -5,6 +5,7 @@ import { sqlGet } from '../api';
 import EditDropdown from '../paymentMatch/EditDropdown';
 
 import { orderBy, sumBy } from 'lodash';
+import moment from 'moment';
 
 export default function MonthlyComp() {
     const [workers, setWorkers] = useState([]);
@@ -116,7 +117,30 @@ export default function MonthlyComp() {
     }
     
     const totalEarned = sumBy(curWorkerComp.map(getCmpAmt),x=>x);
-    const totalReimburseAmunt = sumBy(maintenanceRecords,'amount');
+    const maintenanceRecordsByExpCat = maintenanceRecords.reduce((acc, r)=>{
+        let cat = acc.byCat[r.expenseCategoryName];
+        if (!cat) {
+            cat = {
+                name: r.expenseCategoryName,
+                reimburse: r.expenseCategoryName !== 'Commission Fee',
+                total: 0,
+                items: [],                
+            };
+            acc.byCat[r.expenseCategoryName] = cat;
+            acc.cats.push(cat);
+        }
+        cat.total += r.amount;
+        if (cat.reimburse) {
+            acc.total += r.amount;
+        }
+        cat.items.push(r);
+        return acc;
+    },{
+        total: 0,
+        byCat: {},
+        cats: [],
+    });
+    maintenanceRecordsByExpCat.cats = orderBy(maintenanceRecordsByExpCat.cats,['expCatDisplayOrder']);
     return <div style={{display:'flex', height:'100%', flexDirection:'column', boxSizing:'border-box'}}>
         <Modal show={!!errorTxt}>
             <Modal.Header closeButton>
@@ -183,23 +207,23 @@ export default function MonthlyComp() {
                 </thead>
                 <tbody>
                     {
-                        maintenanceRecords.map(mr => {                            
+                        maintenanceRecordsByExpCat.cats.map(mr => {                            
                             return <tr>
-                                <td>{mr.expenseCategoryName}</td><td>{mr.amount}</td><td>{mr.date}</td><td>{mr.description}</td>
-                            </tr>
+                                <td style={{textDecoration:mr.reimburse?'none':'line-through'}}>{mr.name}</td><td>{mr.total}</td>
+                                </tr>
                         })
                     }
                     {
                         <tr><td>Total</td>
                             <td>{
-                                totalReimburseAmunt.toFixed(2)
+                                maintenanceRecordsByExpCat.total.toFixed(2)
                             }</td>
                             </tr>
                     }
                 </tbody>
             </Table>
             <span>
-                Total to be paied: {(totalEarned + totalReimburseAmunt).toFixed(2)}
+                Total to be paied: {(totalEarned + maintenanceRecordsByExpCat.total).toFixed(2)}
             </span>
         </div>
     </div>
