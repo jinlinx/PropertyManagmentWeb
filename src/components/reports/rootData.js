@@ -114,33 +114,8 @@ export function JJDataRoot(props) {
     
 
 
-    useEffect(() => {
-        getMaintenanceReport().then(d => {
-            const maintenceData = d.reduce((acc, r) => {
-                const month = moment(r.month).add(2,'days').format('YYYY-MM');
-                if (!acc.dateKeys[month]) {
-                    acc.dateKeys[month] = true;
-                    acc.monthes.push(month);
-                }
-                let cats = acc.categoriesByKey[r.category];
-                if (!cats) {
-                    cats = { [TOTALCOLNAME]: 0, order: r.displayOrder };
-                    acc.categoriesByKey[r.category] = cats;
-                    acc.categoryNames.push(r.category);
-                }
-                const ctotal = acc.categoriesByKey[TOTALCOLNAME];
-                cats[month] = r.amount;
-                ctotal[month] = (ctotal[month] || 0) + r.amount;
-                cats[TOTALCOLNAME] = 0;
-                acc.monthlyTotal[month] = (acc.monthlyTotal[month] || 0) + r.amount;
-                return acc;
-            }, getInitExpenseTableData());
-            addMonths(maintenceData.monthes);
-            maintenceData.originalData = d;
-            setExpenseData(maintenceData);
-            calculateExpenseByDate(maintenceData)
-        });
-        getPaymnents().then(r => {
+    const beginReLoadPaymentData = ()=>{
+        return getPaymnents().then(r => {
             r = r.map(r => {
                 return {
                     ...r,
@@ -195,7 +170,37 @@ export function JJDataRoot(props) {
             pm.months.originalData = r.res;
             addMonths(pm.monthNames);
             setPaymentsByMonth(pm.months);
-        })
+        });        
+    }
+
+    useEffect(() => {
+        getMaintenanceReport().then(d => {
+            const maintenceData = d.reduce((acc, r) => {
+                const month = moment(r.month).add(2,'days').format('YYYY-MM');
+                if (!acc.dateKeys[month]) {
+                    acc.dateKeys[month] = true;
+                    acc.monthes.push(month);
+                }
+                let cats = acc.categoriesByKey[r.category];
+                if (!cats) {
+                    cats = { [TOTALCOLNAME]: 0, order: r.displayOrder };
+                    acc.categoriesByKey[r.category] = cats;
+                    acc.categoryNames.push(r.category);
+                }
+                const ctotal = acc.categoriesByKey[TOTALCOLNAME];
+                cats[month] = r.amount;
+                ctotal[month] = (ctotal[month] || 0) + r.amount;
+                cats[TOTALCOLNAME] = 0;
+                acc.monthlyTotal[month] = (acc.monthlyTotal[month] || 0) + r.amount;
+                return acc;
+            }, getInitExpenseTableData());
+            addMonths(maintenceData.monthes);
+            maintenceData.originalData = d;
+            setExpenseData(maintenceData);
+            calculateExpenseByDate(maintenceData)
+        });
+        
+        beginReLoadPaymentData();
     }, []);
     
     function checkDate(mon, selectedMonths) {
@@ -239,7 +244,8 @@ export function JJDataRoot(props) {
             allMonthes,
             monthes, setMonthes,
             curMonthSelection, setCurMonthSelection,
-            selectedMonths, setSelectedMonths
+            selectedMonths, setSelectedMonths,
+            beginReLoadPaymentData,
         }
     }>
         { props.children}

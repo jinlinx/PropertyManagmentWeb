@@ -1,4 +1,4 @@
-import { sqlFreeForm, getData } from './api';
+import { sqlFreeForm, doPostOp } from './api';
 import { get } from 'lodash';
 
 
@@ -62,9 +62,9 @@ export async function createLeaseTenantLink(leaseID, tenantID) {
 export async function deletePaymentImport(id) {
     sqlFreeForm(`update importPayments set deleted='1' where id=? `, [id])
 }
-//export async function linkPayments() {
-//    return getData('misc/matchPayments')
-//}
+export async function linkPayments(data) {
+    return doPostOp('misc/matchPayments', data);
+}
 
 export async function getImportablePayments() {
     return sqlFreeForm(`select ip.id, ip.name, ip.date, ip.amount, ip.source, ip.notes , ptm.tenantID, t.firstName, t.lastName, lti.leaseID

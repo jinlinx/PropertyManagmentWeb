@@ -3,7 +3,7 @@ import { Table, DropdownButton, Dropdown, Button, InputGroup } from 'react-boots
 import {orderBy} from 'lodash';
 import { TenantMatcher } from './TenantMatcher';
 import { sqlGet } from '../api';
-import { getImportablePayments, deletePaymentImport } from '../aapi';
+import { getImportablePayments, deletePaymentImport, linkPayments } from '../aapi';
 import EditDropdown from './EditDropdown';
 
 function PaymentMatch(props) {
@@ -127,6 +127,24 @@ function PaymentMatch(props) {
                                                  setImportItem(importItemsCheck);
                                              }}/>
                         }
+                    </td>
+                    <td>
+                        { importItem[itm.itemId] && <Button onClick={()=>{
+                            console.log('Posting payment datad');
+                            console.log({
+                                ids:[itm.itemId],
+                                paymentTypeID: itm.paymentTypeID
+                            })
+                            linkPayments({
+                                ids:[itm.itemId],
+                                paymentTypeID: itm.paymentTypeID
+                            }).then(r=>{
+                                setImported(imported.filter(r => r.id !== itm.id)); 
+                            }).catch(err=>{
+                                console.log(`TODO got error ${err.message}`);
+                            });
+                        }}>Create</Button>
+                    }
                     </td>
                     <td>
                         {
