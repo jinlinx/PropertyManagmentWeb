@@ -80,7 +80,7 @@ export default function MonthlyComp() {
             table: 'rentPaymentInfo',
             whereArray:[{field:'workerID', op:'=',val: curWorker.value},{field:'month',op:'=',val:curMonth.value}],
         }).then(res => {
-            setPayments(res.rows);
+            setPayments(res.rows.filter(r=>r.isIncome !== '0'));
         })
 
         sqlGet({
