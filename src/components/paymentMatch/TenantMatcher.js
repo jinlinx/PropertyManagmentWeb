@@ -153,7 +153,7 @@ export function TenantMatcher(props) {
         setShowProgress
     };
     const curSelectedHouseId = get(curHouseSelection, 'value.houseID', 'NA');
-    console.log(`houseid is ${curSelectedHouseId}`);
+    
     return <div >
         <Modal show={!!showProgress}>
             <Container>

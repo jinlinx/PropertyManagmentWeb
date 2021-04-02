@@ -19,7 +19,7 @@ export default function CashFlowReport(props) {
         <table className='tableReport'>
             <thead>
             
-                <th className='tdColumnHeader'></th><th className='tdColumnHeader'>Total</th>
+                <td className='tdColumnHeader'></td><td className='tdColumnHeader'>Total</td>
                 {
                     monthes.map((mon,key) => {
                         return <th className='tdColumnHeader' key={key}>{ mon}</th>
@@ -64,10 +64,10 @@ export default function CashFlowReport(props) {
                 {
                     //expenses
                     [...expenseData.categoryNames].map((cat,key) => {
-                        return <tr>
+                        return <tr key={key}>
                             <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(expenseData.categoriesByKey[cat][TOTALCOLNAME])}</td>
                             {
-                                monthes.map(mon => {
+                                monthes.map((mon,key) => {
                                     return <td key={key} class='tdCenter'>{fMoneyformat(expenseData.categoriesByKey[cat][mon] || '' )}</td>  
                                 })
                             }

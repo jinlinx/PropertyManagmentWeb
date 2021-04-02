@@ -185,9 +185,9 @@ export default function MonthlyComp() {
                 </thead>
                 <tbody>
                     {
-                        curWorkerComp.map(cmp => {
+                        curWorkerComp.map((cmp,key) => {
                             const lt = cmpToLease(cmp);
-                            return <><tr><td>{cmp.amount}</td><td>{cmp.type}</td><td>{cmp.address}</td>
+                            return <><tr key={key}><td>{cmp.amount}</td><td>{cmp.type}</td><td>{cmp.address}</td>
                                 <td>{lt.total}</td><td>{ getCmpAmt(cmp).toFixed(2)}</td>
                                 <td><div style={{cursor:'pointer'}} onClick={()=>{
                                     setShowDetails(state=>{
@@ -224,8 +224,8 @@ export default function MonthlyComp() {
                 </thead>
                 <tbody>
                     {
-                        maintenanceRecordsByExpCat.cats.map(mr => {                            
-                            return <><tr>
+                        maintenanceRecordsByExpCat.cats.map((mr,key) => {                            
+                            return <><tr key={key}>
                                 <td style={{textDecoration:mr.reimburse?'none':'line-through'}}>{mr.name}</td><td>{mr.total}</td>
                                 <td></td><td></td>
                                 <td><div style={{cursor:'pointer'}} onClick={()=>{

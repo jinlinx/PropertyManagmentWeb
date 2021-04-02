@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Table, DropdownButton, Dropdown, Button, InputGroup } from 'react-bootstrap';
-import {v1} from 'uuid';
-import Promise from 'bluebird';
+import {orderBy} from 'lodash';
 import { TenantMatcher } from './TenantMatcher';
-import { linkPayments, getImportablePayments, deletePaymentImport } from '../aapi';
+import { sqlGet } from '../api';
+import { getImportablePayments, deletePaymentImport } from '../aapi';
+import EditDropdown from './EditDropdown';
 
 function PaymentMatch(props) {
     const [imported, setImported] = useState([]);
@@ -14,24 +15,43 @@ function PaymentMatch(props) {
     const [matchedTo, setMatchedTo] = useState({});
     const [createTenantItem, setCreateTenantItem] = useState({});
 
-    useEffect(() => {
-        getImportablePayments().then(async r => {
+    const [itemPaymentTypeSelection, setItemPaymentTypeSelection] = useState({});
+
+    const [paymentTypes, setPaymentTypes] = useState([]);
+    useEffect(() => {        
+        const doLoad = async()=>{
+            const paymentTypeRes = await sqlGet({
+                table:'paymentType'
+            });
+            const paymentTypes = orderBy(paymentTypeRes.rows,['displayOrder']);
+            setPaymentTypes(paymentTypes);
+            const r = await getImportablePayments();
             setImported(r.map(r => {
+                const paymentTypeID = paymentTypes.reduce((acc,pt)=>{
+                    if (r.notes.toLowerCase().indexOf(pt.paymentTypeName.toLowerCase()) >= 0) {
+                        return pt.paymentTypeID;
+                    }
+                    return acc;
+                }, '1');                
+                itemPaymentTypeSelection[r.id] = paymentTypes.find(t=>t.paymentTypeID === paymentTypeID);                
                 return {
                     ...r,
+                    paymentTypeID,
                     itemId: r.id,
                 }
             }));
+            setItemPaymentTypeSelection({...itemPaymentTypeSelection});
             setImportItem(r.reduce((acc, rr) => { 
                 if (rr.leaseID) acc[rr.id] = true;
                 return acc;
             }, {}))
-        });
+        };
+        doLoad();
     },[]);
     const idToItemMap = imported.reduce((acc,ci)=>{
         acc[ci.itemId] = ci;
         return acc;
-    },{});
+    },{});    
     return <>
         <TenantMatcher context={{
             onClose: () => setCreateTenantItem({}),
@@ -46,28 +66,8 @@ function PaymentMatch(props) {
         } }></TenantMatcher>
         <Table>
         <thead><tr>
-            <td>Date</td><td>Name</td><td>Amount</td><td>Note</td><td>Source</td><td>Action</td><td>                        
-                    <Button onClick={async () => {
-                        await linkPayments();
-                        await Promise.map(imported, async imp => {
-                            const canImport = importItem[imp.itemId];                            
-                            if (canImport && imp.leaseID && !imp.matchedTo) {
-                                const id = v1();                                
-                                console.log(`importing ${imp.date} ${imp.amount} ${imp.name} leaseid=${imp.leaseID} ${imp.notes}`)
-                                setImported(prev => prev.map(p => {
-                                    if (p.id === imp.id) {
-                                        return {
-                                            ...imp,
-                                            matchedTo: id,
-                                        }
-                                    }
-                                    return p;
-                                }));
-                                //await linkPayment(id, imp);
-                            }
-                        }, { concurrency: 1 });
-                    }}>Map</Button>
-            </td></tr></thead>
+            <td>Date</td><td>Name</td><td>Amount</td><td>Note</td><td>Source</td><td>Type</td>
+            <td>Add</td></tr></thead>
         <tbody>
         {
             imported.map((itm, ind) => {
@@ -126,6 +126,26 @@ function PaymentMatch(props) {
                                                      });
                                                  setImportItem(importItemsCheck);
                                              }}/>
+                        }
+                    </td>
+                    <td>
+                        {
+                            <>
+                            <EditDropdown context={{
+                                disabled: false,
+                                curSelection: itemPaymentTypeSelection[itm.itemId], setCurSelection: sel=>{
+                                    setItemPaymentTypeSelection(state=>({
+                                        ...state,
+                                        [itm.itemId]: sel,
+                                    }));
+                                }, getCurSelectionText: t=>{                       
+                                    return t?.paymentTypeName;
+                                },
+                                options: paymentTypes, setOptions: ()=>{},
+                                loadOptions: ()=>{},
+                            }}></EditDropdown>
+                            
+                            </>
                         }
                     </td>
                     <td>                        

@@ -22,10 +22,10 @@ function ExpenseCategoryList(props) {
     const pageProps = props?.pageState?.pageProps[tableName];
     if (pageProps) {
         if (pageProps.sorts) {
-            console.log(pageProps.sorts);
+            //console.log(pageProps.sorts);
         }
     }
-    console.log(props);
+    //console.log(props);
     return <GenList {...props} table={tableName} title={'Expense Category'} initialPageSize={100}/> 
 }
 

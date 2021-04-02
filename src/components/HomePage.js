@@ -116,6 +116,7 @@ function App() {
                                                 <Button className='btn-LeftMenuButton' onClick={()=>setCurView('expenseCategory')}>Expanse Category List</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('developer')}>Developer Tools</Button><br></br><br></br>
                                                 <Button className='btn-LeftMenuButton' onClick={() => setCurView('oldapp')}>OldApp</Button><br></br><br></br>
+                                                <Button className='btn-leftMenuButton' onClick={()=>setCurView('importPayments')}>Import Payments</Button>
                                             </>
                                         }
                                     </Col>
@@ -149,6 +150,7 @@ function App() {
                                 if (curView === 'tenantlist') return <Tenantlist pageState={pageState} ></Tenantlist>
                                 if (curView === 'maintenanceList') return <MaintanceList pageState={pageState} ></MaintanceList>
                                 if (curView === 'workerCompList') return <WorkerCompList  pageState={pageState}></WorkerCompList>
+                                if (curView ==='importPayments') return <Reportlist pageState={pageState} />
                                 return <span>Not implemented {curView}</span>
                             }
                         }
