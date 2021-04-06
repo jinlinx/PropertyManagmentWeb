@@ -22,14 +22,14 @@ export async function getModel(name) {
     return doGetOp(`${apiBase}/getModel?name=${name}`);
 }
 
-export async function sqlGet({table, field, joins, whereArray, groupByArray, order, rowCount, offset}) {
+export async function sqlGet({table, fields, joins, whereArray, groupByArray, order, rowCount, offset}) {
     // "table":"tenantInfo",
     // "field":["tenantID", "firstName"],
     // joins:[{ table:{col:als}}]
     // "order":[{"name":"tenantID", "asc": true}, {"name":"firstName"}]
     return doPostOp(`sql/get`, {
         table,
-        field,
+        fields,
         whereArray,
         groupByArray,
         joins,

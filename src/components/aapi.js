@@ -85,6 +85,24 @@ export async function getOwners() {
 }
 
 export async function getMaintenanceReport(ownerInfo) {
+    if (!ownerInfo) return [];
+    return sqlGet({
+        fields:['month', {op:'sum', field:'amount', name:'amount'},'expenseCategoryName','displayOrder'],
+        table:'maintenanceRecords',
+        whereArray:[{
+            field:'ownerID',
+            op: '=',
+            val: ownerInfo.ownerID || ''
+        }],
+        groupByArray:[{field:'month'},{field:'expenseCategoryID'},{field:'displayOrder'}]
+    }).then(r=>{
+        return r.rows.map(r=>{
+            return {
+                ...r,
+                category: r.expenseCategoryName,
+            }
+        });
+    });
     return sqlFreeForm(`select month, sum(amount) amount,  expenseCategoryName category, e.displayOrder 
     from maintenanceRecords m inner join expenseCategories e on m.expenseCategoryID=e.expenseCategoryID 
     group by m.month,

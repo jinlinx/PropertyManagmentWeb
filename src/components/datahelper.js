@@ -18,7 +18,9 @@ export function createHelper(table) {
             if (!loadMapper) loadMapper = (x,y) => y;
             //fields: array of field names
             const {whereArray, order, rowCount, offset} = opts;
-            return sqlGet({table, fields: loadMapper('fields',accModelFields().map(f => f.field)), joins:loadMapper('joins'), whereArray, order, rowCount,offset});
+            const modFields = accModelFields().map(f => f.field);
+            const viewFields = get(accModel(),'view.fields',[]).map(f=>f.name || f.field);
+            return sqlGet({table, fields: loadMapper('fields',modFields.concat(viewFields)), joins:loadMapper('joins'), whereArray, order, rowCount,offset});
         },
         saveData: async (data,id) => {
             const submitData=accModelFields().reduce((acc,f) => {
