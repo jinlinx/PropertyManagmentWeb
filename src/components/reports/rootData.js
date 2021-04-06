@@ -32,6 +32,7 @@ const getInitExpenseTableData = () => ({
 export const IncomeExpensesContext = React.createContext();
 
 export function JJDataRoot(props) {
+    const {ownerInfo} = props.dataRootParam;
     const [expenseData, setExpenseData] = useState(getInitExpenseTableData);
     const [payments, setPayments] = useState([]);
     const [paymentsByMonth, setPaymentsByMonth] = useState({
@@ -114,8 +115,8 @@ export function JJDataRoot(props) {
     
 
 
-    const beginReLoadPaymentData = ()=>{
-        return getPaymnents().then(r => {
+    const beginReLoadPaymentData = ownerInfo=>{
+        return getPaymnents(ownerInfo).then(r => {
             r = r.map(r => {
                 return {
                     ...r,
@@ -200,8 +201,8 @@ export function JJDataRoot(props) {
             calculateExpenseByDate(maintenceData)
         });
         
-        beginReLoadPaymentData();
-    }, []);
+        beginReLoadPaymentData(ownerInfo);
+    }, [ownerInfo]);
     
     function checkDate(mon, selectedMonths) {
         if (mon === TOTALCOLNAME) return true;
@@ -236,6 +237,7 @@ export function JJDataRoot(props) {
     };
     return <IncomeExpensesContext.Provider value={
         {
+            ownerInfo,
             expenseData,
             payments,
             paymentsByMonth,

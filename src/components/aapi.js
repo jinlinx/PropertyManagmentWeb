@@ -1,4 +1,4 @@
-import { sqlFreeForm, doPostOp } from './api';
+import { sqlFreeForm, doPostOp, sqlGet } from './api';
 import { get } from 'lodash';
 
 
@@ -92,7 +92,24 @@ export async function getMaintenanceReport() {
     order by month, e.displayOrder,expenseCategoryName`);
 }
 
-export async function getPaymnents() {
+export async function getPaymnents(ownerInfo) {
+    if (!ownerInfo) return [];
+    return sqlGet({
+        table:'rentPaymentInfo',
+        whereArray:[{
+            field:'ownerID',
+            op: '=',
+            val: ownerInfo.ownerID || ''
+        }]
+    }).then(r=>{
+        return r.rows.map(r=>{
+            return {
+                ...r,
+                date: r.receivedDate,
+                amount: r.receivedAmount,
+            }
+        });
+    })
     return sqlFreeForm(` select rp.receivedAmount amount, rp.receivedDate date, rp.paidBy, rp.notes, h.address, h.houseID addressId,
     oi.shortName ownerName,
     ip.source

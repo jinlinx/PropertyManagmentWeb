@@ -24,6 +24,7 @@ import PaymentRport from './reports/paymentReport';
 import ExepenseCategory from './dataEntry/expenseCategory';
 import MaintanceList from './maintenanceList';
 import MonthlyComp from './reports/monthlyComp';
+import { showOwner } from './util';
     
 import { JJDataRoot, IncomeExpensesContext} from './reports/rootData';
 function App() {
@@ -33,14 +34,14 @@ function App() {
     const [curView, setCurView] = useState('maintenanceReport');
 
     const [pageProps, setPageProps] = useState({});
-    const pageState = { pageProps, setPageProps };
+    const pageState = { pageProps, setPageProps, ownerInfo };
     
     useEffect(() => {
         getOwners().then(owners => {
             //console.log(owners);
             if (owners) {
                 setOwners(owners);
-                setOwnerInfo(owners[1] || {});
+                setOwnerInfo(owners[0] || {});
             }
         }).catch(err => {
             console.log('network failed');
@@ -62,7 +63,7 @@ function App() {
                             <td><Button className='btnTopButton' href="#adminTools" onClick={() => setCurPage('tools')}>Admin Tools</Button> </td>
            
                             {
-                                false && <td><NavDropdown title={"Owner:  " + ownerInfo.ownerName} id="basic-nav-dropdown">
+                                showOwner() && <td><NavDropdown title={"Owner:  " + ownerInfo.ownerName} id="basic-nav-dropdown">
                                     {
                                         owners.map((p, i) => {
                                             return <NavDropdown.Item key={i} onClick={() => {
@@ -128,7 +129,7 @@ function App() {
                     </Row>
                 </Container>
             </div>
-            <JJDataRoot>
+            <JJDataRoot dataRootParam ={{ownerInfo}}>
 
             
                 <div className='divMain'>

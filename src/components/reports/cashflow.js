@@ -8,6 +8,7 @@ export default function CashFlowReport(props) {
         paymentsByMonth, expenseData,
         selectedMonths,
         monthes, 
+        ownerInfo,
     } = jjctx;
 
     const monAddr = getPaymentsByMonthAddress(paymentsByMonth.originalData, {

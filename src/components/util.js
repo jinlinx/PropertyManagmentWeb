@@ -82,3 +82,7 @@ export function parseCsv(str) {
     }
     return res;
 }
+
+export function showOwner() {
+    return true;
+}

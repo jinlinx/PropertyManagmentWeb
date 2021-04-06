@@ -15,6 +15,7 @@ export default function PaymentReport(props) {
         paymentsByMonth,
         selectedMonths, 
         beginReLoadPaymentData,
+        ownerInfo,
     } = jjctx;
 
     const [selectedHouses, setSelectedHouses] = useState({});
@@ -26,7 +27,7 @@ export default function PaymentReport(props) {
     const goodHouses = monAddr.houseAry.map(h => h.address);
     goodHouses.sort();
     useEffect(()=>{
-        beginReLoadPaymentData();
+        beginReLoadPaymentData(ownerInfo);
     },[]);
     useEffect(() => {
         const sh = monAddr.houseAry.reduce((acc, h) => {
