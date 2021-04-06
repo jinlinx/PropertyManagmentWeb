@@ -175,7 +175,7 @@ export function JJDataRoot(props) {
     }
 
     useEffect(() => {
-        getMaintenanceReport().then(d => {
+        getMaintenanceReport(ownerInfo).then(d => {
             const maintenceData = d.reduce((acc, r) => {
                 const month = moment(r.month).add(2,'days').format('YYYY-MM');
                 if (!acc.dateKeys[month]) {

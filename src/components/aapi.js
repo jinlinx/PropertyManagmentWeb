@@ -84,7 +84,7 @@ export async function getOwners() {
     return sqlFreeForm(`select * from ownerInfo`);
 }
 
-export async function getMaintenanceReport() {
+export async function getMaintenanceReport(ownerInfo) {
     return sqlFreeForm(`select month, sum(amount) amount,  expenseCategoryName category, e.displayOrder 
     from maintenanceRecords m inner join expenseCategories e on m.expenseCategoryID=e.expenseCategoryID 
     group by m.month,
@@ -92,6 +92,7 @@ export async function getMaintenanceReport() {
     order by month, e.displayOrder,expenseCategoryName`);
 }
 
+// Used by cashflow
 export async function getPaymnents(ownerInfo) {
     if (!ownerInfo) return [];
     return sqlGet({
