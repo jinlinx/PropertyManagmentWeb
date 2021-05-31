@@ -110,8 +110,8 @@ function Developer(props) {
         <Row>
             <Col>
                 <Button disabled={!!message} onClick={async () => {
-                    setMessage(`Delete all is now disabled`);
-                    return;
+                    //setMessage(`Delete all is now disabled`);
+                    //return;
                     await Promise.map([
                         "houseInfo",
                         "ownerInfo",
