@@ -78,14 +78,25 @@ export default function MonthlyComp(props) {
         ],
             groupByArray: [{ 'field': 'month' }]
         }).then(res => {
-            let rows = res.rows.map(r=>r.month).map(m=>m.substr(0,7));
-            rows = orderBy(rows,[x=>x],['desc']);
-            const m = rows.map(value => ({
-                value,
-                label: value,
-            }));
-            setMonthes(m);
-            if (m.length) setCurMonth(m[0]);
+            let rows = res.rows.map(r=>r.month).map(m=>m.substr(0,7));            
+            
+            sqlGet({
+                table: 'rentPaymentInfo',
+                fields: ['month'],
+                whereArray: [{ field: 'workerID', op: '=', val: curWorker.value }],
+                groupByArray: [{ 'field': 'month' }]
+            }).then(paymentMonthes => {
+                let mrows = uniqBy(paymentMonthes.rows.map(r => r.month).concat(rows), x => x);
+                mrows = orderBy(mrows, [x => x], ['desc']);
+                console.log(mrows);
+                console.log('payment monthes')
+                const m = mrows.map(value => ({
+                    value,
+                    label: value,
+                }));
+                setMonthes(m);
+                if (m.length) setCurMonth(m[0]);
+            })
         });
     }, [curWorker]);
     
