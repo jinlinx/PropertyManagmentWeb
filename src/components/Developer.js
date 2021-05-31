@@ -117,6 +117,7 @@ function Developer(props) {
                         "ownerInfo",
                         "tenantInfo",
                         "payerTenantMapping",
+                        "maintenanceRecords",
                         "leaseInfo",
                         "rentPaymentInfo",
                         "leaseTenantInfo"], async name => {
