@@ -94,7 +94,7 @@ export async function getMaintenanceReport(ownerInfo) {
             op: '=',
             val: ownerInfo.ownerID || ''
         }],
-        groupByArray:[{field:'month'},{field:'expenseCategoryID'},{field:'displayOrder'}]
+        groupByArray: [{ field: 'month' }, { field: 'expenseCategoryID' }, { field: 'expenseCategoryName'},{field:'displayOrder'}]
     }).then(r=>{
         return r.rows.map(r=>{
             return {
