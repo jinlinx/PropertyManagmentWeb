@@ -4,10 +4,11 @@ import { Table, Form, Modal, Dropdown, Button, Toast, InputGroup, Tab } from 're
 import { sqlGet } from '../api';
 import EditDropdown from '../paymentMatch/EditDropdown';
 
-import { orderBy, sumBy } from 'lodash';
+import { orderBy, sumBy, uniqBy } from 'lodash';
 import moment from 'moment';
 
-export default function MonthlyComp() {
+export default function MonthlyComp(props) {
+    const { ownerInfo} = props.compPrm;
     const [workers, setWorkers] = useState([]);
     const [workerComps, setWorkerComps] = useState({});
     const [errorTxt, setErrorText] = useState('');
@@ -37,11 +38,27 @@ export default function MonthlyComp() {
                 cmp.push(wc);
                 return acc;
             }, {}));
-            setWorkers(res.rows);
+            
+            setWorkers(uniqBy(res.rows,x=>x.workerID));
             if (res.rows.length) {
                 const w = res.rows[0];
                 setCurWorker(workerToOptin(w));
             }
+            sqlGet({
+                table: 'maintenanceRecords',
+                fields: ['workerID', 'workerFirstName', 'workerLastName'],
+                groupByArray: [{ 'field': 'workerID' }]
+            }).then(resMW => {
+                const resMWWkr = uniqBy(resMW.rows.map(r => {
+                    return {
+                        workerID: r.workerID,
+                        firstName: r.workerFirstName,
+                        lastName: r.workerLastName,
+                    }
+                }), x => x.workerID);
+                console.log(resMWWkr)
+                setWorkers(uniqBy(res.rows.concat(resMWWkr),'workerID'))
+            });
         }).catch(err => {
             
         });       
