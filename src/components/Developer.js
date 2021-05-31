@@ -147,6 +147,15 @@ function Developer(props) {
                     });
                 }}>Import MaintenanceReport</Button>
             </Col>
+            <Col>
+                <Button disabled={!!message} onClick={() => {
+                    setMessage('Starting imports, please wait');
+                    getData('misc/gsimport?who=payment').then(res => {
+                        setMessage('import done');
+                        setMessages([res.message]);
+                    });
+                }}>Import Payments</Button>
+            </Col>
         </Row>
         <Row>
             <Col>
