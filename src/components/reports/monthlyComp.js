@@ -115,19 +115,19 @@ export default function MonthlyComp(props) {
 
     const curWorkerComp = orderBy(workerComps[curWorker.value] || [], ['address'], ['asc']);
     const paymentsByLease = payments.reduce((acc, p) => {
-        let lp = acc[p.leaseID];
+        let lp = acc[p.houseID];
         if (!lp) {
             lp = {
                 total: 0,
                 payments: [],
             };
-            acc[p.leaseID] = lp;
+            acc[p.houseID] = lp;
         }
         lp.total += p.receivedAmount;
         lp.payments.push(p);
         return acc;
     }, {});
-    const cmpToLease = cmp => paymentsByLease[cmp.leaseID] || { total: 0 };
+    const cmpToLease = cmp => paymentsByLease[cmp.houseID] || { total: 0, payments:[] };
     const getCmpAmt = cmp => {
         if (cmp.type === 'percent')
             return cmpToLease(cmp).total*cmp.amount/100;
@@ -204,28 +204,29 @@ export default function MonthlyComp(props) {
                     {
                         curWorkerComp.map((cmp,key) => {
                             const lt = cmpToLease(cmp);
+                            if (!lt.payments.length) return <></>;
                             return <><tr key={key}><td>{cmp.amount}</td><td>{cmp.type}</td><td>{cmp.address}</td>
                                 <td>{lt.total}</td><td>{ getCmpAmt(cmp).toFixed(2)}</td>
                                 <td><div style={{cursor:'pointer'}} onClick={()=>{
                                     setShowDetails(state=>{
                                         return {
                                             ...state,
-                                            [cmp.leaseID]: !state[cmp.leaseID],
+                                            [cmp.houseID]: !state[cmp.houseID],
                                         }
                                     });
 
-                                }}>+</div></td>
+                                }}>{ lt.payments.length?'+':'' }</div></td>
                             </tr>
                             {
-                                showDetails[cmp.leaseID] && lt.payments.map(pmt=>{
-                                    return <tr><td>{moment(pmt.receivedDate).format('YYYY-MM-DD')}</td><td>{pmt.paidBy}</td><td>{pmt.notes}</td><td>{pmt.receivedAmount}</td></tr>
+                                showDetails[cmp.houseID] && lt.payments.map(pmt=>{
+                                    return <tr key={`detail-${key}`}><td>{moment(pmt.receivedDate).format('YYYY-MM-DD')}</td><td>{pmt.paidBy}</td><td>{pmt.notes}</td><td>{pmt.receivedAmount}</td></tr>
                                 })
                             }
                             </>
                         })
                     }
                     {
-                        <tr><td>Total</td><td></td><td></td>
+                        <tr key={'endkey'}><td>Total</td><td></td><td></td>
                             <td>{
                                 sumBy(curWorkerComp.map(cmpToLease),'total').toFixed(2)
                             }</td><td>
