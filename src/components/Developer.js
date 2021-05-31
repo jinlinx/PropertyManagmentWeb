@@ -114,7 +114,7 @@ function Developer(props) {
                     //return;
                     await Promise.map([
                         "houseInfo",
-                        "ownerInfo",
+                        //"ownerInfo",
                         "tenantInfo",
                         "payerTenantMapping",
                         "maintenanceRecords",

@@ -1,6 +1,6 @@
 //import { get } from 'superagent';
 //const urlBase = 'http://localhost:8081';
-const urlBase = 'http://192.168.1.41';
+const urlBase = process.env.NODE_ENV === 'dev' ? 'http://localhost:8081': 'http://192.168.1.41';
 const apiBase=`${urlBase}/pmapi`;
 const getUrl=path => `${apiBase}/${path}`;
 const request = require('superagent');
