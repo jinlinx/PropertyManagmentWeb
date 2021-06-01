@@ -300,7 +300,7 @@ export default function MonthlyComp() {
                     const csvContent = [csvHeader];
                     for (let i = 0; ; i++) {
                         const cmpi = res.paymentsFlattened[i];
-                        const curLine = [];
+                        const curLine = cmpiMapper.map(()=>'');
                         if (cmpi) {
                             for (let j = 0; j < cmpiMapper.length; j++) {
                                 curLine[j] = cmpiMapper[j](cmpi);
