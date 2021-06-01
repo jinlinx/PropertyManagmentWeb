@@ -1,14 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { Table, Form, Modal, Dropdown, Button, Toast, InputGroup, Tab } from 'react-bootstrap';
+import { Table, Modal, Button, } from 'react-bootstrap';
 import { sqlGet } from '../api';
 import EditDropdown from '../paymentMatch/EditDropdown';
 
 import { orderBy, sumBy, uniqBy } from 'lodash';
 import moment from 'moment';
 
-export default function MonthlyComp(props) {
-    const { ownerInfo} = props.compPrm;
+export default function MonthlyComp() {
+    //const { ownerInfo} = props.compPrm;
     const [workers, setWorkers] = useState([]);
     const [workerComps, setWorkerComps] = useState({});
     const [errorTxt, setErrorText] = useState('');
@@ -201,6 +201,154 @@ export default function MonthlyComp(props) {
                     options: monthes, setOptions: () => { },
                     loadOptions: () => null,
                 }}></EditDropdown>
+            </div>
+            <div>
+                <Button onClick={() => {
+                    
+                    const rows = curWorkerComp.map((cmp, key) => {
+                        const lt = cmpToLease(cmp);
+                        if (!lt.payments.length) return;
+                        return {
+                            address: cmp.address,
+                            paymentAmount: lt.total,
+                            comp: getCmpAmt(cmp).toFixed(2),
+                            details: lt.payments.map(pmt => ({
+                                date: moment(pmt.receivedDate).format('YYYY-MM-DD'),
+                                paidBy: pmt.paidBy,
+                                amount: pmt.receivedAmount,
+                                desc: pmt.notes,
+                            }))
+                        }
+                    }).filter(x=>x);
+                    const res = {
+                        totalPayments: sumBy(curWorkerComp.map(cmpToLease), 'total').toFixed(2),
+                        totalPaymentComp: totalEarned.toFixed(2),
+                        paymentRows: rows,
+                        paymentsFlattened: rows.reduce((acc, r) => {
+                            const drs = r.details.map(rd => {
+                                return {
+                                    date: rd.date,
+                                    amount: rd.amount,
+                                    address: r.address,
+                                    comp: '-',
+                                }
+                            });
+                            drs.push({
+                                date: '-',
+                                amount: r.paymentAmount,
+                                address: '-',
+                                comp: r.comp,
+                            })
+                            return acc.concat(drs);
+                        }, []),
+                    }
+
+                    const reimbusements = maintenanceRecordsByExpCat.cats.map((mr, key) => {
+                        if (!mr.reimburse) return;
+                        return {
+                            name: mr.name,
+                            amount: mr.total,
+                            rows: mr.items.map(itm => {
+                                return {
+                                    amount: itm.amount,
+                                    address: itm.address,
+                                    date: moment(itm.date).format('YYYY-MM-DD'),
+                                    desc: itm.description
+                                }
+                            })
+                        }
+                    }).filter(x => x);
+                    console.log('reimbusements===============')
+                    console.log(reimbusements)
+                    const reimbusementsFlattened = reimbusements.reduce((acc, r) => {
+                        const drs = r.rows.map(rr => {
+                            return {
+                                date: rr.date,
+                                name: r.name,
+                                amount: rr.amount,
+                                address: rr.address,
+                                desc: rr.desc,
+                            }
+                        });
+                        drs.push({
+                            date: '-',
+                            name: r.name,
+                            amount: r.amount,
+                            address: '-',
+                            desc:'-'
+                        })
+                        acc= acc.concat(drs)
+                        return acc;
+                    },[]);
+                    const reimbusementTotal = maintenanceRecordsByExpCat.total.toFixed(2);
+                    res.reimbusements = reimbusements;
+                    res.reimbusementTotal = reimbusementTotal;
+                    res.totalToBePaid = (totalEarned + maintenanceRecordsByExpCat.total).toFixed(2);
+
+                    const doPad = true;
+                    const padRight = (s, len) => doPad ? (s || '').toString().padEnd(len):s;                                   
+                    const csvHeader = ['Received Date', 'Received Amount', 'Comp        ',
+                        'Address               ',
+                        '      ', 'Date      ', 'Category             ',
+                        'Address               ',
+                        'Amount      ', 'Description                                                '];
+                    
+                    const colWidths = csvHeader.map(c => c.length);
+
+
+                    const cmpiMapper = [x => x.date, x => x.amount, x => x.comp, x => x.address, x => ''];
+                    const rembiMapper = [x => x.date, x => x.name, x => x.address, x => x.amount, x => x.desc];
+                    const csvContent = [csvHeader];
+                    for (let i = 0; ; i++) {
+                        const cmpi = res.paymentsFlattened[i];
+                        const curLine = [];
+                        if (cmpi) {
+                            for (let j = 0; j < cmpiMapper.length; j++) {
+                                curLine[j] = padRight(cmpiMapper[j](cmpi), colWidths[j]);
+                            }
+                        }
+                        const rembi = reimbusementsFlattened[i];
+                        if (rembi) {
+                            for (let j = 0; j < rembiMapper.length; j++) {
+                                const curCol = j + cmpiMapper.length;
+                                console.log('rembi debug');
+                                console.log(rembi);
+                                console.log(`mapper of ${j} = ${rembiMapper[j](rembi)}`)
+                                curLine[curCol] = padRight(rembiMapper[j](rembi), colWidths[curCol]);
+                            }
+                        }
+                        if (!cmpi && !rembi) break;
+                        csvContent.push(curLine);
+                    }
+
+                    csvContent.push([]);
+                    let summary = [
+                        ['Total', res.totalPayments],
+                        ['Comp', res.totalPaymentComp, '', '', '', '', 'Total', res.reimbusementTotal],
+                        [`Total of ${curMonth?.value}`,res.totalToBePaid]
+                    ]
+                    summary.forEach(s => {
+                        s = s.map((itm, i) => {
+                            return padRight(itm, colWidths[i]);
+                        });
+                        csvContent.push(s);
+                    })
+                    console.log(csvContent)
+
+                    var link = document.createElement("a");
+                    link.href = window.URL.createObjectURL(
+                        new Blob([csvContent.map(c=>c.join(',')).join('\n')], { type: "application/txt" })
+                    );
+                    link.download = `report-${curMonth?.value}.csv`;
+
+                    document.body.appendChild(link);
+
+                    link.click();
+                    setTimeout(function () {
+                        window.URL.revokeObjectURL(link);
+                    }, 200);
+                    
+                }}>CSV</Button>
             </div>
         </div>
         
