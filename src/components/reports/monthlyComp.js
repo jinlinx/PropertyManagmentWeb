@@ -285,7 +285,7 @@ export default function MonthlyComp() {
                     res.totalToBePaid = (totalEarned + maintenanceRecordsByExpCat.total).toFixed(2);
 
                     const doPad = true;
-                    const padRight = (s, len) => doPad ? (s || '').toString().padEnd(len):s;                                   
+                    const padRight = (s, len,i) => doPad ? (s || '').toString().padEnd(len) : s;                        
                     const csvHeader = ['Received Date', 'Received Amount', 'Comp        ',
                         'Address               ',
                         '      ', 'Date      ', 'Category             ',
@@ -303,21 +303,18 @@ export default function MonthlyComp() {
                         const curLine = [];
                         if (cmpi) {
                             for (let j = 0; j < cmpiMapper.length; j++) {
-                                curLine[j] = padRight(cmpiMapper[j](cmpi), colWidths[j]);
+                                curLine[j] = cmpiMapper[j](cmpi);
                             }
                         }
                         const rembi = reimbusementsFlattened[i];
                         if (rembi) {
                             for (let j = 0; j < rembiMapper.length; j++) {
-                                const curCol = j + cmpiMapper.length;
-                                console.log('rembi debug');
-                                console.log(rembi);
-                                console.log(`mapper of ${j} = ${rembiMapper[j](rembi)}`)
-                                curLine[curCol] = padRight(rembiMapper[j](rembi), colWidths[curCol]);
+                                const curCol = j + cmpiMapper.length;                                
+                                curLine[curCol] = rembiMapper[j](rembi);
                             }
                         }
                         if (!cmpi && !rembi) break;
-                        csvContent.push(curLine);
+                        csvContent.push(curLine.map((l,i)=>padRight(l,colWidths[i],i)));
                     }
 
                     csvContent.push([]);
