@@ -1,13 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
-import { Table, Form, Modal, Dropdown, Button, Toast, InputGroup, Tab } from 'react-bootstrap';
+import { Table, Modal, Button, } from 'react-bootstrap';
 import { sqlGet } from '../api';
 import EditDropdown from '../paymentMatch/EditDropdown';
 
-import { orderBy, sumBy } from 'lodash';
+import { orderBy, sumBy, uniqBy } from 'lodash';
 import moment from 'moment';
 
 export default function MonthlyComp() {
+    //const { ownerInfo} = props.compPrm;
     const [workers, setWorkers] = useState([]);
     const [workerComps, setWorkerComps] = useState({});
     const [errorTxt, setErrorText] = useState('');
@@ -37,11 +38,27 @@ export default function MonthlyComp() {
                 cmp.push(wc);
                 return acc;
             }, {}));
-            setWorkers(res.rows);
+            
+            setWorkers(uniqBy(res.rows,x=>x.workerID));
             if (res.rows.length) {
                 const w = res.rows[0];
                 setCurWorker(workerToOptin(w));
             }
+            sqlGet({
+                table: 'maintenanceRecords',
+                fields: ['workerID', 'workerFirstName', 'workerLastName'],
+                groupByArray: [{ 'field': 'workerID' }]
+            }).then(resMW => {
+                const resMWWkr = uniqBy(resMW.rows.map(r => {
+                    return {
+                        workerID: r.workerID,
+                        firstName: r.workerFirstName,
+                        lastName: r.workerLastName,
+                    }
+                }), x => x.workerID);
+                console.log(resMWWkr)
+                setWorkers(uniqBy(res.rows.concat(resMWWkr),'workerID'))
+            });
         }).catch(err => {
             
         });       
@@ -61,14 +78,25 @@ export default function MonthlyComp() {
         ],
             groupByArray: [{ 'field': 'month' }]
         }).then(res => {
-            let rows = res.rows.map(r=>r.month).map(m=>m.substr(0,7));
-            rows = orderBy(rows,[x=>x],['desc']);
-            const m = rows.map(value => ({
-                value,
-                label: value,
-            }));
-            setMonthes(m);
-            if (m.length) setCurMonth(m[0]);
+            let rows = res.rows.map(r=>r.month).map(m=>m.substr(0,7));            
+            
+            sqlGet({
+                table: 'rentPaymentInfo',
+                fields: ['month'],
+                whereArray: [{ field: 'workerID', op: '=', val: curWorker.value }],
+                groupByArray: [{ 'field': 'month' }]
+            }).then(paymentMonthes => {
+                let mrows = uniqBy(paymentMonthes.rows.map(r => r.month).concat(rows), x => x);
+                mrows = orderBy(mrows, [x => x], ['desc']);
+                console.log(mrows);
+                console.log('payment monthes')
+                const m = mrows.map(value => ({
+                    value,
+                    label: value,
+                }));
+                setMonthes(m);
+                if (m.length) setCurMonth(m[0]);
+            })
         });
     }, [curWorker]);
     
@@ -98,19 +126,19 @@ export default function MonthlyComp() {
 
     const curWorkerComp = orderBy(workerComps[curWorker.value] || [], ['address'], ['asc']);
     const paymentsByLease = payments.reduce((acc, p) => {
-        let lp = acc[p.leaseID];
+        let lp = acc[p.houseID];
         if (!lp) {
             lp = {
                 total: 0,
                 payments: [],
             };
-            acc[p.leaseID] = lp;
+            acc[p.houseID] = lp;
         }
         lp.total += p.receivedAmount;
         lp.payments.push(p);
         return acc;
     }, {});
-    const cmpToLease = cmp => paymentsByLease[cmp.leaseID] || { total: 0 };
+    const cmpToLease = cmp => paymentsByLease[cmp.houseID] || { total: 0, payments:[] };
     const getCmpAmt = cmp => {
         if (cmp.type === 'percent')
             return cmpToLease(cmp).total*cmp.amount/100;
@@ -174,6 +202,154 @@ export default function MonthlyComp() {
                     loadOptions: () => null,
                 }}></EditDropdown>
             </div>
+            <div>
+                <Button onClick={() => {
+                    
+                    const rows = curWorkerComp.map((cmp, key) => {
+                        const lt = cmpToLease(cmp);
+                        if (!lt.payments.length) return;
+                        return {
+                            address: cmp.address,
+                            paymentAmount: lt.total,
+                            comp: getCmpAmt(cmp).toFixed(2),
+                            details: lt.payments.map(pmt => ({
+                                date: moment(pmt.receivedDate).format('YYYY-MM-DD'),
+                                paidBy: pmt.paidBy,
+                                amount: pmt.receivedAmount,
+                                desc: pmt.notes,
+                            }))
+                        }
+                    }).filter(x=>x);
+                    const res = {
+                        totalPayments: sumBy(curWorkerComp.map(cmpToLease), 'total').toFixed(2),
+                        totalPaymentComp: totalEarned.toFixed(2),
+                        paymentRows: rows,
+                        paymentsFlattened: rows.reduce((acc, r) => {
+                            const drs = r.details.map(rd => {
+                                return {
+                                    date: rd.date,
+                                    amount: rd.amount,
+                                    address: r.address,
+                                    comp: '-',
+                                }
+                            });
+                            drs.push({
+                                date: '-',
+                                amount: r.paymentAmount,
+                                address: '-',
+                                comp: r.comp,
+                            })
+                            return acc.concat(drs);
+                        }, []),
+                    }
+
+                    const reimbusements = maintenanceRecordsByExpCat.cats.map((mr, key) => {
+                        if (!mr.reimburse) return;
+                        return {
+                            name: mr.name,
+                            amount: mr.total,
+                            rows: mr.items.map(itm => {
+                                return {
+                                    amount: itm.amount,
+                                    address: itm.address,
+                                    date: moment(itm.date).format('YYYY-MM-DD'),
+                                    desc: itm.description
+                                }
+                            })
+                        }
+                    }).filter(x => x);
+                    console.log('reimbusements===============')
+                    console.log(reimbusements)
+                    const reimbusementsFlattened = reimbusements.reduce((acc, r) => {
+                        const drs = r.rows.map(rr => {
+                            return {
+                                date: rr.date,
+                                name: r.name,
+                                amount: rr.amount,
+                                address: rr.address,
+                                desc: rr.desc,
+                            }
+                        });
+                        drs.push({
+                            date: '-',
+                            name: r.name,
+                            amount: r.amount,
+                            address: '-',
+                            desc:'-'
+                        })
+                        acc= acc.concat(drs)
+                        return acc;
+                    },[]);
+                    const reimbusementTotal = maintenanceRecordsByExpCat.total.toFixed(2);
+                    res.reimbusements = reimbusements;
+                    res.reimbusementTotal = reimbusementTotal;
+                    res.totalToBePaid = (totalEarned + maintenanceRecordsByExpCat.total).toFixed(2);
+
+                    const doPad = true;
+                    const padRight = (s, len) => doPad ? (s || '').toString().padEnd(len):s;                                   
+                    const csvHeader = ['Received Date', 'Received Amount', 'Comp        ',
+                        'Address               ',
+                        '      ', 'Date      ', 'Category             ',
+                        'Address               ',
+                        'Amount      ', 'Description                                                '];
+                    
+                    const colWidths = csvHeader.map(c => c.length);
+
+
+                    const cmpiMapper = [x => x.date, x => x.amount, x => x.comp, x => x.address, x => ''];
+                    const rembiMapper = [x => x.date, x => x.name, x => x.address, x => x.amount, x => x.desc];
+                    const csvContent = [csvHeader];
+                    for (let i = 0; ; i++) {
+                        const cmpi = res.paymentsFlattened[i];
+                        const curLine = [];
+                        if (cmpi) {
+                            for (let j = 0; j < cmpiMapper.length; j++) {
+                                curLine[j] = padRight(cmpiMapper[j](cmpi), colWidths[j]);
+                            }
+                        }
+                        const rembi = reimbusementsFlattened[i];
+                        if (rembi) {
+                            for (let j = 0; j < rembiMapper.length; j++) {
+                                const curCol = j + cmpiMapper.length;
+                                console.log('rembi debug');
+                                console.log(rembi);
+                                console.log(`mapper of ${j} = ${rembiMapper[j](rembi)}`)
+                                curLine[curCol] = padRight(rembiMapper[j](rembi), colWidths[curCol]);
+                            }
+                        }
+                        if (!cmpi && !rembi) break;
+                        csvContent.push(curLine);
+                    }
+
+                    csvContent.push([]);
+                    let summary = [
+                        ['Total', res.totalPayments],
+                        ['Comp', res.totalPaymentComp, '', '', '', '', 'Total', res.reimbusementTotal],
+                        [`Total of ${curMonth?.value}`,res.totalToBePaid]
+                    ]
+                    summary.forEach(s => {
+                        s = s.map((itm, i) => {
+                            return padRight(itm, colWidths[i]);
+                        });
+                        csvContent.push(s);
+                    })
+                    console.log(csvContent)
+
+                    var link = document.createElement("a");
+                    link.href = window.URL.createObjectURL(
+                        new Blob([csvContent.map(c=>c.join(',')).join('\n')], { type: "application/txt" })
+                    );
+                    link.download = `report-${curMonth?.value}.csv`;
+
+                    document.body.appendChild(link);
+
+                    link.click();
+                    setTimeout(function () {
+                        window.URL.revokeObjectURL(link);
+                    }, 200);
+                    
+                }}>CSV</Button>
+            </div>
         </div>
         
         <div style={{flexGrow:1, overflowY:'auto'}}>
@@ -187,28 +363,29 @@ export default function MonthlyComp() {
                     {
                         curWorkerComp.map((cmp,key) => {
                             const lt = cmpToLease(cmp);
+                            if (!lt.payments.length) return <></>;
                             return <><tr key={key}><td>{cmp.amount}</td><td>{cmp.type}</td><td>{cmp.address}</td>
                                 <td>{lt.total}</td><td>{ getCmpAmt(cmp).toFixed(2)}</td>
                                 <td><div style={{cursor:'pointer'}} onClick={()=>{
                                     setShowDetails(state=>{
                                         return {
                                             ...state,
-                                            [cmp.leaseID]: !state[cmp.leaseID],
+                                            [cmp.houseID]: !state[cmp.houseID],
                                         }
                                     });
 
-                                }}>+</div></td>
+                                }}>{ lt.payments.length?'+':'' }</div></td>
                             </tr>
                             {
-                                showDetails[cmp.leaseID] && lt.payments.map(pmt=>{
-                                    return <tr><td>{moment(pmt.receivedDate).format('YYYY-MM-DD')}</td><td>{pmt.paidBy}</td><td>{pmt.notes}</td><td>{pmt.receivedAmount}</td></tr>
+                                showDetails[cmp.houseID] && lt.payments.map(pmt=>{
+                                    return <tr key={`detail-${key}`}><td>{moment(pmt.receivedDate).format('YYYY-MM-DD')}</td><td>{pmt.paidBy}</td><td>{pmt.notes}</td><td>{pmt.receivedAmount}</td></tr>
                                 })
                             }
                             </>
                         })
                     }
                     {
-                        <tr><td>Total</td><td></td><td></td>
+                        <tr key={'endkey'}><td>Total</td><td></td><td></td>
                             <td>{
                                 sumBy(curWorkerComp.map(cmpToLease),'total').toFixed(2)
                             }</td><td>

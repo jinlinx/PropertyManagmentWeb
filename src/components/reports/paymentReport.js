@@ -1,11 +1,7 @@
 import React, {useState, useEffect} from 'react';
-import moment from 'moment';
-import { getPaymnents } from '../aapi';
-import { Table } from 'react-bootstrap';
-import EditDropdown from '../paymentMatch/EditDropdown';
 import { TOTALCOLNAME,fMoneyformat } from './rootData';
 import { MonthRange } from './monthRange';
-import sortBy from 'lodash/sortBy';
+
 
 import { getPaymentsByMonthAddress } from './reportUtil';
 
@@ -45,7 +41,7 @@ export default function PaymentReport(props) {
                 monAddr.houseAry.map((h,key) => {
                     return <><input type='checkbox' key={key} checked={!!selectedHouses[h.addressId]} onChange={() => {
                         setSelectedHouses({ ...selectedHouses, [h.addressId]: !selectedHouses[h.addressId] });
-                    }}></input>{h.address}<span></span></>
+                    }}></input>{h.address}<span key={`spn${key}`}></span></>
                 })
             }
         </div>

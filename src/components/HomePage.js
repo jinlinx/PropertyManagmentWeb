@@ -147,7 +147,7 @@ function App() {
                                 if (curView === 'Leaselist') return <Leaselist pageState={pageState} />
                                 if (curView === 'OwnerList') return <OwnerList pageState={pageState} />
                                 if (curView === 'expenseCategory') return <ExepenseCategory pageState={pageState}></ExepenseCategory>
-                                if (curView === 'workerCompensationReport') return <MonthlyComp></MonthlyComp>
+                                if (curView === 'workerCompensationReport') return <MonthlyComp compPrm={ownerInfo}></MonthlyComp>
                                 if (curView === 'tenantlist') return <Tenantlist pageState={pageState} ></Tenantlist>
                                 if (curView === 'maintenanceList') return <MaintanceList pageState={pageState} ></MaintanceList>
                                 if (curView === 'workerCompList') return <WorkerCompList  pageState={pageState}></WorkerCompList>

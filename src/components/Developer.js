@@ -114,7 +114,7 @@ function Developer(props) {
                     //return;
                     await Promise.map([
                         "houseInfo",
-                        "ownerInfo",
+                        //"ownerInfo",
                         "tenantInfo",
                         "payerTenantMapping",
                         "maintenanceRecords",
@@ -146,6 +146,15 @@ function Developer(props) {
                         setMessages([res.message]);
                     });
                 }}>Import MaintenanceReport</Button>
+            </Col>
+            <Col>
+                <Button disabled={!!message} onClick={() => {
+                    setMessage('Starting imports, please wait');
+                    getData('misc/gsimport?who=payment').then(res => {
+                        setMessage('import done');
+                        setMessages([res.message]);
+                    });
+                }}>Import Payments</Button>
             </Col>
         </Row>
         <Row>
