@@ -1,8 +1,7 @@
 //import { get } from 'superagent';
 //const urlBase = 'http://localhost:8081';
-console.log(process.env.REACT_APP_ENDPOINT_ENV)
-console.log('envvvvvv')
-const urlBase = process.env.REACT_APP_ENDPOINT_ENV === 'dev' ? 'http://localhost:8081': 'http://192.168.1.41';
+
+const urlBase = process.env.NODE_ENV === 'production' ? 'http://192.168.1.41' : 'http://localhost:8081';
 const apiBase=`${urlBase}/pmapi`;
 const getUrl=path => `${apiBase}/${path}`;
 const request = require('superagent');
