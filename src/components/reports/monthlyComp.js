@@ -224,21 +224,21 @@ export default function MonthlyComp() {
                         totalPayments: sumBy(curWorkerComp.map(cmpToLease), 'total').toFixed(2),
                         totalPaymentComp: totalEarned.toFixed(2),
                         paymentRows: rows,
-                        paymentsFlattened: rows.reduce((acc, r) => {
+                        paymentsFlattened: rows.reduce((acc, r,i) => {
                             const drs = r.details.map(rd => {
                                 return {
                                     date: rd.date,
                                     amount: rd.amount,
                                     address: r.address,
-                                    comp: '-',
+                                    comp: `c-${i}-${r.comp}`,
                                 }
                             });
-                            drs.push({
-                                date: '-',
-                                amount: r.paymentAmount,
-                                address: '-',
-                                comp: r.comp,
-                            })
+                            //drs.push({
+                            //    date: '-',
+                            //    amount: r.paymentAmount,
+                            //    address: '-',
+                            //    comp: r.comp,
+                            //})
                             return acc.concat(drs);
                         }, []),
                     }
@@ -258,8 +258,7 @@ export default function MonthlyComp() {
                             })
                         }
                     }).filter(x => x);
-                    console.log('reimbusements===============')
-                    console.log(reimbusements)
+                    
                     const reimbusementsFlattened = reimbusements.reduce((acc, r) => {
                         const drs = r.rows.map(rr => {
                             return {
@@ -270,13 +269,13 @@ export default function MonthlyComp() {
                                 desc: rr.desc,
                             }
                         });
-                        drs.push({
-                            date: '-',
-                            name: r.name,
-                            amount: r.amount,
-                            address: '-',
-                            desc:'-'
-                        })
+                        //drs.push({
+                        //    date: '-',
+                        //    name: r.name,
+                        //    amount: r.amount,
+                        //    address: '-',
+                        //    desc:'-'
+                        //})
                         acc= acc.concat(drs)
                         return acc;
                     },[]);
