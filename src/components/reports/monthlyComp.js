@@ -332,46 +332,49 @@ export default function MonthlyComp() {
                     ];
 
                     const allColMaps = cmpiMapper.concat(rembiMapper);
-                    
-                    const mapper = allColMaps.map((fmt) => {
-                        return x => {
-                            const v = typeof x === 'string'? x: fmt.field ? x[fmt.field] : '';
-                            const padder = fmt.format || padRight;
-                            return padder(v, fmt.title.length)
-                        };
-                    });
-                    const csvContent = [allColMaps.map(c=>c.title)];
-                    for (let i = 0; ; i++) {
-                        const cmpi = res.paymentsFlattened[i];
-                        const curLine = allColMaps.map(() => '');
-                        if (cmpi) {
-                            for (let j = 0; j < cmpiMapper.length; j++) {
-                                curLine[j] = mapper[j](cmpi);
-                            }
-                        }
-                        const rembi = reimbusementsFlattened[i];
-                        if (rembi) {
-                            for (let j = rembiMapper.length; j < mapper.length; j++) {
-                                curLine[j] = mapper[j](rembi);
-                            }
-                        }
-                        if (!cmpi && !rembi) break;
-                        csvContent.push(curLine.map((l, i) => l.padEnd(allColMaps[i].title.length)));
-                    }
-
-                    csvContent.push([]);
-                    let summary = [
-                        ['Total', res.totalPayments],
-                        ['Comp', res.totalPaymentComp, '', '', '', '', '', 'Total', res.reimbusementTotal],
-                        [`Total ${curMonth?.value}`, res.totalToBePaid]
-                    ]
-                    summary.forEach(s => {
-                        s = s.map((itm, i) => {
-                            return mapper[i](itm);
+                    const fromColMapToCsv = allColMaps => {
+                        const mapper = allColMaps.map((fmt) => {
+                            return x => {
+                                const v = typeof x === 'string' ? x : fmt.field ? x[fmt.field] : '';
+                                const padder = fmt.format || padRight;
+                                return padder(v, fmt.title.length)
+                            };
                         });
-                        csvContent.push(s);
-                    })
-                    console.log(csvContent)
+                        const csvContent = [allColMaps.map(c => c.title)];
+                        for (let i = 0; ; i++) {
+                            const cmpi = res.paymentsFlattened[i];
+                            const curLine = allColMaps.map(() => '');
+                            if (cmpi) {
+                                for (let j = 0; j < cmpiMapper.length; j++) {
+                                    curLine[j] = mapper[j](cmpi);
+                                }
+                            }
+                            const rembi = reimbusementsFlattened[i];
+                            if (rembi) {
+                                for (let j = rembiMapper.length; j < mapper.length; j++) {
+                                    curLine[j] = mapper[j](rembi);
+                                }
+                            }
+                            if (!cmpi && !rembi) break;
+                            csvContent.push(curLine.map((l, i) => l.padEnd(allColMaps[i].title.length)));
+                        }
+
+                        csvContent.push([]);
+                        let summary = [
+                            ['Total', res.totalPayments],
+                            ['Comp', res.totalPaymentComp, '', '', '', '', '', 'Total', res.reimbusementTotal],
+                            [`Total ${curMonth?.value}`, res.totalToBePaid]
+                        ]
+                        summary.forEach(s => {
+                            s = s.map((itm, i) => {
+                                return mapper[i](itm);
+                            });
+                            csvContent.push(s);
+                        });
+                        return csvContent;
+                    }
+                    
+                    const csvContent = fromColMapToCsv(allColMaps);
 
                     var link = document.createElement("a");
                     link.href = window.URL.createObjectURL(
