@@ -219,12 +219,12 @@ export default function MonthlyComp() {
                                 desc: pmt.notes,
                             }))
                         }
-                    }).filter(x=>x);
+                    }).filter(x => x);
                     const res = {
                         totalPayments: sumBy(curWorkerComp.map(cmpToLease), 'total').toFixed(2),
                         totalPaymentComp: totalEarned.toFixed(2),
                         paymentRows: rows,
-                        paymentsFlattened: rows.reduce((acc, r,i) => {
+                        paymentsFlattened: rows.reduce((acc, r, i) => {
                             const drs = r.details.map(rd => {
                                 return {
                                     date: rd.date,
@@ -276,56 +276,98 @@ export default function MonthlyComp() {
                         //    address: '-',
                         //    desc:'-'
                         //})
-                        acc= acc.concat(drs)
+                        acc = acc.concat(drs)
                         return acc;
-                    },[]);
+                    }, []);
                     const reimbusementTotal = maintenanceRecordsByExpCat.total.toFixed(2);
                     res.reimbusements = reimbusements;
                     res.reimbusementTotal = reimbusementTotal;
                     res.totalToBePaid = (totalEarned + maintenanceRecordsByExpCat.total).toFixed(2);
 
                     const doPad = true;
-                    const padRight = (s, len,i) => doPad ? (s || '').toString().padEnd(len) : s;                        
-                    const csvHeader = ['Received Date', 'Received Amount', 'Comp        ',
-                        'Address               ',
-                        '      ', 'Date      ', 'Category             ',
-                        'Address               ',
-                        'Amount      ', 'Description                                                '];
+                    const padRight = (s, len) => doPad ? (s || '').toString().padEnd(len) : s;
+
+
+                    const padNum = (num, w) => parseFloat(num).toFixed(2).padStart(w || 5);
                     
-                    const colWidths = csvHeader.map(c => c.length);
+                    const cmpiMapper = [
+                        {
+                            field: 'date',
+                            title: 'Received Date'
+                        }, {
+                            field: 'amount',
+                            title: 'Received Amount',
+                            format: padNum,
+                        }, {
+                            field: 'comp',
+                            title: 'Comp        ',
+                        },
+                        {
+                            field: 'address',
+                            title: 'Address               ',
+                        },
+                        {
+                            field: '',
+                            title: '   '
+                        }
+                    ];
+                    const rembiMapper = [
+                        {
+                            field: 'date',
+                            title: 'Date      '
+                        }, {
+                            field: 'name',
+                            title: 'Category             '
+                        }, {
+                            field: 'address',
+                            title: 'Address               ',
+                        }, {
+                            field: 'amount',
+                            title: 'Amount      ',
+                            format: padNum,
+                        }, {
+                            field: 'desc',
+                            title: 'Description                                                '
+                        }
+                    ];
 
-
-                    const cmpiMapper = [x => x.date, x => x.amount, x => x.comp, x => x.address, x => ''];
-                    const rembiMapper = [x => x.date, x => x.name, x => x.address, x => x.amount, x => x.desc];
-                    const csvContent = [csvHeader];
+                    const allColMaps = cmpiMapper.concat(rembiMapper);
+                    
+                    const mapper = allColMaps.map((fmt) => {
+                        return x => {
+                            const v = typeof x === 'string'? x: fmt.field ? x[fmt.field] : '';
+                            const padder = fmt.format || padRight;
+                            return padder(v, fmt.title.length)
+                        };
+                    });
+                    const csvContent = [allColMaps.map(c=>c.title)];
                     for (let i = 0; ; i++) {
                         const cmpi = res.paymentsFlattened[i];
-                        const curLine = cmpiMapper.map(()=>'');
+                        const curLine = allColMaps.map(() => '');
                         if (cmpi) {
                             for (let j = 0; j < cmpiMapper.length; j++) {
-                                curLine[j] = cmpiMapper[j](cmpi);
+                                curLine[j] = mapper[j](cmpi);
                             }
                         }
                         const rembi = reimbusementsFlattened[i];
                         if (rembi) {
-                            for (let j = 0; j < rembiMapper.length; j++) {
-                                const curCol = j + cmpiMapper.length;                                
-                                curLine[curCol] = rembiMapper[j](rembi);
+                            for (let j = rembiMapper.length; j < mapper.length; j++) {
+                                curLine[j] = mapper[j](rembi);
                             }
                         }
                         if (!cmpi && !rembi) break;
-                        csvContent.push(curLine.map((l,i)=>padRight(l,colWidths[i],i)));
+                        csvContent.push(curLine.map((l, i) => l.padEnd(allColMaps[i].title.length)));
                     }
 
                     csvContent.push([]);
                     let summary = [
                         ['Total', res.totalPayments],
-                        ['Comp', res.totalPaymentComp, '', '', '', '', 'Total', res.reimbusementTotal],
-                        [`Total of ${curMonth?.value}`,res.totalToBePaid]
+                        ['Comp', res.totalPaymentComp, '', '', '', '', '', 'Total', res.reimbusementTotal],
+                        [`Total ${curMonth?.value}`, res.totalToBePaid]
                     ]
                     summary.forEach(s => {
                         s = s.map((itm, i) => {
-                            return padRight(itm, colWidths[i]);
+                            return mapper[i](itm);
                         });
                         csvContent.push(s);
                     })
@@ -333,7 +375,7 @@ export default function MonthlyComp() {
 
                     var link = document.createElement("a");
                     link.href = window.URL.createObjectURL(
-                        new Blob([csvContent.map(c=>c.join(',')).join('\n')], { type: "application/txt" })
+                        new Blob([csvContent.map(c => c.join(',')).join('\n')], { type: "application/txt" })
                     );
                     link.download = `report-${curMonth?.value}.csv`;
 
