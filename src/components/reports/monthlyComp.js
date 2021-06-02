@@ -308,7 +308,7 @@ export default function MonthlyComp() {
                         },
                         {
                             field: '',
-                            title: '   '
+                            title: '----'
                         }
                     ];
                     const rembiMapper = [
@@ -374,11 +374,31 @@ export default function MonthlyComp() {
                         return csvContent;
                     }
                     
+                    const testSet = fromColMapToCsv(allColMaps.map(a => {
+                        return {
+                            ...a,
+                            title: a.title.trim(),
+                        }
+                    }));
+                    const setColWidth = testSet => {
+                        const colWidth = testSet.reduce((acc, r) => {
+                            return r.reduce((acc, ri, i) => {
+                                if ((acc[i] || 0) < ri.length) {
+                                    acc[i] = ri.length;
+                                }
+                                return acc;
+                            }, acc);
+                        }, []);
+                        allColMaps.forEach((c, i) => {
+                            c.title = c.title.trim().padEnd(colWidth[i]);
+                        });
+                    };
+                    setColWidth(testSet);
                     const csvContent = fromColMapToCsv(allColMaps);
 
                     var link = document.createElement("a");
                     link.href = window.URL.createObjectURL(
-                        new Blob([csvContent.map(c => c.join(',')).join('\n')], { type: "application/txt" })
+                        new Blob([csvContent.map(c => c.join(', ')).join('\n')], { type: "application/txt" })
                     );
                     link.download = `report-${curMonth?.value}.csv`;
 
