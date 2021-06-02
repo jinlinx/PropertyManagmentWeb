@@ -124,7 +124,7 @@ export default function MonthlyComp() {
         })
     }, [curMonth.value]);
 
-    const curWorkerComp = orderBy(workerComps[curWorker.value] || [], ['address'], ['asc']);
+    let curWorkerComp = []; //orderBy(workerComps[curWorker.value] || [], ['address'], ['asc']);
     const paymentsByLease = payments.reduce((acc, p) => {
         let lp = acc[p.houseID];
         if (!lp) {
@@ -133,11 +133,27 @@ export default function MonthlyComp() {
                 payments: [],
             };
             acc[p.houseID] = lp;
+            acc.keys.push(p.houseID);
         }
         lp.total += p.receivedAmount;
         lp.payments.push(p);
         return acc;
-    }, {});
+    }, {
+        keys:[]
+    });
+    const curWorkerCompTops = workerComps[curWorker.value] || [];
+    const curWorkerCompTop = curWorkerCompTops[0];
+    if (curWorkerCompTop) {
+        if (paymentsByLease.keys.length) {
+            curWorkerComp = orderBy(paymentsByLease.keys.map(houseID => {
+                return {
+                    ...curWorkerCompTop,
+                    houseID,
+                    address: paymentsByLease[houseID].payments[0].address,
+                }
+            }), ['address'], ['asc']);
+        }
+    }
     const cmpToLease = cmp => paymentsByLease[cmp.houseID] || { total: 0, payments:[] };
     const getCmpAmt = cmp => {
         if (cmp.type === 'percent')
@@ -417,7 +433,7 @@ export default function MonthlyComp() {
             <Table>
                 <thead>
                     <tr><td></td><td>Type</td><td>Address</td>
-                    <td>Rent</td><td>Comp</td>
+                        <td>Rent</td><td>Comp{curWorkerCompTops.length > 1?'!!!Warning!! Extra worker comp found':''}</td>
                     </tr>
                 </thead>
                 <tbody>
