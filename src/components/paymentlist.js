@@ -7,6 +7,7 @@ import EmailTemplate from './leaseEmail/emailTemplate';
 import moment from 'moment';
 function PaymentList(props) {
 
+    const tableName = 'rentPaymentInfo';
     const [pageState, setPageState] = useState({
         retrivingData: 0,
         operationText: '',
@@ -14,6 +15,26 @@ function PaymentList(props) {
         tenants: [],
         row: {},
     });
+    useEffect(() => {
+        const pageState = props?.pageState;
+        pageState.setPageProps(state => ({
+            ...state,
+            [tableName]: {
+                sorts: [
+                    {
+                        name: 'receivedDate',
+                        op: 'desc',
+                        shortDesc: 'DS',
+                    },
+                    {
+                        name: 'address',
+                        op: 'asc',
+                        shortDesc: 'AS',
+                    }
+                ]
+            }
+        }));
+    }, []);
 
     const [selectedEmails, setSelectedEmails] = useState([]);
     const [template, setTemplate] = useState({
@@ -149,7 +170,7 @@ function PaymentList(props) {
       </Modal>
     <GenList 
     {...props}
-    table={'rentPaymentInfo'}    
+    table={tableName}    
         displayFields={
             //actualy don't need to do this
             [
