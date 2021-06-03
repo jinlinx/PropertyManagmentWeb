@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Table, Modal, Button, } from 'react-bootstrap';
+import { Table, Modal, Button, Container, Row, Col} from 'react-bootstrap';
 import { sqlGet } from '../api';
 import EditDropdown from '../paymentMatch/EditDropdown';
 
@@ -144,7 +144,7 @@ export default function MonthlyComp() {
     
     
     //const totalEarned = sumBy(curWorkerComp.map(getCmpAmt),x=>x);
-    
+    const csvContent = generateCsv(curMonth?.value);
     return <div style={{display:'flex', height:'100%', flexDirection:'column', boxSizing:'border-box'}}>
         <Modal show={!!errorTxt}>
             <Modal.Header closeButton>
@@ -178,7 +178,6 @@ export default function MonthlyComp() {
             </div>
             <div>
                 <Button onClick={() => {                    
-                    const csvContent = generateCsv(curMonth?.value);
                     var link = document.createElement("a");
                     link.href = window.URL.createObjectURL(
                         new Blob([csvContent.map(c => c.join(', ')).join('\n')], { type: "application/txt" })
@@ -196,88 +195,30 @@ export default function MonthlyComp() {
             </div>
         </div>
         
-        <div style={{flexGrow:1, overflowY:'auto'}}>
-            <Table>
-                <thead>
-                    <tr><td></td><td>Type</td><td>Address</td>
-                        <td>Rent</td><td>Comp{curWorkerCompTops.length > 1?'!!!Warning!! Extra worker comp found':''}</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {
-                        curWorkerComp.map((cmp,key) => {
-                            const lt = cmpToLease(cmp);
-                            if (!lt.payments.length) return <></>;
-                            return <><tr key={key}><td>{cmp.amount}</td><td>{cmp.type}</td><td>{cmp.address}</td>
-                                <td>{lt.total}</td><td>{ getCmpAmt(cmp).toFixed(2)}</td>
-                                <td><div style={{cursor:'pointer'}} onClick={()=>{
-                                    setShowDetails(state=>{
-                                        return {
-                                            ...state,
-                                            [cmp.houseID]: !state[cmp.houseID],
+        {
+            true && <div>
+                <Table>
+                {
+                        csvContent.map((csvLine, key) => {
+                        
+                            return key === 0 ?
+                                <thead key={key}>
+                                    <tr>
+                                    {
+                                            csvLine.map((itm, key) => <td key={key}><b>{itm}</b></td>)
                                         }
-                                    });
-
-                                }}>{ lt.payments.length?'+':'' }</div></td>
-                            </tr>
-                            {
-                                showDetails[cmp.houseID] && lt.payments.map(pmt=>{
-                                    return <tr key={`detail-${key}`}><td>{moment(pmt.receivedDate).format('YYYY-MM-DD')}</td><td>{pmt.paidBy}</td><td>{pmt.notes}</td><td>{pmt.receivedAmount}</td></tr>
-                                })
-                            }
-                            </>
-                        })
-                    }
-                    {
-                        <tr key={'endkey'}><td>Total</td><td></td><td></td>
-                            <td>{
-                                sumBy(curWorkerComp.map(cmpToLease),'total').toFixed(2)
-                            }</td><td>
-                                {
-                                    totalEarned.toFixed(2)
-                                }
-                            </td></tr>
-                    }
-                </tbody>
-            </Table>
-            <Table>
-                <thead>                
-                </thead>
-                <tbody>
-                    {
-                        maintenanceRecordsByExpCat.cats.map((mr,key) => {                            
-                            return <><tr key={key}>
-                                <td style={{textDecoration:mr.reimburse?'none':'line-through'}}>{mr.name}</td><td>{mr.total}</td>
-                                <td></td><td></td>
-                                <td><div style={{cursor:'pointer'}} onClick={()=>{
-                                    setShowDetails(state=>{
-                                        return {
-                                            ...state,
-                                            [mr.id]: !state[mr.id],
-                                        }
-                                    });
-
-                                }}>+</div></td>
+                                    </tr>
+                                </thead>
+                                :
+                                <tr key={key}>
+                                    {
+                                        csvLine.map((itm, key) => <td key={key}>{itm}</td>)
+                                    }
                                 </tr>
-                                {
-                                    showDetails[mr.id] && mr.items.map(itm=><tr><td></td><td>{itm.amount}</td><td>{itm.address}</td><td>{moment(itm.date).format('YYYY-MM-DD')}</td><td>{itm.description}</td></tr>)
-                                    
-                                }
-                                </>
                         })
                     }
-                    {
-                        <tr><td>Total</td>
-                            <td>{
-                                maintenanceRecordsByExpCat.total.toFixed(2)
-                            }</td>
-                            </tr>
-                    }
-                </tbody>
-            </Table>
-            <span>
-                Total to be paied: {(totalEarned + maintenanceRecordsByExpCat.total).toFixed(2)}
-            </span>
-        </div>
+                </Table>
+            </div>
+        }        
     </div>
 }

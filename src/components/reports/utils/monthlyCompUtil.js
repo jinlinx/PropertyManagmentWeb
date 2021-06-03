@@ -166,10 +166,11 @@ export function doCalc({
                 field: 'amount',
                 title: 'Received Amount',
                 format: padNum,
-            }, {
-                field: 'comp',
-                title: 'Comp        ',
             },
+            //{
+            //    field: 'comp',
+            //    title: 'Comp        ',
+            //},
             {
                 field: 'address',
                 title: 'Address               ',
@@ -230,7 +231,7 @@ export function doCalc({
             csvContent.push([]);
             let summary = [
                 ['Total', res.totalPayments],
-                ['Comp', res.totalPaymentComp, '', '', '', '', '', 'Total', res.reimbusementTotal],
+                ['Comp', res.totalPaymentComp, '', '', '', '', 'Total', res.reimbusementTotal],
                 [`Total ${curMonth}`, res.totalToBePaid]
             ]
             summary.forEach(s => {
