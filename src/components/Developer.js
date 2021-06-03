@@ -115,6 +115,7 @@ function Developer(props) {
                     await Promise.map([
                         "houseInfo",
                         //"ownerInfo",
+                        'paymentType',
                         "tenantInfo",
                         "payerTenantMapping",
                         "maintenanceRecords",
