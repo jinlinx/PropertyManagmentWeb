@@ -156,7 +156,7 @@ export function doCalc({
         const padRight = (s, len) => doPad ? (s || '').toString().padEnd(len) : s;
 
 
-        const padNum = (num, w) => parseFloat(num).toFixed(2).padStart(w || 5);
+        const padNum = (num, w) => `\$${parseFloat(num).toFixed(2).padStart(w || 5)}`;
 
         const cmpiMapper = [
             {

@@ -197,6 +197,18 @@ export function JJDataRoot(props) {
             }, getInitExpenseTableData());
             addMonths(maintenceData.monthes);
             maintenceData.originalData = d;
+
+            const sortLowOthers = cats => {
+                const others = 'Others';
+                const res = cats.filter(k => k !== others);
+                res.sort();
+                if (cats.filter(k => k === others).length) {
+                    res.push(others);
+                }
+                return res;
+            }
+            
+            maintenceData.categoryNames = sortLowOthers(maintenceData.categoryNames);
             setExpenseData(maintenceData);
             calculateExpenseByDate(maintenceData)
         });
