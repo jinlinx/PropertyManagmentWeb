@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { getMaintenanceReport, getPaymnents } from '../aapi';
-import { sumBy } from 'lodash';
+import { sumBy, sortBy, pick, uniqBy } from 'lodash';
 
 export const TOTALCOLNAME = 'coltotal';
 export const fMoneyformat = amt=> {
@@ -40,14 +40,17 @@ export function JJDataRoot(props) {
         [TOTALCOLNAME]:{total:0}
     });
     const [allMonthes, setAllMonths] = useState([]);
+    const [allHouses, setAllHouses] = useState([]); //{houseID, address}
 
 
     //month selection states
     const [monthes, setMonthes] = useState([]);
     const [curMonthSelection, setCurMonthSelection] = useState({label: ''});
     const [selectedMonths, setSelectedMonths] = useState({});
+    const [selectedHouses, setSelectedHouses] = useState({});
 
 
+    const TOTALHOUSECOUNT = 5;
 
     function addMonths(mons) {
         setAllMonths(orig => {
@@ -65,6 +68,23 @@ export function JJDataRoot(props) {
             return r;
         });
     }
+
+    function addHouses(housesAll) {
+        const houses = uniqBy(housesAll.map(h => pick(h, ['houseID', 'address'])), 'houseID').filter(h => h.address);
+        setAllHouses(orig => {
+            const r = orig.concat(houses).reduce((acc, m) => {
+                if (!acc.dict[m.houseID]) {
+                    acc.dict[m.houseID] = true;
+                    acc.res.push(m);
+                }
+                return acc;
+            }, {
+                dict: {},
+                res: []
+            }).res;            
+            return sortBy(r,['address']);
+        });
+    }
     useEffect(() => {
         setMonthes(allMonthes);
     }, [allMonthes]);
@@ -73,8 +93,8 @@ export function JJDataRoot(props) {
     useEffect(() => {
         setMonthes(allMonthes.filter(m => selectedMonths[m]));
         
-        calculateExpenseByDate(expenseData, selectedMonths);
-        calculateIncomeByDate(paymentsByMonth, selectedMonths);
+        calculateExpenseByDate(expenseData, selectedMonths, selectedHouses);
+        calculateIncomeByDate(paymentsByMonth, selectedMonths, selectedHouses);
     }, [expenseData.originalData, paymentsByMonth.originalData, curMonthSelection, selectedMonths]);
 
     useEffect(() => {
@@ -111,6 +131,10 @@ export function JJDataRoot(props) {
                 break;
         }
         setSelectedMonths({ ...selectedMonths });
+        setSelectedHouses(allHouses.reduce((acc, h) => {
+            acc[h.houseID] = true;
+            return acc;
+        }, {}));
     }, [expenseData.originalData, paymentsByMonth.originalData,curMonthSelection]);
     
 
@@ -128,7 +152,7 @@ export function JJDataRoot(props) {
                 if (a.date < b.date) return -1;
                 return 0;
             });
-            r = r.reduce((acc, r) => {
+            const r111 = r.reduce((acc, r) => {
                 if (acc.curMon !== r.month) {
                     acc.curMon = r.month;
                     acc.total = 0;
@@ -142,9 +166,9 @@ export function JJDataRoot(props) {
                     curMon: null,
                 total: 0,
             });
-            setPayments(r.res);
+            setPayments(r);
 
-            const pm = r.res.reduce((acc, p) => {
+            const pm = r.reduce((acc, p) => {
                 const month = moment(p.date).format('YYYY-MM');
                 let m = acc.months[month];
                 acc.months[TOTALCOLNAME].total += p.amount;
@@ -157,6 +181,7 @@ export function JJDataRoot(props) {
                     acc.monthNames.push(month);
                 }
                 m.total += parseFloat(p.amount);
+                
                 return acc;
             }, {
                 months: {
@@ -165,11 +190,12 @@ export function JJDataRoot(props) {
                         total: 0,
                     }
                 },
-                monthNames: [],
+                monthNames: [],                
             });
             pm.months.monthNames = pm.monthNames.sort();
-            pm.months.originalData = r.res;
+            pm.months.originalData = r;
             addMonths(pm.monthNames);
+            addHouses(r);
             setPaymentsByMonth(pm.months);
         });        
     }
@@ -193,9 +219,11 @@ export function JJDataRoot(props) {
                 ctotal[month] = (ctotal[month] || 0) + r.amount;
                 cats[TOTALCOLNAME] = 0;
                 acc.monthlyTotal[month] = (acc.monthlyTotal[month] || 0) + r.amount;
+
                 return acc;
             }, getInitExpenseTableData());
             addMonths(maintenceData.monthes);
+            addHouses(d);
             maintenceData.originalData = d;
 
             const sortLowOthers = cats => {
@@ -238,7 +266,7 @@ export function JJDataRoot(props) {
         })
     };
 
-    const calculateIncomeByDate = (incomeData, selectedMonths) => {
+    const calculateIncomeByDate = (incomeData, selectedMonths, selectedHouses) => {
 
         //console.log(incomeData);
         if (!incomeData[TOTALCOLNAME] ) return;
@@ -256,9 +284,11 @@ export function JJDataRoot(props) {
             calculateExpenseByDate,
             calculateIncomeByDate,
             allMonthes,
+            allHouses,
             monthes, setMonthes,
             curMonthSelection, setCurMonthSelection,
             selectedMonths, setSelectedMonths,
+            selectedHouses, setSelectedHouses,
             beginReLoadPaymentData,
         }
     }>

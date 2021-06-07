@@ -7,13 +7,14 @@ export default function CashFlowReport(props) {
     const {
         paymentsByMonth, expenseData,
         selectedMonths,
+        selectedHouses,
         monthes, 
         ownerInfo,
     } = jjctx;
 
     const monAddr = getPaymentsByMonthAddress(paymentsByMonth.originalData, {
         isGoodMonth: m => selectedMonths[m],
-        isGoodHouseId: ()=>true,
+        isGoodHouseId: id=>selectedHouses[id],
     });
     return <>
         <MonthRange jjctx={jjctx}></MonthRange>
@@ -31,7 +32,7 @@ export default function CashFlowReport(props) {
             <tbody><tr>
                 <td className='tdLeftSubHeader' colSpan={monthes.length + 2}>Income</td></tr>
                 {
-                    monAddr.houseAry.map((house,key) => {
+                    monAddr.houseAry.filter(h=>selectedHouses[h.addressId]).map((house,key) => {
                         const curHouse = monAddr.houseByKey[house.addressId];
                         return <tr key={key}>
                             <td className='tdLeftSubCategoryHeader'>{house.address}</td>
