@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { getMaintenanceReport, getPaymnents } from '../aapi';
-import { sumBy, sortBy, pick, uniqBy } from 'lodash';
+import { sumBy, sortBy, pick, uniqBy, uniq } from 'lodash';
 
 export const TOTALCOLNAME = 'coltotal';
 export const fMoneyformat = amt=> {
@@ -152,20 +152,7 @@ export function JJDataRoot(props) {
                 if (a.date < b.date) return -1;
                 return 0;
             });
-            const r111 = r.reduce((acc, r) => {
-                if (acc.curMon !== r.month) {
-                    acc.curMon = r.month;
-                    acc.total = 0;
-                }
-                acc.total += r.amount;
-                r.total = acc.total;
-                acc.res.push(r);
-                return acc;
-            }, {
-                    res: [],
-                    curMon: null,
-                total: 0,
-            });
+
             setPayments(r);
 
             const pm = r.reduce((acc, p) => {
@@ -194,7 +181,8 @@ export function JJDataRoot(props) {
             });
             pm.months.monthNames = pm.monthNames.sort();
             pm.months.originalData = r;
-            addMonths(pm.monthNames);
+            //addMonths(pm.monthNames);
+            addMonths(uniq(r.map(r=>r.month)))
             addHouses(r);
             setPaymentsByMonth(pm.months);
         });        

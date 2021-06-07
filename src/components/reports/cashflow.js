@@ -32,7 +32,7 @@ export default function CashFlowReport(props) {
             <tbody><tr>
                 <td className='tdLeftSubHeader' colSpan={monthes.length + 2}>Income</td></tr>
                 {
-                    monAddr.houseAry.filter(h=>selectedHouses[h.addressId]).map((house,key) => {
+                    monAddr.houseAry.filter(h=>(selectedHouses[h.addressId] || h.addressId === h.address)).map((house,key) => {
                         const curHouse = monAddr.houseByKey[house.addressId];
                         return <tr key={key}>
                             <td className='tdLeftSubCategoryHeader'>{house.address}</td>
@@ -54,9 +54,10 @@ export default function CashFlowReport(props) {
                 </td><td className='tdCenter  tdTotalItalic'>{fMoneyformat(paymentsByMonth[TOTALCOLNAME].total)}</td>
                 {
                     monthes.map((name,key) => {
-                        const mon = paymentsByMonth[name];
-                        if (!mon) return <td className='tdCenter  tdTotalItalic' key={key}></td>;
-                        return <td className='tdCenter  tdTotalItalic' key={key}>{ fMoneyformat(mon.total)}</td>
+                        const monDbg = paymentsByMonth[name];
+                        const mon = monAddr.monthTotal[name];
+                        if (!mon && mon !== 0) return <td className='tdCenter  tdTotalItalic' key={key}></td>;
+                        return <td className='tdCenter  tdTotalItalic' key={key}>{fMoneyformat(mon)} dbg={ monDbg?.total}</td>
                     })
                     }</tr>
                 

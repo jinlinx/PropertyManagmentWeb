@@ -35,14 +35,18 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
     const { isGoodMonth, isGoodHouseId } = opts;
     const monAddr = paymentsByMonth.reduce((acc, d) => {
         //console.log(d);
-        if (!isGoodMonth(d.month)) return acc;
+        if (!isGoodMonth(d.month)) return acc;        
         
         let dispOrder = 0;
-        if (d.paymentTypeName !== 'Rent') {
+        const isNotRent = d.paymentTypeName !== 'Rent';
+        if (isNotRent) {
             //hack;
             d.addressId = d.paymentTypeName;
+            d.houseID = d.addressId;
             d.address = d.paymentTypeName;
             dispOrder = 9999;
+        } else {
+            if (!isGoodHouseId(d.houseID)) return acc;
         }
         let addData = acc.houseByKey[d.addressId];
         if (!addData) {
@@ -63,7 +67,7 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
             };
             addData[d.month] = monData;
         }
-        if (isGoodHouseId(d.addressId)) {
+        if (isGoodHouseId(d.addressId) || isNotRent) {
             monData[TOTALCOLNAME] += d.amount;
             acc.total += d.amount;
         }
@@ -72,7 +76,7 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
             acc.monthAry.push(d.month);
         }
         monData.amount += d.amount;
-        if (isGoodHouseId(d.addressId)) {
+        if (isGoodHouseId(d.addressId) || isNotRent) {
             addData[TOTALCOLNAME] += d.amount;
             acc.monthTotal[d.month] = (acc.monthTotal[d.month] || 0) + d.amount;
         }
