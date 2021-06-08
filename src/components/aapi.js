@@ -102,12 +102,28 @@ export async function getMaintenanceReport(ownerInfo) {
                 category: r.expenseCategoryName,
             }
         });
-    });
-    return sqlFreeForm(`select month, sum(amount) amount,  expenseCategoryName category, e.displayOrder 
-    from maintenanceRecords m inner join expenseCategories e on m.expenseCategoryID=e.expenseCategoryID 
-    group by m.month,
-    e.expenseCategoryID ,e.displayOrder 
-    order by month, e.displayOrder,expenseCategoryName`);
+    });    
+}
+
+export async function getHouseAnchorInfo(ownerInfo) {
+    if (!ownerInfo) return [];
+    return sqlGet({
+        fields: ['houseID','address'],
+        table: 'houseInfo',
+        whereArray: [{
+            field: 'ownerID',
+            op: '=',
+            val: ownerInfo.ownerID || ''
+        }],        
+    }).then(r => {
+        return r.rows.map(r => {
+            return {
+                id: r.houseID,
+                address: r.address,
+                isAnchor: r.address.includes('1633'),
+            }
+        }).filter(x=>x.address);
+    });    
 }
 
 // Used by cashflow
@@ -129,14 +145,7 @@ export async function getPaymnents(ownerInfo) {
             }
         });
     })
-    return sqlFreeForm(` select rp.receivedAmount amount, rp.receivedDate date, rp.paidBy, rp.notes, h.address, h.houseID addressId,
-    oi.shortName ownerName,
-    ip.source
-     from rentPaymentInfo rp inner join leaseInfo l on l.leaseID=rp.leaseID
-     inner join houseInfo h on h.houseID=l.houseID
-     inner join ownerInfo oi on oi.ownerID  = h.ownerID 
-left join importPayments ip  on ip.paymentID  = rp.paymentID 
-     order by rp.receivedDate;`);
+    
 }
 
 export async function getPaymentSubTotalInfo() {

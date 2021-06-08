@@ -7,13 +7,16 @@ export default function CashFlowReport(props) {
     const {
         paymentsByMonth, expenseData,
         selectedMonths,
+        selectedHouses,
+        houseAnchorInfo,
         monthes, 
         ownerInfo,
     } = jjctx;
 
     const monAddr = getPaymentsByMonthAddress(paymentsByMonth.originalData, {
         isGoodMonth: m => selectedMonths[m],
-        isGoodHouseId: ()=>true,
+        isGoodHouseId: id => selectedHouses[id],
+        getHouseShareInfo: () => [...houseAnchorInfo],
     });
     return <>
         <MonthRange jjctx={jjctx}></MonthRange>
@@ -31,7 +34,7 @@ export default function CashFlowReport(props) {
             <tbody><tr>
                 <td className='tdLeftSubHeader' colSpan={monthes.length + 2}>Income</td></tr>
                 {
-                    monAddr.houseAry.map((house,key) => {
+                    monAddr.houseAry.filter(h=>(selectedHouses[h.addressId] || h.addressId === h.address)).map((house,key) => {
                         const curHouse = monAddr.houseByKey[house.addressId];
                         return <tr key={key}>
                             <td className='tdLeftSubCategoryHeader'>{house.address}</td>
@@ -53,9 +56,11 @@ export default function CashFlowReport(props) {
                 </td><td className='tdCenter  tdTotalItalic'>{fMoneyformat(paymentsByMonth[TOTALCOLNAME].total)}</td>
                 {
                     monthes.map((name,key) => {
-                        const mon = paymentsByMonth[name];
-                        if (!mon) return <td className='tdCenter  tdTotalItalic' key={key}></td>;
-                        return <td className='tdCenter  tdTotalItalic' key={key}>{ fMoneyformat(mon.total)}</td>
+                        const monDbg = paymentsByMonth[name];
+                        const mon = monAddr.monthTotal[name];
+                        // dbg={ monDbg?.total}
+                        if (!mon && mon !== 0) return <td className='tdCenter  tdTotalItalic' key={key}></td>;
+                        return <td className='tdCenter  tdTotalItalic' key={key}>{fMoneyformat(mon)}</td>
                     })
                     }</tr>
                 

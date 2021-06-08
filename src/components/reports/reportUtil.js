@@ -1,10 +1,30 @@
+import { each } from 'bluebird';
 import sortBy from 'lodash/sortBy';
 import { TOTALCOLNAME,fMoneyformat } from './rootData';
 export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
     if (!opts) opts = {
         isGoodMonth: () => true,
         isGoodHouseId: () => true,
+        getHouseShareInfo: ()=>[],
     };
+    const { isGoodMonth, isGoodHouseId, getHouseShareInfo } = opts;
+    const calcHouseSpreadShare = (d, isNotRent) => {
+        if (!isNotRent) return d;
+        //need to return based on enabled house shares.
+        const houseInfo = getHouseShareInfo();
+        if (!houseInfo.length)
+            return d;
+        const total = parseInt(d * 100);
+        const eachShare = parseInt(total / houseInfo.length);
+        const anchorShare = total - (eachShare * (houseInfo.length - 1));
+        
+        return houseInfo.reduce((acc, h) => {            
+            if (isGoodHouseId(h.id)) {
+                acc += h.isAnchor ? anchorShare : eachShare;
+            }
+            return acc;
+        },0)/100.0;
+    }
     ///
     /// paymentsByMonth: Array of
 //     {
@@ -32,17 +52,21 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
 //     "total": ###
 // }
 
-    const { isGoodMonth, isGoodHouseId } = opts;
+    
     const monAddr = paymentsByMonth.reduce((acc, d) => {
         //console.log(d);
-        if (!isGoodMonth(d.month)) return acc;
+        if (!isGoodMonth(d.month)) return acc;        
         
         let dispOrder = 0;
-        if (d.paymentTypeName !== 'Rent') {
+        const isNotRent = d.paymentTypeName !== 'Rent';
+        if (isNotRent) {
             //hack;
             d.addressId = d.paymentTypeName;
+            d.houseID = d.addressId;
             d.address = d.paymentTypeName;
             dispOrder = 9999;
+        } else {
+            if (!isGoodHouseId(d.houseID)) return acc;
         }
         let addData = acc.houseByKey[d.addressId];
         if (!addData) {
@@ -63,18 +87,19 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
             };
             addData[d.month] = monData;
         }
-        if (isGoodHouseId(d.addressId)) {
-            monData[TOTALCOLNAME] += d.amount;
-            acc.total += d.amount;
+        const damount = calcHouseSpreadShare(d.amount, isNotRent);
+        if (isGoodHouseId(d.addressId) || isNotRent) {
+            monData[TOTALCOLNAME] += damount;
+            acc.total += damount;
         }
         if (!acc.monthByKey[d.month]) {
             acc.monthByKey[d.month] = true;
             acc.monthAry.push(d.month);
         }
-        monData.amount += d.amount;
-        if (isGoodHouseId(d.addressId)) {
-            addData[TOTALCOLNAME] += d.amount;
-            acc.monthTotal[d.month] = (acc.monthTotal[d.month] || 0) + d.amount;
+        monData.amount += damount;
+        if (isGoodHouseId(d.addressId) || isNotRent) {
+            addData[TOTALCOLNAME] += damount;
+            acc.monthTotal[d.month] = (acc.monthTotal[d.month] || 0) + damount;
         }
         return acc;
     }, {

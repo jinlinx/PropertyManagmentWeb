@@ -52,7 +52,8 @@ function MaintenanceList(props) {
             { field: 'workerID', desc: 'Worker', dspFunc: (name, row) => `${ignoreNull(row['workerFirstName'])} ${ignoreNull(row['workerLastName'])}`},
                 {field: 'address',desc: 'Address',required: true},
                 {field: 'date',desc: 'date', dspFunc: fmtDate},
-                {field: 'amount',desc: 'Amount',},
+            { field: 'amount', desc: 'Amount', },
+            { field: 'description', desc: 'Description', },
             { field: 'comment', desc: 'Comment', },
                 //{field: 'ownerID',desc: 'Owner ID',require: true,foreignKey: {table: 'ownerInfo',field: 'ownerID'}},
             ]
