@@ -5,6 +5,7 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
         isGoodMonth: () => true,
         isGoodHouseId: () => true,
     };
+    const calcHouseSpreadShare = d => d;
     ///
     /// paymentsByMonth: Array of
 //     {
@@ -67,18 +68,19 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
             };
             addData[d.month] = monData;
         }
+        const damount = calcHouseSpreadShare(d.amount, isNotRent);
         if (isGoodHouseId(d.addressId) || isNotRent) {
-            monData[TOTALCOLNAME] += d.amount;
-            acc.total += d.amount;
+            monData[TOTALCOLNAME] += damount;
+            acc.total += damount;
         }
         if (!acc.monthByKey[d.month]) {
             acc.monthByKey[d.month] = true;
             acc.monthAry.push(d.month);
         }
-        monData.amount += d.amount;
+        monData.amount += damount;
         if (isGoodHouseId(d.addressId) || isNotRent) {
-            addData[TOTALCOLNAME] += d.amount;
-            acc.monthTotal[d.month] = (acc.monthTotal[d.month] || 0) + d.amount;
+            addData[TOTALCOLNAME] += damount;
+            acc.monthTotal[d.month] = (acc.monthTotal[d.month] || 0) + damount;
         }
         return acc;
     }, {
