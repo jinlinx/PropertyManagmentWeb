@@ -56,8 +56,9 @@ export default function CashFlowReport(props) {
                     monthes.map((name,key) => {
                         const monDbg = paymentsByMonth[name];
                         const mon = monAddr.monthTotal[name];
+                        // dbg={ monDbg?.total}
                         if (!mon && mon !== 0) return <td className='tdCenter  tdTotalItalic' key={key}></td>;
-                        return <td className='tdCenter  tdTotalItalic' key={key}>{fMoneyformat(mon)} dbg={ monDbg?.total}</td>
+                        return <td className='tdCenter  tdTotalItalic' key={key}>{fMoneyformat(mon)}</td>
                     })
                     }</tr>
                 
