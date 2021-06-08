@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
-import { getMaintenanceReport, getPaymnents } from '../aapi';
+import { getMaintenanceReport, getPaymnents, getHouseAnchorInfo } from '../aapi';
 import { sumBy, sortBy, pick, uniqBy, uniq } from 'lodash';
 
 export const TOTALCOLNAME = 'coltotal';
@@ -42,6 +42,7 @@ export function JJDataRoot(props) {
     const [allMonthes, setAllMonths] = useState([]);
     const [allHouses, setAllHouses] = useState([]); //{houseID, address}
 
+    const [houseAnchorInfo, setHouseAnchorInfo] = useState([]);
 
     //month selection states
     const [monthes, setMonthes] = useState([]);
@@ -87,6 +88,7 @@ export function JJDataRoot(props) {
     }
     useEffect(() => {
         setMonthes(allMonthes);
+
     }, [allMonthes]);
     
     //format data
@@ -139,7 +141,10 @@ export function JJDataRoot(props) {
     
 
 
-    const beginReLoadPaymentData = ownerInfo=>{
+    const beginReLoadPaymentData = ownerInfo => {
+        getHouseAnchorInfo(ownerInfo).then(r => {
+            setHouseAnchorInfo(r);
+        })
         return getPaymnents(ownerInfo).then(r => {
             r = r.map(r => {
                 return {
@@ -273,6 +278,7 @@ export function JJDataRoot(props) {
             calculateIncomeByDate,
             allMonthes,
             allHouses,
+            houseAnchorInfo,
             monthes, setMonthes,
             curMonthSelection, setCurMonthSelection,
             selectedMonths, setSelectedMonths,

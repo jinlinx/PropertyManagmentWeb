@@ -1,11 +1,30 @@
+import { each } from 'bluebird';
 import sortBy from 'lodash/sortBy';
 import { TOTALCOLNAME,fMoneyformat } from './rootData';
 export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
     if (!opts) opts = {
         isGoodMonth: () => true,
         isGoodHouseId: () => true,
+        getHouseShareInfo: ()=>[],
     };
-    const calcHouseSpreadShare = d => d;
+    const { isGoodMonth, isGoodHouseId, getHouseShareInfo } = opts;
+    const calcHouseSpreadShare = (d, isNotRent) => {
+        if (!isNotRent) return d;
+        //need to return based on enabled house shares.
+        const houseInfo = getHouseShareInfo();
+        if (!houseInfo.length)
+            return d;
+        const total = parseInt(d * 100);
+        const eachShare = parseInt(total / houseInfo.length);
+        const anchorShare = total - (eachShare * (houseInfo.length - 1));
+        
+        return houseInfo.reduce((acc, h) => {            
+            if (isGoodHouseId(h.id)) {
+                acc += h.isAnchor ? anchorShare : eachShare;
+            }
+            return acc;
+        },0)/100.0;
+    }
     ///
     /// paymentsByMonth: Array of
 //     {
@@ -33,7 +52,7 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
 //     "total": ###
 // }
 
-    const { isGoodMonth, isGoodHouseId } = opts;
+    
     const monAddr = paymentsByMonth.reduce((acc, d) => {
         //console.log(d);
         if (!isGoodMonth(d.month)) return acc;        

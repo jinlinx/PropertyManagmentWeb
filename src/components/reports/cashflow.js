@@ -8,13 +8,15 @@ export default function CashFlowReport(props) {
         paymentsByMonth, expenseData,
         selectedMonths,
         selectedHouses,
+        houseAnchorInfo,
         monthes, 
         ownerInfo,
     } = jjctx;
 
     const monAddr = getPaymentsByMonthAddress(paymentsByMonth.originalData, {
         isGoodMonth: m => selectedMonths[m],
-        isGoodHouseId: id=>selectedHouses[id],
+        isGoodHouseId: id => selectedHouses[id],
+        getHouseShareInfo: () => [...houseAnchorInfo],
     });
     return <>
         <MonthRange jjctx={jjctx}></MonthRange>

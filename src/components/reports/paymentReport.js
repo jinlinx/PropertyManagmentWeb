@@ -11,6 +11,7 @@ export default function PaymentReport(props) {
         paymentsByMonth,
         selectedMonths, 
         beginReLoadPaymentData,
+        houseAnchorInfo,
         ownerInfo,
     } = jjctx;
 
@@ -18,7 +19,8 @@ export default function PaymentReport(props) {
     
     const monAddr = getPaymentsByMonthAddress(paymentsByMonth.originalData, {
         isGoodMonth: m => selectedMonths[m],
-        isGoodHouseId: id=>selectedHouses[id],
+        isGoodHouseId: id => selectedHouses[id],
+        getHouseShareInfo: () => [...houseAnchorInfo ],
     });
     const goodHouses = monAddr.houseAry.map(h => h.address);
     goodHouses.sort();
