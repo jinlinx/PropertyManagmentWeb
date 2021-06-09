@@ -56,28 +56,23 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
     const monAddr = paymentsByMonth.reduce((acc, d) => {
         //console.log(d);
         if (!isGoodMonth(d.month)) return acc;        
-        
-        let dispOrder = 0;
+        if (!isGoodHouseId(d.houseID)) return acc;
         const isNotRent = d.paymentTypeName !== 'Rent';
-        if (isNotRent) {
-            //hack;
-            d.addressId = d.paymentTypeName;
-            d.houseID = d.addressId;
-            d.address = d.paymentTypeName;
-            dispOrder = 9999;
-        } else {
-            if (!isGoodHouseId(d.houseID)) return acc;
-        }
-        let addData = acc.houseByKey[d.addressId];
+                
+        const catByKey = isNotRent ? acc.nonRentByKey : acc.houseByKey;
+        const catAry = isNotRent ? acc.nonRentAry : acc.houseAry;
+        const catId = isNotRent ? d.paymentTypeName : d.addressId;
+        let addData = catByKey[catId];
         if (!addData) {
             addData = {
+                isNotRent,
                 addressId: d.addressId,
                 address: d.address,
+                displayName: isNotRent ? d.paymentTypeName: d.address,
                 [TOTALCOLNAME]: 0,
-                dispOrder,
             };
-            acc.houseByKey[d.addressId] = addData;
-            acc.houseAry.push(addData);
+            catByKey[catId] = addData;
+            catAry.push(addData);
         }
 
         let monData = addData[d.month];
@@ -87,32 +82,36 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
             };
             addData[d.month] = monData;
         }
-        const damount = calcHouseSpreadShare(d.amount, isNotRent);
-        if (isGoodHouseId(d.addressId) || isNotRent) {
-            monData[TOTALCOLNAME] += damount;
-            acc.total += damount;
-        }
+        const damount = d.amount; //calcHouseSpreadShare(d.amount, isNotRent);
+        
+        monData[TOTALCOLNAME] += damount;
+        acc.total += damount;
+        
         if (!acc.monthByKey[d.month]) {
             acc.monthByKey[d.month] = true;
             acc.monthAry.push(d.month);
         }
-        monData.amount += damount;
-        if (isGoodHouseId(d.addressId) || isNotRent) {
+        monData.amount += damount;        
             addData[TOTALCOLNAME] += damount;
-            acc.monthTotal[d.month] = (acc.monthTotal[d.month] || 0) + damount;
-        }
+            acc.monthTotal[d.month] = (acc.monthTotal[d.month] || 0) + damount;        
         return acc;
     }, {
         monthAry: [],
         monthByKey: {},
         houseAry: [],
         houseByKey: {},
+
+        nonRentByKey: {},
+        nonRentAry: [],
+
         monthTotal: {},
         total: 0,
     });
 
     monAddr.monthAry.sort();
-    monAddr.houseAry = sortBy(monAddr.houseAry, ['dispOrder','address']);
+    ['houseAry', 'nonRentAry'].forEach(name => {
+        monAddr[name] = sortBy(monAddr[name], ['displayName']);
+    })    
 
     return monAddr;
 }
