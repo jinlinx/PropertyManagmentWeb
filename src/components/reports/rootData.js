@@ -33,7 +33,6 @@ export const IncomeExpensesContext = React.createContext();
 
 export function JJDataRoot(props) {
     const {ownerInfo} = props.dataRootParam;
-    const [expenseData, setExpenseData] = useState(getInitExpenseTableData);
     const [rawExpenseData, setRawExpenseData] = useState([]);
     const [payments, setPayments] = useState([]);
     const [paymentsByMonth, setPaymentsByMonth] = useState({
@@ -96,9 +95,8 @@ export function JJDataRoot(props) {
     useEffect(() => {
         setMonthes(allMonthes.filter(m => selectedMonths[m]));
         
-        calculateExpenseByDate(expenseData, selectedMonths, selectedHouses);
         calculateIncomeByDate(paymentsByMonth, selectedMonths, selectedHouses);
-    }, [expenseData.originalData, paymentsByMonth.originalData, curMonthSelection, selectedMonths]);
+    }, [rawExpenseData, paymentsByMonth.originalData, curMonthSelection, selectedMonths]);
 
     useEffect(() => {
         allMonthes.forEach(m => selectedMonths[m] = false);
@@ -138,7 +136,7 @@ export function JJDataRoot(props) {
             acc[h.houseID] = true;
             return acc;
         }, {}));
-    }, [expenseData.originalData, paymentsByMonth.originalData,curMonthSelection]);
+    }, [rawExpenseData, paymentsByMonth.originalData,curMonthSelection]);
     
 
 
@@ -196,44 +194,7 @@ export function JJDataRoot(props) {
 
     useEffect(() => {
         getMaintenanceReport(ownerInfo).then(d => {
-            setRawExpenseData(d);
-            const maintenceData = d.reduce((acc, r) => {
-                const month = moment(r.month).add(2,'days').format('YYYY-MM');
-                if (!acc.dateKeys[month]) {
-                    acc.dateKeys[month] = true;
-                    acc.monthes.push(month);
-                }
-                let cats = acc.categoriesByKey[r.category];
-                if (!cats) {
-                    cats = { [TOTALCOLNAME]: 0, order: r.displayOrder };
-                    acc.categoriesByKey[r.category] = cats;
-                    acc.categoryNames.push(r.category);
-                }
-                const ctotal = acc.categoriesByKey[TOTALCOLNAME];
-                cats[month] = r.amount;
-                ctotal[month] = (ctotal[month] || 0) + r.amount;
-                cats[TOTALCOLNAME] = 0;
-                acc.monthlyTotal[month] = (acc.monthlyTotal[month] || 0) + r.amount;
-
-                return acc;
-            }, getInitExpenseTableData());
-            addMonths(maintenceData.monthes);
-            addHouses(d);
-            maintenceData.originalData = d;
-
-            const sortLowOthers = cats => {
-                const others = 'Others';
-                const res = cats.filter(k => k !== others);
-                res.sort();
-                if (cats.filter(k => k === others).length) {
-                    res.push(others);
-                }
-                return res;
-            }
-            
-            maintenceData.categoryNames = sortLowOthers(maintenceData.categoryNames);
-            setExpenseData(maintenceData);
-            calculateExpenseByDate(maintenceData)
+            setRawExpenseData(d);           
         });
         
         beginReLoadPaymentData(ownerInfo);
@@ -243,23 +204,7 @@ export function JJDataRoot(props) {
         if (mon === TOTALCOLNAME) return true;
         if (!selectedMonths) return true;
         return selectedMonths[mon];
-    }
-    const calculateExpenseByDate = (expenseData, dateSel) => {
-        const { monthes,
-            categoriesByKey,
-            categoryNames } = expenseData;
-        [...categoryNames,TOTALCOLNAME].map(cn => {
-            const cat = categoriesByKey[cn]
-            cat[TOTALCOLNAME] = monthes.reduce((acc, mon) => {
-                if (!checkDate(mon, dateSel)) return acc;
-                return acc + (cat[mon] || 0);
-            }, 0)
-        });
-        setExpenseData({
-            ...expenseData,
-            categoriesByKey,
-        })
-    };
+    }   
 
     const calculateIncomeByDate = (incomeData, selectedMonths, selectedHouses) => {
 
@@ -276,7 +221,6 @@ export function JJDataRoot(props) {
             rawExpenseData,
             payments,
             paymentsByMonth,
-            calculateExpenseByDate,
             calculateIncomeByDate,
             allMonthes,
             allHouses,
