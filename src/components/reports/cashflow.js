@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import { TOTALCOLNAME,fMoneyformat } from './rootData';
 import { MonthRange } from './monthRange';
-import { getPaymentsByMonthAddress } from './reportUtil';
+import { getPaymentsByMonthAddress, getMaintenanceData } from './reportUtil';
 export default function CashFlowReport(props) {
     const jjctx = props.jjctx;
     const {
         paymentsByMonth, expenseData,
+        rawExpenseData,
         selectedMonths,
         selectedHouses,
         houseAnchorInfo,
@@ -13,11 +14,14 @@ export default function CashFlowReport(props) {
         ownerInfo,
     } = jjctx;
 
-    const monAddr = getPaymentsByMonthAddress(paymentsByMonth.originalData, {
+    const copt = {
         isGoodMonth: m => selectedMonths[m],
         isGoodHouseId: id => selectedHouses[id],
         getHouseShareInfo: () => [...houseAnchorInfo],
-    });
+    };
+    const monAddr = getPaymentsByMonthAddress(paymentsByMonth.originalData, copt);
+
+    const calculatedMaintData = getMaintenanceData(rawExpenseData, copt);
     return <>
         <MonthRange jjctx={jjctx}></MonthRange>
         <table className='tableReport'>
@@ -96,7 +100,19 @@ export default function CashFlowReport(props) {
                             }
                         </tr>
                     })
-                    }
+                }
+                {
+                    [...calculatedMaintData.categoryNames].map((cat, key) => {
+                        return <tr key={key}>
+                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(calculatedMaintData.categoriesByKey[cat][TOTALCOLNAME])}</td>
+                            {
+                                monthes.map((mon, key) => {
+                                    return <td key={key} class='tdCenter'>rc={fMoneyformat(calculatedMaintData.categoriesByKey[cat][mon] || '')}</td>
+                                })
+                            }
+                        </tr>
+                    })
+                }
                 <tr><td className='tdLeftSubCategoryHeader'>Sub Total</td><td class='tdCenter  tdTotalItalic'>{
                     fMoneyformat(expenseData.categoriesByKey[TOTALCOLNAME][TOTALCOLNAME])
                 }</td>

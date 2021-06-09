@@ -34,6 +34,7 @@ export const IncomeExpensesContext = React.createContext();
 export function JJDataRoot(props) {
     const {ownerInfo} = props.dataRootParam;
     const [expenseData, setExpenseData] = useState(getInitExpenseTableData);
+    const [rawExpenseData, setRawExpenseData] = useState([]);
     const [payments, setPayments] = useState([]);
     const [paymentsByMonth, setPaymentsByMonth] = useState({
         monthNames: [],
@@ -195,6 +196,7 @@ export function JJDataRoot(props) {
 
     useEffect(() => {
         getMaintenanceReport(ownerInfo).then(d => {
+            setRawExpenseData(d);
             const maintenceData = d.reduce((acc, r) => {
                 const month = moment(r.month).add(2,'days').format('YYYY-MM');
                 if (!acc.dateKeys[month]) {
@@ -272,6 +274,7 @@ export function JJDataRoot(props) {
         {
             ownerInfo,
             expenseData,
+            rawExpenseData,
             payments,
             paymentsByMonth,
             calculateExpenseByDate,

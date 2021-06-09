@@ -1,4 +1,5 @@
 import { each } from 'bluebird';
+import moment from 'moment';
 import sortBy from 'lodash/sortBy';
 import { TOTALCOLNAME,fMoneyformat } from './rootData';
 export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
@@ -114,4 +115,67 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
     })    
 
     return monAddr;
+}
+
+
+export function getMaintenanceData(maintenanceRecords, opts) {
+    if (!opts) opts = {
+        isGoodMonth: () => true,
+        isGoodHouseId: () => true,
+        getHouseShareInfo: () => [],
+    };
+    const { isGoodMonth, isGoodHouseId, getHouseShareInfo } = opts;
+    const calcHouseSpreadShare = r => {
+        const ramount = r.amount;
+        if (isGoodHouseId(r.houseID)) return ramount;
+        //need to return based on enabled house shares.
+        const houseInfo = getHouseShareInfo();
+        if (!houseInfo.length)
+            return ramount;
+        const total = parseInt(ramount * 100);
+        const eachShare = parseInt(total / houseInfo.length);
+        const anchorShare = total - (eachShare * (houseInfo.length - 1));
+
+        return houseInfo.reduce((acc, h) => {
+            if (isGoodHouseId(h.id)) {
+                acc += h.isAnchor ? anchorShare : eachShare;
+            }
+            return acc;
+        }, 0) / 100.0;
+    }
+
+    const maintenceData = maintenanceRecords.reduce((acc, r) => {
+        const month = moment(r.month).add(2, 'days').format('YYYY-MM');
+        if (!isGoodMonth(month)) return acc;
+        if (!isGoodHouseId(r.houseID) && r.houseID) return acc;
+        
+        let monthData = acc.monthByName[month];
+        if (!monthData) {
+            acc.monthByName[month] = {
+                total: 0,
+            };
+            acc.monthes.push(month);
+        }
+        let cats = acc.categoriesByKey[r.category];
+        if (!cats) {
+            cats = { };
+            acc.categoriesByKey[r.category] = cats;
+            acc.categoryNames.push(r.category);
+        }
+        
+        const amount = calcHouseSpreadShare(r);
+        cats[month] = (cats[month] || 0) + amount;
+        acc.categoryTotals[month] = (acc.categoryTotals[month] || 0) + amount;
+        acc.monthlyTotal[month] = (acc.monthlyTotal[month] || 0) + amount;
+
+        return acc;
+    }, {
+        monthByName: {},
+        monthes: [],
+        categoriesByKey: {},
+        categoryNames: [],
+        categoryTotals: {},
+        monthlyTotal: {},
+    });
+    return maintenceData;
 }

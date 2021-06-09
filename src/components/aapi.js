@@ -87,14 +87,14 @@ export async function getOwners() {
 export async function getMaintenanceReport(ownerInfo) {
     if (!ownerInfo) return [];
     return sqlGet({
-        fields:['month', {op:'sum', field:'amount', name:'amount'},'expenseCategoryName','displayOrder'],
+        fields:['month', 'houseID','address', {op:'sum', field:'amount', name:'amount'},'expenseCategoryName','displayOrder'],
         table:'maintenanceRecords',
         whereArray:[{
             field:'ownerID',
             op: '=',
             val: ownerInfo.ownerID || ''
         }],
-        groupByArray: [{ field: 'month' }, { field: 'expenseCategoryID' }, { field: 'expenseCategoryName'},{field:'displayOrder'}]
+        groupByArray: [{ field: 'month' }, { field: 'houseID' }, { field: 'address' }, { field: 'expenseCategoryID' }, { field: 'expenseCategoryName'},{field:'displayOrder'}]
     }).then(r=>{
         return r.rows.map(r=>{
             return {
