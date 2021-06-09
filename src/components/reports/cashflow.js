@@ -1,27 +1,20 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import { TOTALCOLNAME,fMoneyformat } from './rootData';
 import { MonthRange } from './monthRange';
 import { getPaymentsByMonthAddress, getMaintenanceData } from './reportUtil';
 export default function CashFlowReport(props) {
     const jjctx = props.jjctx;
     const {
-        paymentsByMonth, expenseData,
+        paymentsByMonth,
         rawExpenseData,
-        selectedMonths,
         selectedHouses,
-        houseAnchorInfo,
         monthes, 
-        ownerInfo,
+        paymentCalcOpts,
     } = jjctx;
+    
+    const monAddr = getPaymentsByMonthAddress(paymentsByMonth.originalData, paymentCalcOpts);
 
-    const copt = {
-        isGoodMonth: m => selectedMonths[m],
-        isGoodHouseId: id => selectedHouses[id],
-        getHouseShareInfo: () => [...houseAnchorInfo],
-    };
-    const monAddr = getPaymentsByMonthAddress(paymentsByMonth.originalData, copt);
-
-    const calculatedMaintData = getMaintenanceData(rawExpenseData, copt);
+    const calculatedMaintData = getMaintenanceData(rawExpenseData, paymentCalcOpts);
     return <>
         <MonthRange jjctx={jjctx}></MonthRange>
         <table className='tableReport'>
@@ -89,25 +82,12 @@ export default function CashFlowReport(props) {
             
                 
                 {
-                    //expenses
-                    [...expenseData.categoryNames].map((cat,key) => {
-                        return <tr key={key}>
-                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(expenseData.categoriesByKey[cat][TOTALCOLNAME])}</td>
-                            {
-                                monthes.map((mon,key) => {
-                                    return <td key={key} class='tdCenter'>{fMoneyformat(expenseData.categoriesByKey[cat][mon] || '' )}</td>  
-                                })
-                            }
-                        </tr>
-                    })
-                }
-                {
                     [...calculatedMaintData.categoryNames].map((cat, key) => {
                         return <tr key={key}>
-                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>rc={fMoneyformat(calculatedMaintData.categoryTotals[cat])}</td>
+                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(calculatedMaintData.categoryTotals[cat])}</td>
                             {
                                 monthes.map((mon, key) => {
-                                    return <td key={key} class='tdCenter'>rc={fMoneyformat(calculatedMaintData.categoriesByKey[cat][mon] || '')}</td>
+                                    return <td key={key} class='tdCenter'>{fMoneyformat(calculatedMaintData.categoriesByKey[cat][mon] || '')}</td>
                                 })
                             }
                         </tr>
@@ -127,12 +107,12 @@ export default function CashFlowReport(props) {
                 </tr>
                 <tr>
                     <td className='tdLeftSubHeader tdButtomTotalCell'>Net Income</td>
-                    <td class='tdCenter tdTotalBold'>{ fMoneyformat((paymentsByMonth[TOTALCOLNAME].total -expenseData.categoriesByKey[TOTALCOLNAME][TOTALCOLNAME]))}</td>
+                    <td class='tdCenter tdTotalBold'>{fMoneyformat((paymentsByMonth[TOTALCOLNAME].total - calculatedMaintData.total))}</td>
                     {
                         monthes.map((mon,key) => {
                             const inc = paymentsByMonth[mon] || {};
                             const incTotal = inc.total || 0;
-                            const cost = expenseData.monthlyTotal[mon] || 0;
+                            const cost = calculatedMaintData.monthlyTotal[mon] || 0;
                             return <td key={key} className='tdButtomTotalCell tdTotalBold tdCenter t'>{fMoneyformat( (incTotal - cost))}</td>
                         })
                     }

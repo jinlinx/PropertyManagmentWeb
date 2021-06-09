@@ -273,7 +273,6 @@ export function JJDataRoot(props) {
     return <IncomeExpensesContext.Provider value={
         {
             ownerInfo,
-            expenseData,
             rawExpenseData,
             payments,
             paymentsByMonth,
@@ -287,6 +286,11 @@ export function JJDataRoot(props) {
             selectedMonths, setSelectedMonths,
             selectedHouses, setSelectedHouses,
             beginReLoadPaymentData,
+            paymentCalcOpts: {
+                isGoodMonth: m => selectedMonths[m],
+                isGoodHouseId: id => selectedHouses[id],
+                getHouseShareInfo: () => [...houseAnchorInfo],
+            },
         }
     }>
         { props.children}
