@@ -104,7 +104,7 @@ export default function CashFlowReport(props) {
                 {
                     [...calculatedMaintData.categoryNames].map((cat, key) => {
                         return <tr key={key}>
-                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(calculatedMaintData.categoriesByKey[cat][TOTALCOLNAME])}</td>
+                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>rc={fMoneyformat(calculatedMaintData.categoryTotals[cat])}</td>
                             {
                                 monthes.map((mon, key) => {
                                     return <td key={key} class='tdCenter'>rc={fMoneyformat(calculatedMaintData.categoriesByKey[cat][mon] || '')}</td>
@@ -114,11 +114,11 @@ export default function CashFlowReport(props) {
                     })
                 }
                 <tr><td className='tdLeftSubCategoryHeader'>Sub Total</td><td class='tdCenter  tdTotalItalic'>{
-                    fMoneyformat(expenseData.categoriesByKey[TOTALCOLNAME][TOTALCOLNAME])
+                    fMoneyformat(calculatedMaintData.total)
                 }</td>
                     {
                         monthes.map((mon,key) => {
-                            return <td key={key} class='tdCenter tdTotalItalic'>{ fMoneyformat((expenseData.monthlyTotal[mon] || 0)) }</td>
+                            return <td key={key} class='tdCenter tdTotalItalic'>{fMoneyformat((calculatedMaintData.monthlyTotal[mon] || 0)) }</td>
                         })
                     }
                 </tr>

@@ -132,7 +132,7 @@ export function getMaintenanceData(maintenanceRecords, opts) {
         const houseInfo = getHouseShareInfo();
         if (!houseInfo.length)
             return ramount;
-        const total = parseInt(ramount * 100);
+        const total = Math.round(ramount * 100);
         const eachShare = parseInt(total / houseInfo.length);
         const anchorShare = total - (eachShare * (houseInfo.length - 1));
 
@@ -147,7 +147,7 @@ export function getMaintenanceData(maintenanceRecords, opts) {
     const maintenceData = maintenanceRecords.reduce((acc, r) => {
         const month = moment(r.month).add(2, 'days').format('YYYY-MM');
         if (!isGoodMonth(month)) return acc;
-        if (!isGoodHouseId(r.houseID) && r.houseID) return acc;
+        if (!isGoodHouseId(r.houseID) && !r.houseID) return acc;
         
         let monthData = acc.monthByName[month];
         if (!monthData) {
@@ -165,9 +165,10 @@ export function getMaintenanceData(maintenanceRecords, opts) {
         
         const amount = calcHouseSpreadShare(r);
         cats[month] = (cats[month] || 0) + amount;
-        acc.categoryTotals[month] = (acc.categoryTotals[month] || 0) + amount;
+        acc.categoryTotals[r.category] = (acc.categoryTotals[r.category] || 0) + amount;
         acc.monthlyTotal[month] = (acc.monthlyTotal[month] || 0) + amount;
 
+        acc.total += amount;
         return acc;
     }, {
         monthByName: {},
@@ -176,6 +177,19 @@ export function getMaintenanceData(maintenanceRecords, opts) {
         categoryNames: [],
         categoryTotals: {},
         monthlyTotal: {},
+        total: 0,
     });
+
+    const sortLowOthers = cats => {
+        const others = 'Others';
+        const res = cats.filter(k => k !== others);
+        res.sort();
+        if (cats.filter(k => k === others).length) {
+            res.push(others);
+        }
+        return res;
+    }
+
+    maintenceData.categoryNames = sortLowOthers(maintenceData.categoryNames);
     return maintenceData;
 }
