@@ -6,7 +6,7 @@ import { Container, Row, Col} from 'react-bootstrap';
 export function MonthRange(props) {
     const jjctx = props.jjctx;
     const {
-        //paymentsByMonth, expenseData, calculateExpenseByDate, calculateIncomeByDate,
+        //paymentsByMonth, expenseData, calculateExpenseByDate,
         allMonthes,
         allHouses,
         //monthes, setMonthes,

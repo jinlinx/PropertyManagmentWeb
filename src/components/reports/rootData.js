@@ -95,7 +95,6 @@ export function JJDataRoot(props) {
     useEffect(() => {
         setMonthes(allMonthes.filter(m => selectedMonths[m]));
         
-        calculateIncomeByDate(paymentsByMonth, selectedMonths, selectedHouses);
     }, [rawExpenseData, paymentsByMonth.originalData, curMonthSelection, selectedMonths]);
 
     useEffect(() => {
@@ -206,22 +205,13 @@ export function JJDataRoot(props) {
         return selectedMonths[mon];
     }   
 
-    const calculateIncomeByDate = (incomeData, selectedMonths, selectedHouses) => {
 
-        //console.log(incomeData);
-        if (!incomeData[TOTALCOLNAME] ) return;
-        incomeData[TOTALCOLNAME].total = 0;
-        
-        incomeData[TOTALCOLNAME].total = sumBy(incomeData.monthNames.filter(n => checkDate(n, selectedMonths)).map(n=>incomeData[n]), 'total');
-        setPaymentsByMonth(incomeData)
-    };
     return <IncomeExpensesContext.Provider value={
         {
             ownerInfo,
             rawExpenseData,
             payments,
             paymentsByMonth,
-            calculateIncomeByDate,
             allMonthes,
             allHouses,
             houseAnchorInfo,
