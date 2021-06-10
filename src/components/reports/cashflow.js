@@ -24,9 +24,9 @@ export default function CashFlowReport(props) {
                     setShowDetail(null);
                 }}>
                     <Modal.Header closeButton>
-                <Modal.Title>{(showDetail||[]).map(d => {
+                <Modal.Body>{(showDetail||[]).map(d => {
                     return <div>{d.amount.toFixed(2)} {d.date} {d.address} {d.notes} { d.debugText}</div>
-                })}</Modal.Title>
+                })}</Modal.Body>
                     </Modal.Header>
                     <Container>
                     </Container>
@@ -36,9 +36,9 @@ export default function CashFlowReport(props) {
             setShowExpenseDetail(null);
         }}>
             <Modal.Header closeButton>
-                <Modal.Title>{(showExpenseDetail || []).map(d => {
+                <Modal.Body>{(showExpenseDetail || []).map(d => {
                     return <div>{d.debugText}</div>
-                })}</Modal.Title>
+                })}</Modal.Body>
             </Modal.Header>
             <Container>
             </Container>
