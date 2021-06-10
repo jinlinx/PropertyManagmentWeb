@@ -35,10 +35,7 @@ export function JJDataRoot(props) {
     const {ownerInfo} = props.dataRootParam;
     const [rawExpenseData, setRawExpenseData] = useState([]);
     const [payments, setPayments] = useState([]);
-    const [paymentsByMonth, setPaymentsByMonth] = useState({
-        monthNames: [],
-        [TOTALCOLNAME]:{total:0}
-    });
+    
     const [allMonthes, setAllMonths] = useState([]);
     const [allHouses, setAllHouses] = useState([]); //{houseID, address}
 
@@ -50,8 +47,6 @@ export function JJDataRoot(props) {
     const [selectedMonths, setSelectedMonths] = useState({});
     const [selectedHouses, setSelectedHouses] = useState({});
 
-
-    const TOTALHOUSECOUNT = 5;
 
     function addMonths(mons) {
         setAllMonths(orig => {
@@ -95,7 +90,7 @@ export function JJDataRoot(props) {
     useEffect(() => {
         setMonthes(allMonthes.filter(m => selectedMonths[m]));
         
-    }, [rawExpenseData, paymentsByMonth.originalData, curMonthSelection, selectedMonths]);
+    }, [rawExpenseData, payments, curMonthSelection, selectedMonths]);
 
     useEffect(() => {
         allMonthes.forEach(m => selectedMonths[m] = false);
@@ -135,7 +130,7 @@ export function JJDataRoot(props) {
             acc[h.houseID] = true;
             return acc;
         }, {}));
-    }, [rawExpenseData, paymentsByMonth.originalData,curMonthSelection]);
+    }, [rawExpenseData, payments,curMonthSelection]);
     
 
 
@@ -157,53 +152,21 @@ export function JJDataRoot(props) {
             });
 
             setPayments(r);
-
-            const pm = r.reduce((acc, p) => {
-                const month = moment(p.date).format('YYYY-MM');
-                let m = acc.months[month];
-                acc.months[TOTALCOLNAME].total += p.amount;
-                if (!m) {
-                    m = {
-                        month,
-                        total: 0,
-                    };
-                    acc.months[month] = m;
-                    acc.monthNames.push(month);
-                }
-                m.total += parseFloat(p.amount);
-                
-                return acc;
-            }, {
-                months: {
-                    [TOTALCOLNAME]: {
-                        month: 'Total',
-                        total: 0,
-                    }
-                },
-                monthNames: [],                
-            });
-            pm.months.monthNames = pm.monthNames.sort();
-            pm.months.originalData = r;
             //addMonths(pm.monthNames);
             addMonths(uniq(r.map(r=>r.month)))
             addHouses(r);
-            setPaymentsByMonth(pm.months);
         });        
     }
 
     useEffect(() => {
         getMaintenanceReport(ownerInfo).then(d => {
-            setRawExpenseData(d);           
+            setRawExpenseData(d);
+            addMonths(uniq(d.map(r => r.month)))
         });
         
         beginReLoadPaymentData(ownerInfo);
     }, [ownerInfo]);
-    
-    function checkDate(mon, selectedMonths) {
-        if (mon === TOTALCOLNAME) return true;
-        if (!selectedMonths) return true;
-        return selectedMonths[mon];
-    }   
+
 
 
     return <IncomeExpensesContext.Provider value={
@@ -211,7 +174,6 @@ export function JJDataRoot(props) {
             ownerInfo,
             rawExpenseData,
             payments,
-            paymentsByMonth,
             allMonthes,
             allHouses,
             houseAnchorInfo,

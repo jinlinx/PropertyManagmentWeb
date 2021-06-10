@@ -8,7 +8,7 @@ import { getPaymentsByMonthAddress } from './reportUtil';
 export default function PaymentReport(props) {
     const jjctx = props.jjctx;
     const {
-        paymentsByMonth,
+        payments,
         selectedMonths, 
         beginReLoadPaymentData,
         houseAnchorInfo,
@@ -17,7 +17,7 @@ export default function PaymentReport(props) {
 
     const [selectedHouses, setSelectedHouses] = useState({});
     
-    const monAddr = getPaymentsByMonthAddress(paymentsByMonth.originalData, {
+    const monAddr = getPaymentsByMonthAddress(payments, {
         isGoodMonth: m => selectedMonths[m],
         isGoodHouseId: id => selectedHouses[id],
         getHouseShareInfo: () => [...houseAnchorInfo ],

@@ -5,14 +5,14 @@ import { getPaymentsByMonthAddress, getMaintenanceData } from './reportUtil';
 export default function CashFlowReport(props) {
     const jjctx = props.jjctx;
     const {
-        paymentsByMonth,
+        payments,
         rawExpenseData,
         selectedHouses,
         monthes, 
         paymentCalcOpts,
     } = jjctx;
     
-    const monAddr = getPaymentsByMonthAddress(paymentsByMonth.originalData, paymentCalcOpts);
+    const monAddr = getPaymentsByMonthAddress(payments, paymentCalcOpts);
 
     const calculatedMaintData = getMaintenanceData(rawExpenseData, paymentCalcOpts);
     return <>
