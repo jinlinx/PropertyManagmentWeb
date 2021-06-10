@@ -58,7 +58,7 @@ export default function MaintenanceReport(props) {
                                                 }
                                                 return acc;
                                             }, [{
-                                                debugText: `For Total expense of ${catMon.amount}`
+                                                debugText: `For Total expense of ${catMon.amount.toFixed(2)}`
                                             }]);
                                             setShowExpenseDetail(msgs)
                                         }
