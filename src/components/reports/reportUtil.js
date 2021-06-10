@@ -9,23 +9,6 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
         getHouseShareInfo: ()=>[],
     };
     const { isGoodMonth, isGoodHouseId, getHouseShareInfo } = opts;
-    const calcHouseSpreadShare = (d, isNotRent) => {
-        if (!isNotRent) return d;
-        //need to return based on enabled house shares.
-        const houseInfo = getHouseShareInfo();
-        if (!houseInfo.length)
-            return d;
-        const total = parseInt(d * 100);
-        const eachShare = parseInt(total / houseInfo.length);
-        const anchorShare = total - (eachShare * (houseInfo.length - 1));
-        
-        return houseInfo.reduce((acc, h) => {            
-            if (isGoodHouseId(h.id)) {
-                acc += h.isAnchor ? anchorShare : eachShare;
-            }
-            return acc;
-        },0)/100.0;
-    }
     ///
     /// paymentsByMonth: Array of
 //     {
@@ -128,6 +111,7 @@ export function getMaintenanceData(maintenanceRecords, opts) {
     const calcHouseSpreadShare = r => {
         const ramount = r.amount;
         if (isGoodHouseId(r.houseID)) return ramount;
+        if (r.address) return 0; //belong to a not shown house.
         //need to return based on enabled house shares.
         const houseInfo = getHouseShareInfo();
         if (!houseInfo.length)

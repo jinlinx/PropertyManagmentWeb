@@ -67,10 +67,10 @@ export default function CashFlowReport(props) {
                 <tr>
 
                 <td className='tdLeftSubCategoryHeader'>Sub Total:
-                </td><td className='tdCenter  tdTotalItalic'>{fMoneyformat(paymentsByMonth[TOTALCOLNAME].total)}</td>
+                </td><td className='tdCenter  tdTotalItalic'>{fMoneyformat(monAddr.total)}</td>
                 {
                     monthes.map((name,key) => {
-                        const monDbg = paymentsByMonth[name];
+                        //const monDbg = paymentsByMonth[name];
                         const mon = monAddr.monthTotal[name];
                         // dbg={ monDbg?.total}
                         if (!mon && mon !== 0) return <td className='tdCenter  tdTotalItalic' key={key}></td>;
@@ -107,11 +107,11 @@ export default function CashFlowReport(props) {
                 </tr>
                 <tr>
                     <td className='tdLeftSubHeader tdButtomTotalCell'>Net Income</td>
-                    <td class='tdCenter tdTotalBold'>{fMoneyformat((paymentsByMonth[TOTALCOLNAME].total - calculatedMaintData.total))}</td>
+                    <td class='tdCenter tdTotalBold'>{fMoneyformat((monAddr.total - calculatedMaintData.total))}</td>
                     {
                         monthes.map((mon,key) => {
-                            const inc = paymentsByMonth[mon] || {};
-                            const incTotal = inc.total || 0;
+                            const incTotal = monAddr.monthTotal[mon] || 0; //paymentsByMonth[mon] || {};
+                            //const incTotal = inc.total || 0;
                             const cost = calculatedMaintData.monthlyTotal[mon] || 0;
                             return <td key={key} className='tdButtomTotalCell tdTotalBold tdCenter t'>{fMoneyformat( (incTotal - cost))}</td>
                         })
