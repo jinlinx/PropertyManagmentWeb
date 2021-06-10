@@ -111,12 +111,34 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
 }
 
 
-export function getMaintenanceData(maintenanceRecords, opts) {
+export function getMaintenanceData(maintenanceRecordsRaw, opts) {
     if (!opts) opts = {
         isGoodMonth: () => true,
         isGoodHouseId: () => true,
         getHouseShareInfo: () => [],
     };
+    const maintenanceRecords = maintenanceRecordsRaw.reduce((acc, r) => {
+        const key = `${r.month}-${r.houseID}-${r.expenseCategoryName}`;
+        let keyData = acc.keys[key];
+        if (!keyData) {
+            keyData = {
+                month: r.month,
+                amount: 0,
+                category: r.category,
+                address: r.address,
+                houseID: r.houseID,
+                records: [],
+            };
+            acc.keys[key] = keyData;
+            acc.data.push(keyData);
+        }
+        keyData.amount += r.amount;
+        keyData.records.push(r);
+        return acc;
+    }, {
+        data: [],
+        keys:{}
+    }).data;
     const { isGoodMonth, isGoodHouseId, getHouseShareInfo } = opts;
     const calcHouseSpreadShare = r => {
         const ramount = r.amount;

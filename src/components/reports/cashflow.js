@@ -3,6 +3,7 @@ import { TOTALCOLNAME,fMoneyformat } from './rootData';
 import { MonthRange } from './monthRange';
 import { getPaymentsByMonthAddress, getMaintenanceData } from './reportUtil';
 import { Modal, Container, } from 'react-bootstrap';
+import moment from 'moment';
 export default function CashFlowReport(props) {
     const jjctx = props.jjctx;
     const {
@@ -118,18 +119,35 @@ export default function CashFlowReport(props) {
                                     const catMon = calculatedMaintData.getCatMonth(cat, mon);
                                     return <td key={key} class='tdCenter' onClick={() => {
                                         if (catMon.amountCalcParts) {
+                                            console.log('catMon')
+                                            console.log(catMon)
                                             const msgs = catMon.amountCalcParts.reduce((acc, r) => {
                                                 console.log(r)
-                                                console.log(r.calcInfo)
                                                 if (r.calcInfo) {
                                                     r.calcInfo.forEach(i => acc.push({
                                                         debugText: i.info
                                                     }));
                                                 }
                                                 return acc;
-                                            }, [{
+                                            }, [
+                                                {
                                                 debugText: `For Total expense of ${catMon.amount.toFixed(2)}`
-                                            }]);
+                                                },
+                                                ...catMon.records.reduce((acc,r) => {
+                                                    acc.push({
+                                                        debugText: `=> ${r.amount} is from`
+                                                    });
+                                                    r.records.forEach(r => {
+                                                        acc.push({
+                                                            debugText: `===> ${moment(r.date).format('YYYY-MM-DD')} ${r.amount} ${r.comment} ${r.description}`
+                                                        });
+                                                    })
+                                                    return acc;
+                                                }, []),
+                                                {
+                                                    debugText:'====== breakdowns '
+                                                }
+                                            ]);
                                             setShowExpenseDetail(msgs)
                                         }
                                     }}>{fMoneyformat(catMon.amount)}</td>
