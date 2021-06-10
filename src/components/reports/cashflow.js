@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { TOTALCOLNAME,fMoneyformat } from './rootData';
 import { MonthRange } from './monthRange';
 import { getPaymentsByMonthAddress, getMaintenanceData } from './reportUtil';
+import { Button, Form, Modal, Container, Row, Col } from 'react-bootstrap';
 export default function CashFlowReport(props) {
     const jjctx = props.jjctx;
     const {
@@ -15,7 +16,32 @@ export default function CashFlowReport(props) {
     const monAddr = getPaymentsByMonthAddress(payments, paymentCalcOpts);
 
     const calculatedMaintData = getMaintenanceData(rawExpenseData, paymentCalcOpts);
+    const [showDetail, setShowDetail] = useState(null);
+    const [showExpenseDetail, setShowExpenseDetail] = useState(null);
     return <>
+        <Modal show={!!showDetail} onHide={() => {
+                    setShowDetail(null);
+                }}>
+                    <Modal.Header closeButton>
+                <Modal.Title>{(showDetail||[]).map(d => {
+                    return <div>{d.amount.toFixed(2)} {d.date} {d.address} {d.notes} { d.debugText}</div>
+                })}</Modal.Title>
+                    </Modal.Header>
+                    <Container>
+                    </Container>
+        </Modal>
+        
+        <Modal show={!!showExpenseDetail} onHide={() => {
+            setShowExpenseDetail(null);
+        }}>
+            <Modal.Header closeButton>
+                <Modal.Title>{(showExpenseDetail || []).map(d => {
+                    return <div>{d.debugText}</div>
+                })}</Modal.Title>
+            </Modal.Header>
+            <Container>
+            </Container>
+        </Modal>
         <MonthRange jjctx={jjctx}></MonthRange>
         <table className='tableReport'>
             <thead>
@@ -35,11 +61,12 @@ export default function CashFlowReport(props) {
                         const curHouse = monAddr.houseByKey[house.addressId];
                         return <tr key={key}>
                             <td className='tdLeftSubCategoryHeader'>{house.address}</td>
-                            <td className='tdCenter  tdTotalItalic'>{fMoneyformat(curHouse[TOTALCOLNAME])}</td>
+                            <td className='tdCenter  tdTotalItalic'>{fMoneyformat(house.total)}</td>
                             {
-                                monthes.map((mon,key) => {
-                                    return < td key={key} className='tdCenter'> {
-                                        fMoneyformat((curHouse[mon] || {}).amount)
+                                monthes.map((mon, key) => {
+                                    const curHouseMon = (house.monthes[mon] || {});
+                                    return < td key={key} className='tdCenter' onClick={() => setShowDetail(curHouseMon.records)}> {
+                                        fMoneyformat(curHouseMon.amount)
 
                                     }</td>
                                 })
@@ -52,11 +79,12 @@ export default function CashFlowReport(props) {
                     monAddr.nonRentAry.map((nonRent, key) => {                        
                         return <tr key={key}>
                             <td className='tdLeftSubCategoryHeader'>{nonRent.displayName}</td>
-                            <td className='tdCenter  tdTotalItalic'>{fMoneyformat(nonRent[TOTALCOLNAME])}</td>
+                            <td className='tdCenter  tdTotalItalic' onClick={() => setShowDetail(nonRent.records)}>{fMoneyformat(nonRent.total)}</td>
                             {
                                 monthes.map((mon, key) => {
-                                    return < td key={key} className='tdCenter'> {
-                                        fMoneyformat((nonRent[mon] || {}).amount)
+                                    const curMon = (nonRent.monthes[mon] || {});
+                                    return < td key={key} className='tdCenter' onClick={() => setShowDetail(curMon.records)}> {
+                                        fMoneyformat(curMon.amount)
 
                                     }</td>
                                 })
@@ -87,7 +115,24 @@ export default function CashFlowReport(props) {
                             <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(calculatedMaintData.categoryTotals[cat])}</td>
                             {
                                 monthes.map((mon, key) => {
-                                    return <td key={key} class='tdCenter'>{fMoneyformat(calculatedMaintData.categoriesByKey[cat][mon] || '')}</td>
+                                    const catMon = calculatedMaintData.getCatMonth(cat, mon);
+                                    return <td key={key} class='tdCenter' onClick={() => {
+                                        if (catMon.amountCalcParts) {
+                                            const msgs = catMon.amountCalcParts.reduce((acc, r) => {
+                                                console.log(r)
+                                                console.log(r.calcInfo)
+                                                if (r.calcInfo) {
+                                                    r.calcInfo.forEach(i => acc.push({
+                                                        debugText: i.info
+                                                    }));
+                                                }
+                                                return acc;
+                                            }, [{
+                                                debugText: `For Total expense of ${catMon.amount}`
+                                            }]);
+                                            setShowExpenseDetail(msgs)
+                                        }
+                                    }}>{fMoneyformat(catMon.amount)}</td>
                                 })
                             }
                         </tr>

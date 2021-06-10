@@ -160,8 +160,9 @@ export function JJDataRoot(props) {
 
     useEffect(() => {
         getMaintenanceReport(ownerInfo).then(d => {
+            addMonths(uniq(d.map(r => r.month)));
+            addHouses(d);
             setRawExpenseData(d);
-            addMonths(uniq(d.map(r => r.month)))
         });
         
         beginReLoadPaymentData(ownerInfo);
