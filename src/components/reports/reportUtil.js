@@ -1,4 +1,5 @@
 import { each } from 'bluebird';
+import moment from 'moment';
 import sortBy from 'lodash/sortBy';
 import { TOTALCOLNAME,fMoneyformat } from './rootData';
 export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
@@ -8,23 +9,6 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
         getHouseShareInfo: ()=>[],
     };
     const { isGoodMonth, isGoodHouseId, getHouseShareInfo } = opts;
-    const calcHouseSpreadShare = (d, isNotRent) => {
-        if (!isNotRent) return d;
-        //need to return based on enabled house shares.
-        const houseInfo = getHouseShareInfo();
-        if (!houseInfo.length)
-            return d;
-        const total = parseInt(d * 100);
-        const eachShare = parseInt(total / houseInfo.length);
-        const anchorShare = total - (eachShare * (houseInfo.length - 1));
-        
-        return houseInfo.reduce((acc, h) => {            
-            if (isGoodHouseId(h.id)) {
-                acc += h.isAnchor ? anchorShare : eachShare;
-            }
-            return acc;
-        },0)/100.0;
-    }
     ///
     /// paymentsByMonth: Array of
 //     {
@@ -65,35 +49,44 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
         let addData = catByKey[catId];
         if (!addData) {
             addData = {
+                monthes: {},
                 isNotRent,
                 addressId: d.addressId,
                 address: d.address,
-                displayName: isNotRent ? d.paymentTypeName: d.address,
-                [TOTALCOLNAME]: 0,
+                displayName: isNotRent ? d.paymentTypeName : d.address,
+                records: [],
+                total: 0,
             };
             catByKey[catId] = addData;
             catAry.push(addData);
         }
 
-        let monData = addData[d.month];
+        let monData = addData.monthes[d.month];
         if (!monData) {
             monData = {
                 amount: 0,
+                records: [],
             };
-            addData[d.month] = monData;
+            addData.monthes[d.month] = monData;
         }
         const damount = d.amount; //calcHouseSpreadShare(d.amount, isNotRent);
         
-        monData[TOTALCOLNAME] += damount;
+        //monData[TOTALCOLNAME] += damount;
         acc.total += damount;
         
         if (!acc.monthByKey[d.month]) {
             acc.monthByKey[d.month] = true;
             acc.monthAry.push(d.month);
         }
-        monData.amount += damount;        
-            addData[TOTALCOLNAME] += damount;
-            acc.monthTotal[d.month] = (acc.monthTotal[d.month] || 0) + damount;        
+        monData.amount += damount;
+        monData.records.push(d);
+        addData.total += damount;
+        addData.records.push(d);
+        acc.monthTotal[d.month] = (acc.monthTotal[d.month] || 0) + damount;
+        if (!acc.dbgMonthTotalRecords[d.month]) {
+            acc.dbgMonthTotalRecords[d.month] = [];
+        }
+        acc.dbgMonthTotalRecords[d.month].push(d);
         return acc;
     }, {
         monthAry: [],
@@ -105,6 +98,7 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
         nonRentAry: [],
 
         monthTotal: {},
+        dbgMonthTotalRecords: {},
         total: 0,
     });
 
@@ -114,4 +108,147 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
     })    
 
     return monAddr;
+}
+
+
+export function getMaintenanceData(maintenanceRecordsRaw, opts) {
+    if (!opts) opts = {
+        isGoodMonth: () => true,
+        isGoodHouseId: () => true,
+        getHouseShareInfo: () => [],
+    };
+    const maintenanceRecords = maintenanceRecordsRaw.reduce((acc, r) => {
+        const key = `${r.month}-${r.houseID}-${r.expenseCategoryName}`;
+        let keyData = acc.keys[key];
+        if (!keyData) {
+            keyData = {
+                month: r.month,
+                amount: 0,
+                category: r.category,
+                address: r.address,
+                houseID: r.houseID,
+                records: [],
+            };
+            acc.keys[key] = keyData;
+            acc.data.push(keyData);
+        }
+        keyData.amount += r.amount;
+        keyData.records.push(r);
+        return acc;
+    }, {
+        data: [],
+        keys:{}
+    }).data;
+    const { isGoodMonth, isGoodHouseId, getHouseShareInfo } = opts;
+    const calcHouseSpreadShare = r => {
+        const ramount = r.amount;
+        if (isGoodHouseId(r.houseID)) {
+            return {
+                ...r, amount: ramount,
+                calcInfo: [
+                    {
+                        curTotal: ramount,
+                        house: r,
+                        info: `${r.address} ==> ${(ramount).toFixed(2)}`,
+                    }
+            ]};
+        }
+        if (r.address) return { amount: 0 }; //belong to a not shown house.
+        //need to return based on enabled house shares.
+        const houseInfo = getHouseShareInfo();
+        if (!houseInfo.length)
+            return { ...r, amount: ramount, message:'Warning: no house found return as is' };
+        const total = Math.round(ramount * 100);
+        const eachShare = parseInt(total / houseInfo.length);
+        const anchorShare = total - (eachShare * (houseInfo.length - 1));
+
+        const calcRes = houseInfo.reduce((acc, h) => {
+            if (isGoodHouseId(h.id)) {
+                const toAdd = h.isAnchor ? anchorShare : eachShare;
+                const curTotal = acc.amount;
+                acc.amount += toAdd;
+                acc.calcInfo.push({
+                    curTotal,
+                    house: h,
+                    info: `${h.address} ${(toAdd/100.0).toFixed(2)} cumulated: ${(acc.amount/100).toFixed(2)}`,
+                });                
+            }
+            return acc;
+        }, {
+            amount: 0,
+            calcInfo:[],
+        });
+        return {
+            ...r,
+            amount: calcRes.amount / 100.0,
+            calcInfo: calcRes.calcInfo,
+        }
+    }
+
+    const maintenceData = maintenanceRecords.reduce((acc, r) => {
+        const month = moment(r.month).add(2, 'days').format('YYYY-MM');
+        if (!isGoodMonth(month)) return acc;
+        if (!isGoodHouseId(r.houseID) && !r.houseID) return acc;
+        
+        let monthData = acc.monthByName[month];
+        if (!monthData) {
+            acc.monthByName[month] = {
+                total: 0,
+            };
+            acc.monthes.push(month);
+        }
+        let cats = acc.categoriesByKey[r.category];
+        if (!cats) {
+            cats = { };
+            acc.categoriesByKey[r.category] = cats;
+            acc.categoryNames.push(r.category);
+        }
+        
+        const calcInfo = calcHouseSpreadShare(r);
+        const amount = calcInfo.amount;
+        let catMonth = cats[month];
+        if (!catMonth) {
+            catMonth = {
+                amount: 0,
+                records: [],
+                amountCalcParts: [],
+            }
+            cats[month] = catMonth;
+        }
+        catMonth.amount += amount;
+        if (amount)
+            catMonth.amountCalcParts.push(calcInfo);
+        catMonth.records.push(r);
+        acc.categoryTotals[r.category] = (acc.categoryTotals[r.category] || 0) + amount;
+        acc.monthlyTotal[month] = (acc.monthlyTotal[month] || 0) + amount;
+
+        acc.total += amount;
+        return acc;
+    }, {
+        monthByName: {},
+        monthes: [],
+        categoriesByKey: {},
+        categoryNames: [],
+        categoryTotals: {},
+        monthlyTotal: {},
+        total: 0,
+    });
+
+    const sortLowOthers = cats => {
+        const others = 'Others';
+        const res = cats.filter(k => k !== others);
+        res.sort();
+        if (cats.filter(k => k === others).length) {
+            res.push(others);
+        }
+        return res;
+    }
+
+    maintenceData.categoryNames = sortLowOthers(maintenceData.categoryNames);
+    maintenceData.getCatMonth = (cat, mon) => {
+        const catMon = maintenceData.categoriesByKey[cat];
+        if (!catMon) return {};
+        return catMon[mon] || {};
+    };
+    return maintenceData;
 }
