@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
-import { TOTALCOLNAME,fMoneyformat } from './rootData';
+import { fMoneyformat } from './rootData';
 import { MonthRange } from './monthRange';
 import { getPaymentsByMonthAddress, getMaintenanceData } from './reportUtil';
-import { Modal, Container, } from 'react-bootstrap';
+import { Modal, Container, Button} from 'react-bootstrap';
 import moment from 'moment';
 export default function CashFlowReport(props) {
     const jjctx = props.jjctx;
@@ -47,7 +47,70 @@ export default function CashFlowReport(props) {
         <table className='tableReport'>
             <thead>
             
-                <td className='tdColumnHeader'></td><td className='tdColumnHeader'>Total</td>
+                <td className='tdColumnHeader'>
+                    <Button onClick={() => {
+                        var link = document.createElement("a");
+                        const csvContent = [];
+
+                        const fMoneyformat = d => (d || d === 0) ? d.toFixed(2) : '';
+                        csvContent.push(['','Total',...monthes]);
+                        monAddr.houseAry.filter(h => (selectedHouses[h.addressId])).forEach((house, key) => {
+                            csvContent.push([house.address, fMoneyformat(house.total),
+                            ...monthes.map(mon => fMoneyformat((house.monthes[mon] || {}).amount))
+                            ]);
+                        })
+                        csvContent.push(['Non Rent']);
+                        monAddr.nonRentAry.forEach(nonRent => {
+                            csvContent.push([nonRent.displayName, fMoneyformat(nonRent.total),
+                            ...monthes.map(mon=> fMoneyformat((nonRent.monthes[mon] || {}).amount))
+                            ])
+                        })
+                        csvContent.push(['Sub Total:', fMoneyformat(monAddr.total),
+                            ...monthes.map((name, key) => {
+                                const mon = monAddr.monthTotal[name];
+                                if (!mon && mon !== 0) return '';
+                                return fMoneyformat(mon);
+                            })
+                        ]);
+
+
+                        csvContent.push(['Expenses']);
+
+
+                        [...calculatedMaintData.categoryNames].forEach(cat => {
+                            csvContent.push([cat, fMoneyformat(calculatedMaintData.categoryTotals[cat]),
+                                ...monthes.map(mon => fMoneyformat(calculatedMaintData.getCatMonth(cat, mon).amount))
+                            ])
+
+                        })
+
+                        csvContent.push(['Sub Total', fMoneyformat(calculatedMaintData.total),
+                            ...monthes.map(mon => fMoneyformat((calculatedMaintData.monthlyTotal[mon] || 0)))
+                        ])
+
+                        csvContent.push(['']);
+                        csvContent.push(['Net Income', fMoneyformat((monAddr.total - calculatedMaintData.total)),
+                            ...monthes.map(mon => {
+                                const incTotal = monAddr.monthTotal[mon] || 0;
+                                const cost = calculatedMaintData.monthlyTotal[mon] || 0;
+                                return fMoneyformat((incTotal - cost));
+                            })
+                        ]);
+
+
+                        link.href = window.URL.createObjectURL(
+                            new Blob([csvContent.map(c => c.join(', ')).join('\n')], { type: "application/txt" })
+                        );
+                        link.download = `report-cashflow.csv`;
+                        document.body.appendChild(link);
+                        link.click();
+                        setTimeout(function () {
+                            window.URL.revokeObjectURL(link);
+                        }, 200);
+
+                    }}>CSV</Button>
+                </td>
+                <td className='tdColumnHeader'>Total</td>
                 {
                     monthes.map((mon,key) => {
                         return <th className='tdColumnHeader' key={key}>{ mon}</th>
@@ -59,7 +122,6 @@ export default function CashFlowReport(props) {
                 <td className='tdLeftSubHeader' colSpan={monthes.length + 2}>Income</td></tr>
                 {
                     monAddr.houseAry.filter(h=>(selectedHouses[h.addressId] )).map((house,key) => {
-                        const curHouse = monAddr.houseByKey[house.addressId];
                         return <tr key={key}>
                             <td className='tdLeftSubCategoryHeader'>{house.address}</td>
                             <td className='tdCenter  tdTotalItalic'>{fMoneyformat(house.total)}</td>
