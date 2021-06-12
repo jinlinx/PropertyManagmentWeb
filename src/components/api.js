@@ -124,6 +124,15 @@ export function doStatementWS() {
         });
     }
 }
+
+export function updateGoogleSheet(name, id, data)
+{
+    return doPostOp(`misc/sheet/${name}/batch/${id}/norange`, data)
+}
+
+export function updateCashflowGSheet(data) {
+    return updateGoogleSheet('gzprem', '1MO27odjCsxk6MWL0DygubU53hrtt3OB8SEnqjpUHJ-U', data);
+}
 /*
 module.exports = {
     getData,
