@@ -20,7 +20,8 @@ export function saveToGS(rows) {
                         const isSubTotal = r[0] && r[0].match(/Sub Total/i);
                         const isNetIncom = r[0] && r[0].match(/net income/i);
                         acc.arys.push({
-                            values: r.map(stringValue => {
+                            values: r.map((stringValue, colPos) => {
+                                const horizontalAlignment = colPos ? 'RIGHT' : 'LEFT';
                                 const cell = {
                                     userEnteredValue: { stringValue }
                                 };
@@ -31,6 +32,7 @@ export function saveToGS(rows) {
                                             green: 100,
                                             red: 100
                                         },
+                                        horizontalAlignment,
                                         textFormat: {
                                             foregroundColor: {
                                                 blue: 255,
@@ -56,6 +58,10 @@ export function saveToGS(rows) {
                                             }
                                         }
                                     };
+                                } else {
+                                    cell.userEnteredFormat = {                                        
+                                        horizontalAlignment,
+                                    }
                                 }
                                 return cell;
                             })
