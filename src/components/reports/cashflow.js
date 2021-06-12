@@ -4,6 +4,8 @@ import { MonthRange } from './monthRange';
 import { getPaymentsByMonthAddress, getMaintenanceData } from './reportUtil';
 import { Modal, Container, Button} from 'react-bootstrap';
 import moment from 'moment';
+import {saveToGS} from './utils/updateGS';
+
 export default function CashFlowReport(props) {
     const jjctx = props.jjctx;
     const {
@@ -102,6 +104,7 @@ export default function CashFlowReport(props) {
                             new Blob([csvContent.map(c => c.join(', ')).join('\n')], { type: "application/txt" })
                         );
                         link.download = `report-cashflow.csv`;
+                        saveToGS(csvContent)
                         document.body.appendChild(link);
                         link.click();
                         setTimeout(function () {
