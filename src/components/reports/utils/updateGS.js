@@ -19,18 +19,21 @@ export function saveToGS(rows) {
                     rows: rows.reduce((acc, r, rowIdx) => {
                         const isSubTotal = r[0] && r[0].match(/Sub Total/i);
                         const isNetIncom = r[0] && r[0].match(/net income/i);
+                        const isExpenseTitle = r[0] && r[0].match(/expense/i);
                         acc.arys.push({
-                            values: r.map(stringValue => {
+                            values: r.map((stringValue, colPos) => {
+                                const horizontalAlignment = colPos ? 'RIGHT' : 'LEFT';
                                 const cell = {
                                     userEnteredValue: { stringValue }
                                 };
-                                if (!rowIdx || isSubTotal || isNetIncom) {
+                                if (!rowIdx || isSubTotal || isNetIncom || isExpenseTitle) {
                                     cell.userEnteredFormat = {
                                         backgroundColor: {
                                             blue: 100,
                                             green: 100,
                                             red: 100
                                         },
+                                        horizontalAlignment,
                                         textFormat: {
                                             foregroundColor: {
                                                 blue: 255,
@@ -56,6 +59,10 @@ export function saveToGS(rows) {
                                             }
                                         }
                                     };
+                                } else {
+                                    cell.userEnteredFormat = {                                        
+                                        horizontalAlignment,
+                                    }
                                 }
                                 return cell;
                             })
