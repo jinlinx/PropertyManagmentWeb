@@ -3,7 +3,7 @@
 console.log(`test process.env.NODE_ENV ${process.env.REACT_APP_ENDPOINT_ENV}`)
 const urlBase = process.env.REACT_APP_ENDPOINT_ENV !== 'dev' ? 'http://192.168.1.41' : 'http://localhost:8081';
 const apiBase=`${urlBase}/pmapi`;
-const getUrl=path => `${apiBase}/${path}`;
+export const getUrl=path => `${apiBase}/${path}`;
 const request = require('superagent');
 const get = require('lodash/get');
 

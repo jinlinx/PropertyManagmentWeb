@@ -25,6 +25,8 @@ import ExepenseCategory from './dataEntry/expenseCategory';
 import MaintanceList from './maintenanceList';
 import MonthlyComp from './reports/monthlyComp';
 import { showOwner } from './util';
+import request from 'superagent';
+import { getUrl } from './api';
     
 import { JJDataRoot, IncomeExpensesContext} from './reports/rootData';
 function App() {
@@ -83,6 +85,18 @@ function App() {
                     }}></input></div>
                     <div><Button onClick={() => {
                         console.log(loginInfo);
+                        console.log('sending request')
+                        const auth = `${loginInfo.userName}:${loginInfo.password}`;
+                        console.log(auth)
+                        request.post(getUrl(`sql/get`))
+                            .auth(loginInfo.userName, loginInfo.password, { type: 'basic' })
+                            .send({
+                                table: 'user'
+                            }).then(res => {
+                                console.log(res.body);
+                            }).catch(err => {
+                                console.log(err);
+                            })
                     }}>Submit</Button></div>
                 </Container>
             </Modal>
