@@ -87,7 +87,8 @@ function App() {
                         console.log(loginInfo);
                         console.log('sending request')
                         const auth = `${loginInfo.userName}:${loginInfo.password}`;
-                        console.log(auth)
+                        console.log(auth);
+                        sessionStorage.setItem('loginInfoSess', JSON.stringify(loginInfo));
                         request.post(getUrl(`sql/get`))
                             .auth(loginInfo.userName, loginInfo.password, { type: 'basic' })
                             .send({
