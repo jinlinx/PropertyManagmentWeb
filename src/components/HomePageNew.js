@@ -5,7 +5,7 @@ import {
     Route,
     Navigate
 } from "react-router-dom";
-import SideBar from './components/ui/sidebar'
+import SideBar from './ui/sidebar'
 export default function HomePageNew() {
     return <Router>
         <div className="wrapper fontawesome-i2svg-active fontawesome-i2svg-complete">

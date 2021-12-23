@@ -2,7 +2,7 @@ import React from "react"
 import {    
     Link
 } from "react-router-dom";
-import { SideBarItem } from './sidebarGroup'
+import { SideBarItem } from './sidebarGroupControl'
 export default function SideBar() {
     const components = [
         {
