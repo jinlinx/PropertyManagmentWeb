@@ -14,7 +14,7 @@ import TablePicker from './components/sqlEditor/TablePicker';
 import Developer from './components/Developer';
 import { Navbar, Nav, NavDropdown, Form, FormControl, Button } from 'react-bootstrap';
 import HomePage from './components/HomePage';
-import HomePageNew from './components/HomePageNew';
+import HomePageNew from './components/ui/HomePageLayout';
 import { getOwners } from './components/aapi';
 import LeftMenu from './components/leftMenu';
 
