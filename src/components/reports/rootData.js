@@ -94,7 +94,7 @@ export function JJDataRoot(props) {
         }).catch(err => {
             console.log('network failed');
         })
-    });
+    },[]);
     useEffect(() => {
         setMonthes(allMonthes);
 
