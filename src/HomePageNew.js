@@ -1,4 +1,6 @@
 import React from "react"
+
+import { SideBarItem } from './components/ui/sidebarGroup'
 export default function HomePageNew() {
     return <>
         <div className="wrapper fontawesome-i2svg-active fontawesome-i2svg-complete">
@@ -8,6 +10,11 @@ export default function HomePageNew() {
                 </div>
 
                 <ul className="list-unstyled components">
+                    <SideBarItem name="Home11">
+                        <a href="#">Home 1</a>
+                        <a href="#">Home 1</a>
+                        <a href="#">Home 1</a>
+                    </SideBarItem>
                     <p>Dummy Heading</p>
                     <li className="active">
                         <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" className="dropdown-toggle">Home</a>
@@ -50,10 +57,10 @@ export default function HomePageNew() {
 
                 <ul className="list-unstyled CTAs">
                     <li>
-                        <a href="https://bootstrapious.com/tutorial/files/sidebar.zip" className="download">Download source</a>
+                        <a href="#" className="download">Developer tools</a>
                     </li>
                     <li>
-                        <a href="https://bootstrapious.com/p/bootstrap-sidebar" className="article">Back to article</a>
+                        <a href="#" className="article">Back </a>
                     </li>
                 </ul>
             </nav>
