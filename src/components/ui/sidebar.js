@@ -3,7 +3,8 @@ import {
     Link
 } from "react-router-dom";
 import { SideBarItem } from './sidebarGroupControl'
-export default function SideBar() {
+export default function SideBar(props) {
+    const controlsGrp = props.controlsGrp;
     const components = [
         {
             name: 'Reports',
@@ -44,9 +45,9 @@ export default function SideBar() {
 
         <ul className="list-unstyled components">
             {
-                components.map(comp => {
-                    return <SideBarItem name={ comp.name} children={
-                        comp.links.map(link => <li><Link to={ link}>{ link}</Link></li>)
+                controlsGrp.map(comp => {
+                    return <SideBarItem name={ comp.name || comp.link} children={
+                        comp.links.map(link => <li><Link to={ `/${comp.link}/${link.path}`}>{ link.name || link.path}</Link></li>)
                     }></SideBarItem>
                 })
             }

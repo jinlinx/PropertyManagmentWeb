@@ -6,17 +6,26 @@ import {
 } from "react-router-dom";
 import SideBar from './sidebar'
 import { JJDataRoot, IncomeExpensesContext } from '../reports/rootData';
-export default function HomePageNew() {
-    const [ownerInfo, setOwnerInfo] = useState({ ownerID: '', ownerName: '' });
-    return <JJDataRoot dataRootParam={{ ownerInfo }}>
+export default function HomePageLayout(props) {
+    const controlsGrp = props.controlsGrp || [];
+    return <JJDataRoot>
         <IncomeExpensesContext.Consumer>
             {
                 value => {
                     return <Router>
                         <div className="wrapper fontawesome-i2svg-active fontawesome-i2svg-complete">
-                            <SideBar />
+                            <SideBar controlsGrp={controlsGrp} />
                             <div id="content">               
                                 <Routes>
+                                    {
+                                        controlsGrp.reduce((acc, c) => {
+                                            //link(path, element) c(link, links, name)
+                                            c.links.forEach(link => {
+                                                acc.push(<Route path={`/${c.link}/${link.path}`} element={link.element}></Route>) 
+                                            });                                            
+                                            return acc;
+                                        },[])
+                                    }
                                     <Route path="/cashFlowSummary" element={<><div>Test</div></>}>
                                     </Route>
                                     <Route path="/users">
