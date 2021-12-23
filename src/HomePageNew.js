@@ -5,7 +5,6 @@ import {
     Route,
     Navigate
 } from "react-router-dom";
-
 import SideBar from './components/layout/sidebar'
 export default function HomePageNew() {
     return <Router>
@@ -13,16 +12,12 @@ export default function HomePageNew() {
             <SideBar />            
             <div id="content">
                 <Routes>
-                    <Route path="/about">
-                        <div>about</div>
+                    <Route path="/cashFlowSummary" element={<><div>Test</div></>}>
                     </Route>
                     <Route path="/users">
-                        <div>users</div>
                     </Route>
                     <Route path="/">
-                        <div>home</div>
                     </Route>
-                    <Navigate to="/" />
                 </Routes>
                 <nav className="navbar navbar-expand-lg navbar-light bg-light">
                     <div className="container-fluid">
