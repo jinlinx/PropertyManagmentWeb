@@ -34,3 +34,6 @@ sudo apache2ctl configtest
 
 apache in /var/www/html
 scp -r build\* pi@192.168.1.41:/var/www/html
+
+
+/etc/nginx/sites-enabled/pmapi.conf
