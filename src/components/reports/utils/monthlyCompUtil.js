@@ -220,7 +220,7 @@ export function doCalc({
                 }
                 const rembi = reimbusementsFlattened[i];
                 if (rembi) {
-                    for (let j = rembiMapper.length; j < mapper.length; j++) {
+                    for (let j = cmpiMapper.length; j < mapper.length; j++) {
                         curLine[j] = mapper[j](rembi);
                     }
                 }

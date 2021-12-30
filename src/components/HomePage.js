@@ -11,7 +11,7 @@ import OwnerList from './ownerList';
 import TablePicker from './sqlEditor/TablePicker';
 import Developer from './Developer';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Navbar, Nav, NavDropdown, Form, FormControl, Button,Container, Row, Col } from 'react-bootstrap';
+import { Navbar, Nav, NavDropdown, Form, FormControl, Button,Container, Row, Col, Modal } from 'react-bootstrap';
 import { getOwners } from './aapi';
 import LeftMenu from './leftMenu';
 import myStyles from './HomePage.css';
@@ -25,6 +25,8 @@ import ExepenseCategory from './dataEntry/expenseCategory';
 import MaintanceList from './maintenanceList';
 import MonthlyComp from './reports/monthlyComp';
 import { showOwner } from './util';
+import request from 'superagent';
+import { getUrl } from './api';
     
 import { JJDataRoot, IncomeExpensesContext} from './reports/rootData';
 function App() {
@@ -36,6 +38,10 @@ function App() {
     const [pageProps, setPageProps] = useState({});
     const pageState = { pageProps, setPageProps, ownerInfo };
     
+    const [showLogin, setShowLogin] = useState(null);
+    const [loginInfo, setLoginInfo] = useState({
+        userName: '', password:'',
+    });
     useEffect(() => {
         getOwners().then(owners => {
             //console.log(owners);
@@ -51,12 +57,62 @@ function App() {
     /*return <HomePage/>*/
     return (
         <>
+            <Modal show={!!showLogin} onHide={() => {
+                setShowLogin(false);
+            }}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Login</Modal.Title>
+                </Modal.Header>
+                <Container>
+                    <div>Name:<input type="text" value={loginInfo.userName} onChange={(v) => {                        
+                            const userName = v.target.value;
+                            console.log(v.target.value);
+                            setLoginInfo(s => {
+                                return {
+                                    ...s,
+                                    userName,
+                                }
+                            })                        
+                    }}></input></div>
+                    <div>Pass:<input type="text" value={loginInfo.password} onChange={(v) => {
+                        const password = v.target.value;
+                        setLoginInfo(s => {
+                            return {
+                                ...s,
+                                password,
+                            }
+                        })
+                    }}></input></div>
+                    <div><Button onClick={() => {
+                        console.log(loginInfo);
+                        console.log('sending request')
+                        const auth = `${loginInfo.userName}:${loginInfo.password}`;
+                        console.log(auth);
+                        sessionStorage.setItem('loginInfoSess', JSON.stringify(loginInfo));
+                        request.post(getUrl(`sql/get`))
+                            .auth(loginInfo.userName, loginInfo.password, { type: 'basic' })
+                            .send({
+                                table: 'user'
+                            }).then(res => {
+                                console.log(res.body);
+                            }).catch(err => {
+                                console.log(err);
+                            })
+                    }}>Submit</Button></div>
+                </Container>
+            </Modal>
             <div id="topNav" className="topNav">
                 <table>
                     <tbody>
                         <tr>
                             <td rowSpan='1'>
-                                    <img src={logo} style={{ width: 200, height: 50 }} /></td>
+                                <img src={logo} style={{ width: 200, height: 50 }}
+                                    onClick={() => {
+                                        setShowLogin({
+                                            userName:''
+                                        })
+                                    }}
+                                /></td>
                             <td colSpan='2' className='TopTitleFont'>Property Management</td>
                             <td><Button className='btnTopButton' href="#reports" onClick={() => setCurPage('reports')}>Reports</Button> </td>
                             <td><Button className='btnTopButton' href="#dateEntry" onClick={() => setCurPage('dataEntry')}>Data Entry</Button> </td>
