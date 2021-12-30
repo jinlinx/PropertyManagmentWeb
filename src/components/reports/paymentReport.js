@@ -13,9 +13,10 @@ export default function PaymentReport(props) {
         beginReLoadPaymentData,
         houseAnchorInfo,
         ownerInfo,
+        selectedHouses, setSelectedHouses,
     } = jjctx;
 
-    const [selectedHouses, setSelectedHouses] = useState({});
+    //const [selectedHouses, setSelectedHouses] = useState({});
     
     const monAddr = getPaymentsByMonthAddress(payments, {
         isGoodMonth: m => selectedMonths[m],
@@ -64,11 +65,11 @@ export default function PaymentReport(props) {
                         const curHouse = monAddr.houseByKey[house.addressId];
                         return <tr key={key}>
                             <td className='tdLeftSubCategoryHeader'>{house.address}</td>
-                            <td className='tdCenter  tdTotalItalic'>{fMoneyformat(curHouse[TOTALCOLNAME])}</td>
+                            <td className='tdCenter  tdTotalItalic'>{fMoneyformat(curHouse.total)}</td>
                             {
                                 monAddr.monthAry.map((mon,key) => {
                                     return < td key={key} className='tdCenter  tdTotalItalic'> {
-                                        fMoneyformat((curHouse[mon] || {}).amount)
+                                        fMoneyformat((curHouse.monthes[mon] || {}).amount)
 
                                     }</td>
                                 })
