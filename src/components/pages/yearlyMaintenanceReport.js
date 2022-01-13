@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getMinDatesForMaintenance, getWorkerInfo, getAllMaintenanceData, getExpenseCategories } from '../api';
 import moment from 'moment';
 import EditDropdown from '../paymentMatch/EditDropdown';
+import { sortBy } from "lodash";
 export function YearlyMaintenanceReport(props) {
     const { ownerInfo } = props;
     const [state, setState] = useState({
@@ -13,6 +14,7 @@ export function YearlyMaintenanceReport(props) {
         workerInfoMapping: {},
         showWorkers: {},
         showCategories: {},
+        rawData:[],
     });
     useEffect(() => {
         if (!ownerInfo.ownerID) {
@@ -48,8 +50,14 @@ export function YearlyMaintenanceReport(props) {
 
         getExpenseCategories().then(exp => {
             console.log('setting up expenseCategory info for yearly Maintenance')
-            const expenseCategories = exp.rows.reduce((acc, r) => {
-                acc[r.expenseCategoryID] = r.expenseCategoryName;
+            const expenseCategories = exp.rows.map(r => {
+                return {
+                    id: r.expenseCategoryID,
+                    name: r.expenseCategoryName,
+                };
+            });
+            const expenseCategoriesMapping = expenseCategories.reduce((acc, r) => {
+                acc[r.id] = r.name;
                 return acc;
             }, {});
 
@@ -60,8 +68,8 @@ export function YearlyMaintenanceReport(props) {
                         
             setState(prev=>({
                 ...prev,
-                expenseCategories: exp.rows,
-                expenseCategoriesMapping: expenseCategories,
+                expenseCategories,
+                expenseCategoriesMapping,
                 showCategories,
             }))
         });
@@ -83,6 +91,7 @@ export function YearlyMaintenanceReport(props) {
                 showWorkers,
             }))
         })
+
     }, [ownerInfo.ownerID]);
     
     
@@ -90,6 +99,44 @@ export function YearlyMaintenanceReport(props) {
         console.log(`loading data for ${state.dspYear}`)
         getDataForYYYY(state, setState); 
     }, [state.dspYear]);
+
+    useEffect(() => {
+        formatData(state, setState);
+    }, [state.rawData, state.showCategories]);
+
+    let names = [];
+    let categoryNames = [];
+    if (state.byWorkerByCat) {
+        names = state.byWorkerByCat.workerIds.map(id => {
+            const wi = state.workerInfoMapping[id];
+            if (!wi) {
+                return {
+                    id,
+                    name: id,
+                }
+            } else {
+                return {
+                    id,
+                    name: `${wi.firstName} ${wi.lastName}`
+                }
+            }
+        });
+        names = sortBy(names, 'name');
+
+        categoryNames = state.byWorkerByCat.catIds.map(id => {
+            const name = state.expenseCategoriesMapping[id] || id;            
+            return {
+                id,
+                name,
+            }
+        });
+    }
+    
+
+    const amtDsp = amt => {
+        if (!amt) return 0;
+        return amt.toFixed(2);
+    }
     return <div><EditDropdown context={{
         disabled: false,
         curSelection: state.curYearSelection || {},
@@ -106,16 +153,71 @@ export function YearlyMaintenanceReport(props) {
         loadOptions: () => [],
     }}></EditDropdown>
         <div>
+            <div className="container">
             {
                 state.expenseCategories.map((exp,keyi) => {
-                    return <div key={keyi}>{exp.expenseCategoryName}</div>
+                    return <>
+                        <input type="checkbox" class="form-check-input" id="exampleCheck1"
+                            checked={state.showCategories[exp.id]}
+                            onClick={() => {
+                                setState(prev => ({
+                                    ...prev,
+                                    showCategories: {
+                                        ...state.showCategories,
+                                        [exp.id]: !state.showCategories[exp.id],
+                                    }
+                                }));
+                            }}
+                        ></input>
+                        <span className="border" key={keyi}  >{exp.name}</span>
+                        <span> </span>
+                        </>
                 })
-            }
-            {
-                state.curYearOptions.map((d, keyi) => {
-                    return <div key={keyi}>y={d.label}</div>
-                })
-            }
+                }
+            </div>
+            <table className="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        {
+                            categoryNames.map((n,keyi) => {
+                                return <th scope="col" key={keyi}>{n.name}</th>        
+                            })
+                        }
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        names.map((n, tri) => {
+                            return <tr key={tri}>
+                                <th scope="row">{n.name}</th>
+                                {
+                                    categoryNames.map((cat, keyi) => {
+                                        return <td scope="col" key={keyi}>{
+                                            amtDsp(state.byWorkerByCat.byWorker[n.id][cat.id]?.amount)
+                                        }</td>
+                                    })
+                                }
+                                <td>{amtDsp(state.byWorkerByCat.byWorker[n.id].total)}</td>
+                            </tr>
+                        })
+                    }
+                    {
+                        <tr>
+                            <th>Grand Total:</th>
+                            {
+                                categoryNames.map((cat, keyi) => {
+                                    return <td scope="col" key={keyi}>{
+                                        amtDsp(state.byWorkerByCat.byCats[cat.id]?.total)
+                                    }</td>
+                                })
+                            }
+                            <td>{amtDsp(state.byWorkerByCat?.total)}</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>            
         </div>
     </div>
 }
@@ -131,6 +233,61 @@ function getDataForYYYY(state, setState) {
     console.log(`star= ${startDate} end=${endDate}`)
     getAllMaintenanceData(ownerID, startDate, endDate).then(rrr => {
         const dataRows = rrr.rows;
-        console.log(dataRows)
-    })
+        setState(prev=>({
+            ...prev,
+          rawData: dataRows,  
+        }))
+        //formatData(state, setState);
+    });
+}
+
+
+function formatData(state, setState) {
+    const dataRows = state.rawData;
+    const getSet = (obj, id, init) => {
+        let r = obj[id];
+        if (!r) {
+            r = init || {};
+            obj[id] = r;
+        }
+        return r;
+    }
+    const byWorkerByCat = dataRows.reduce((acc, d) => {
+        if (!state.showWorkers[d.workerID]) return acc;
+        if (!state.showCategories[d.expenseCategoryId]) return acc;
+
+        if (!acc.workerIdHashFind[d.workerID]) {
+            acc.workerIdHashFind[d.workerID] = true;
+            acc.workerIds.push(d.workerID);
+        }
+        if (!acc.catIdHashFind[d.expenseCategoryId]) {
+            acc.catIdHashFind[d.expenseCategoryId] = true;
+            acc.catIds.push(d.expenseCategoryId);
+        }
+        const wkr = getSet(acc.byWorker, d.workerID);
+        const exp = getSet(wkr, d.expenseCategoryId, {
+            amount: 0,
+            items: [],
+        });
+        exp.amount += d.amount;
+        exp.items.push(d);
+        wkr.total = (wkr.total || 0) + d.amount;
+
+        const byCats = getSet(acc.byCats, d.expenseCategoryId, { total: 0 });
+        byCats.total += d.amount;
+        acc.total += d.amount;
+        return acc;
+    }, {
+        byWorker: {},
+        byCats: {},
+        total: 0,
+        workerIds: [],
+        workerIdHashFind: {},
+        catIds: [],
+        catIdHashFind: {},
+    });
+    setState(prev => ({
+        ...prev,
+        byWorkerByCat,
+    }));
 }
