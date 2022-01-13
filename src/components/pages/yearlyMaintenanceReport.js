@@ -55,7 +55,7 @@ export function YearlyMaintenanceReport(props) {
                     id: r.expenseCategoryID,
                     name: r.expenseCategoryName,
                 };
-            });
+            }).filter(r=>r.name);
             const expenseCategoriesMapping = expenseCategories.reduce((acc, r) => {
                 acc[r.id] = r.name;
                 return acc;
