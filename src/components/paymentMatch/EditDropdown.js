@@ -15,27 +15,28 @@ export default function EditDropdown(props) {
 
     const selTextRef = createRef();
     const [show, setShow] = useState(false);
+    const dropdownShowClassName = show ? "dropdown-menu show" : "dropdown-menu";
     return <div>
-        <Dropdown as={ButtonGroup} show={show} >            
+        {false && <Dropdown as={ButtonGroup} show={false} >
             < Form.Control as="input"
                 disabled={disabled}
-                ref={selTextRef}                
+                ref={selTextRef}
                 value={getCurSelectionText(curSelection)}
                 onBlur={() => {
                     setShow(false);
                 }}
                 onKeyDown={
                     async e => {
-                        if (!curSelection ) return;
+                        if (!curSelection) return;
                         if (e.key === 'Tab') {
                             setShow(false);
                         }
-                        if (e.key !== 'Tab' && e.key !=='Home') {
+                        if (e.key !== 'Tab' && e.key !== 'Home') {
                             setShow(true);
                             e.preventDefault();
                             const { selectionStart, selectionEnd } = e.target
 
-                            const starts = (curSelection.label || '').substring(0, selectionStart) + (e.key.length ===1?e.key:'');
+                            const starts = (curSelection.label || '').substring(0, selectionStart) + (e.key.length === 1 ? e.key : '');
                                               
                             const foundOs = options.map(o => {
                                 return {
@@ -72,12 +73,12 @@ export default function EditDropdown(props) {
                     }
                 }
                 onChange={() => { }}
-            />                        
+            />
             <Dropdown.Toggle disabled={disabled} split variant="success" id="dropdown-split-basic" onClick={() => {
                 setShow(!show);
             }} onBlur={() => {
-                setTimeout(()=>setShow(false),400);
-            }}/>
+                setTimeout(() => setShow(false), 400);
+            }} />
             <Dropdown.Menu show={show}>
                 {
                     options.map((l, ind) => {
@@ -86,11 +87,40 @@ export default function EditDropdown(props) {
                             setCurSelection(l);
                             setShow(false);
                         }
-                        }>{getCurSelectionText(l)}</Dropdown.Item>
+                        }>old{getCurSelectionText(l)}</Dropdown.Item>
                     })
                 }
             </Dropdown.Menu>
-        </Dropdown>        
+        </Dropdown>
+        }    
+        <div className="btn-group">
+            <input className="form-control" value={getCurSelectionText(curSelection)}
+                onBlur={() => {
+                    setShow(false);
+                }}></input>
+            <button type="button" className="btn btn-primary dropdown-toggle dropdown-toggle-split" 
+                onClick={() => setShow(!show)}
+                onBlur={() => {
+                    setTimeout(() => setShow(false), 400);
+                }}
+            >
+                <span className="sr-only">Toggle Dropdown</span>
+                <div className="btn-group">
+                    <div className={dropdownShowClassName}>
+                        {
+                            options.map((l, ind) => {
+                                return <a className="dropdown-item" key={ind} onClick={() => {
+                                    console.log('selection ' + l);
+                                    setCurSelection(l);
+                                    setShow(false);
+                                }
+                                }>{getCurSelectionText(l)}</a>
+                            })
+                        }
+                    </div>
+                </div>
+            </button>            
+        </div>
     </div>
 
 }

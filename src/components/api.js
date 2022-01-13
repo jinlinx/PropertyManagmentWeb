@@ -143,6 +143,23 @@ export function updateGoogleSheet(name, id, data)
 export function updateCashflowGSheet(data) {
     return updateGoogleSheet('gzprem', '1MO27odjCsxk6MWL0DygubU53hrtt3OB8SEnqjpUHJ-U', data);
 }
+
+
+export function getMinDatesForMaintenance(ownerID) {
+    return sqlGet({
+        table: 'maintenanceRecords',
+        fields: [{
+            op: 'min',
+            field: 'date',
+            name:'minDate'
+        }],
+        whereArray: [{
+            field: 'ownerID',
+            op: '=',
+            val: ownerID || ''
+        }],  
+    })
+}
 /*
 module.exports = {
     getData,

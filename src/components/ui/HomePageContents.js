@@ -16,6 +16,7 @@ import WorkerCompList from '../workerCompList';
 import ExepenseCategory from '../dataEntry/expenseCategory';
 import ReportList from "../reportlist";
 import Developer from "../Developer";
+import { YearlyMaintenanceReport } from '../pages/yearlyMaintenanceReport';
 export default function HomePageContents() {    
     return <JJDataRoot>
         <IncomeExpensesContext.Consumer>
@@ -30,6 +31,7 @@ export default function HomePageContents() {
                                 { path: 'maintenanceReport', element: <MaintenanceReport jjctx={value} /> },
                                 { path: 'paymentReport', element: <PaymentReport jjctx={value} /> },
                                 { path: 'workerCompensationReport', element: <MonthlyComp compPrm={value.ownerInfo}></MonthlyComp> },
+                                { path: 'yearlyMaintenanceReport', element: <YearlyMaintenanceReport ownerInfo={value.ownerInfo}></YearlyMaintenanceReport> },
                             ]
                         },
                         {
