@@ -20,11 +20,11 @@ export default function HomePageLayout(props) {
                                     {
                                         controlsGrp.reduce((acc, c) => {
                                             //link(path, element) c(link, links, name)
-                                            c.links.forEach(link => {
+                                            c.links.forEach((link,keyi) => {
                                                 if (!acc.length) {
-                                                    acc.push(<Route path={`/`} element={link.element}></Route>)     
+                                                    acc.push(<Route path={`/`} element={link.element} key={keyi}></Route>)     
                                                 }
-                                                acc.push(<Route path={`/${c.link}/${link.path}`} element={link.element}></Route>) 
+                                                acc.push(<Route path={`/${c.link}/${link.path}`} element={link.element} key={keyi}></Route>) 
                                             });                                            
                                             return acc;
                                         },[])

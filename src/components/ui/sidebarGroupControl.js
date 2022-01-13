@@ -23,7 +23,7 @@ export function SideBarItem(props) {
             }}
         >{name}</a>
         <ul className={listClass} ref={collapseRef}>
-            {props.children && props.children.map(c => <li>{c}</li>)}
+            {props.children && props.children.map((c, keyi) => <li key={keyi}>{c}</li>)}
         </ul>
     </li>
 }

@@ -160,6 +160,49 @@ export function getMinDatesForMaintenance(ownerID) {
         }],  
     })
 }
+
+export function getWorkerInfo() {    
+    return sqlGet({
+        table: 'workerInfo',
+        fields: ['workerID', 'firstName', 'lastName', 'email',
+            'phone', 'taxID','address','vdPosControl'],
+    })
+}
+
+export function getExpenseCategories() {    
+    return sqlGet({
+        table: 'expenseCategories',
+        fields: ['expenseCategoryID', 'expenseCategoryName', 'displayOrder',],        
+    })
+}
+
+export function getAllMaintenanceData(ownerID, startDate, endDate) {
+    /*
+    'maintenanceID','date','month','description','amount','houseID',
+    'expenseCategoryId','hours','workerID','comment','vdPosControl',
+    */
+    return sqlGet({
+        table: 'maintenanceRecords',
+        fields: ['maintenanceID', 'date', 'month', 'description', 'amount', 'houseID',
+            'expenseCategoryId', 'hours', 'workerID', 'comment', 'vdPosControl',],
+        whereArray: [{
+            field: 'ownerID',
+            op: '=',
+            val: ownerID || ''
+        },
+            {
+                field: 'date',
+                op: '>=',
+                val: startDate,
+            },
+            {
+                field: 'date',
+                op: '<',
+                val: endDate,
+            }
+        ],
+    })
+}
 /*
 module.exports = {
     getData,

@@ -12,9 +12,9 @@ export default function SideBar(props) {
 
         <ul className="list-unstyled components">
             {
-                controlsGrp.map(comp => {
-                    return <SideBarItem name={ comp.name || comp.link} children={
-                        comp.links.map(link => <li><Link to={ `/${comp.link}/${link.path}`}>{ link.name || link.path}</Link></li>)
+                controlsGrp.map((comp,keyi) => {
+                    return <SideBarItem key={keyi} name={ comp.name || comp.link} children={
+                        comp.links.map((link, ckeyi) => <div key={ckeyi}><Link to={ `/${comp.link}/${link.path}`}>{ link.name || link.path}</Link></div>)
                     }></SideBarItem>
                 })
             }

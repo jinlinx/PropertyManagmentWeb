@@ -94,7 +94,9 @@ export default function EditDropdown(props) {
         </Dropdown>
         }    
         <div className="btn-group">
-            <input className="form-control" value={getCurSelectionText(curSelection)}
+            <input className="form-control"
+                value={getCurSelectionText(curSelection)}
+                onChange={() => { }}
                 onBlur={() => {
                     setShow(false);
                 }}></input>

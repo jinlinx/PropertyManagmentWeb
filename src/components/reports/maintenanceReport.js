@@ -42,11 +42,11 @@ export default function MaintenanceReport(props) {
                     //expenses
                     [...calculatedMaintData.categoryNames].map((cat, key) => {
                         return <tr key={key}>
-                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(calculatedMaintData.categoryTotals[cat])}</td>
+                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td className="tdCenter  tdTotalItalic">{fMoneyformat(calculatedMaintData.categoryTotals[cat])}</td>
                             {
                                 monthes.map((mon, key) => {
                                     const catMon = calculatedMaintData.getCatMonth(cat, mon);
-                                    return <td key={key} class='tdCenter' onClick={() => {
+                                    return <td key={key} className="tdCenter" onClick={() => {
                                         if (catMon.amountCalcParts) {
                                             const msgs = catMon.amountCalcParts.reduce((acc, r) => {
                                                 console.log(r)
