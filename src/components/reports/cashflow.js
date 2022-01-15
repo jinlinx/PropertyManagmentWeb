@@ -186,11 +186,11 @@ export default function CashFlowReport(props) {
                 {
                     [...calculatedMaintData.categoryNames].map((cat, key) => {
                         return <tr key={key}>
-                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td class='tdCenter  tdTotalItalic'>{fMoneyformat(calculatedMaintData.categoryTotals[cat])}</td>
+                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td className="tdCenter  tdTotalItalic">{fMoneyformat(calculatedMaintData.categoryTotals[cat])}</td>
                             {
                                 monthes.map((mon, key) => {
                                     const catMon = calculatedMaintData.getCatMonth(cat, mon);
-                                    return <td key={key} class='tdCenter' onClick={() => {
+                                    return <td key={key} className="tdCenter" onClick={() => {
                                         if (catMon.amountCalcParts) {
                                             console.log('catMon')
                                             console.log(catMon)
@@ -229,12 +229,12 @@ export default function CashFlowReport(props) {
                         </tr>
                     })
                 }
-                <tr><td className='tdLeftSubCategoryHeader'>Sub Total</td><td class='tdCenter  tdTotalItalic'>{
+                <tr><td className='tdLeftSubCategoryHeader'>Sub Total</td><td className="tdCenter  tdTotalItalic">{
                     fMoneyformat(calculatedMaintData.total)
                 }</td>
                     {
                         monthes.map((mon,key) => {
-                            return <td key={key} class='tdCenter tdTotalItalic'>{fMoneyformat((calculatedMaintData.monthlyTotal[mon] || 0)) }</td>
+                            return <td key={key} className="tdCenter tdTotalItalic">{fMoneyformat((calculatedMaintData.monthlyTotal[mon] || 0)) }</td>
                         })
                     }
                 </tr>
@@ -242,8 +242,8 @@ export default function CashFlowReport(props) {
                     <td colSpan={monthes.length+2}></td>
                 </tr>
                 <tr>
-                    <td className='tdLeftSubHeader tdButtomTotalCell'>Net Income</td>
-                    <td class='tdCenter tdTotalBold'>{fMoneyformat((monAddr.total - calculatedMaintData.total))}</td>
+                    <td className="tdLeftSubHeader tdButtomTotalCell">Net Income</td>
+                    <td className="tdCenter tdTotalBold">{fMoneyformat((monAddr.total - calculatedMaintData.total))}</td>
                     {
                         monthes.map((mon,key) => {
                             const incTotal = monAddr.monthTotal[mon] || 0; //paymentsByMonth[mon] || {};

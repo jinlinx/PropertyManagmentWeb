@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import moment from 'moment';
-import { getMaintenanceReport, getPaymnents, getHouseAnchorInfo } from '../aapi';
+import { getMaintenanceReport, getPaymnents, getHouseAnchorInfo, getOwners } from '../aapi';
 import { sumBy, sortBy, pick, uniqBy, uniq } from 'lodash';
-
 export const TOTALCOLNAME = 'coltotal';
 export const fMoneyformat = amt=> {
     if (!amt) return '-';
@@ -32,7 +31,10 @@ const getInitExpenseTableData = () => ({
 export const IncomeExpensesContext = React.createContext();
 
 export function JJDataRoot(props) {
-    const {ownerInfo} = props.dataRootParam;
+    //const {ownerInfo} = props.dataRootParam;
+    const [pageProps, setPageProps] = useState({});
+    const [ownerInfo, setOwnerInfo] = useState({ ownerID: '', ownerName: '' });
+    const [owners, setOwners] = useState([]);
     const [rawExpenseData, setRawExpenseData] = useState([]);
     const [payments, setPayments] = useState([]);
     
@@ -81,6 +83,18 @@ export function JJDataRoot(props) {
             return sortBy(r,['address']);
         });
     }
+
+    useEffect(() => {
+        getOwners().then(owners => {
+            //console.log(owners);
+            if (owners) {
+                setOwners(owners);
+                setOwnerInfo(owners[0] || {});
+            }
+        }).catch(err => {
+            console.log('network failed');
+        })
+    },[]);
     useEffect(() => {
         setMonthes(allMonthes);
 
@@ -172,7 +186,8 @@ export function JJDataRoot(props) {
 
     return <IncomeExpensesContext.Provider value={
         {
-            ownerInfo,
+            pageProps, setPageProps,
+            ownerInfo, setOwnerInfo,
             rawExpenseData,
             payments,
             allMonthes,

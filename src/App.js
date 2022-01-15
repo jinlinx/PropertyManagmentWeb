@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import './bs.css';
 import Propertylist from './components/propertylist';
 import Leaselist from './components/leaselist';
 import WorkerList from './components/workerList';
@@ -10,9 +12,9 @@ import Tenantlist from './components/tenantlist';
 import OwnerList from './components/ownerList';
 import TablePicker from './components/sqlEditor/TablePicker';
 import Developer from './components/Developer';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, NavDropdown, Form, FormControl, Button } from 'react-bootstrap';
 import HomePage from './components/HomePage';
+import HomePageNew from './components/ui/HomePageContents';
 import { getOwners } from './components/aapi';
 import LeftMenu from './components/leftMenu';
 
@@ -62,7 +64,7 @@ function App() {
       setShowPage(who + from);
     }}>{page.desc}</button></td>
   })
-  return <HomePage />;
+  return <HomePageNew />;
   return (
     <div className="App" >
       <table>

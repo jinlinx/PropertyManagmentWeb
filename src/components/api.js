@@ -3,16 +3,26 @@
 console.log(`test process.env.NODE_ENV ${process.env.REACT_APP_ENDPOINT_ENV}`)
 const urlBase = process.env.REACT_APP_ENDPOINT_ENV !== 'dev' ? 'http://192.168.1.41' : 'http://localhost:8081';
 const apiBase=`${urlBase}/pmapi`;
-const getUrl=path => `${apiBase}/${path}`;
+export const getUrl=path => `${apiBase}/${path}`;
 const request = require('superagent');
 const get = require('lodash/get');
 
+function addAuth(op) {
+    const auth = sessionStorage.getItem('loginInfoSess');
+    if (!auth) return op;
+    const loginInfo = JSON.parse(auth);
+    return op.auth(loginInfo.userName, loginInfo.password, { type: 'basic' });
+}
 
 function doGetOp(url) {
-    return request.get(url).send().then(r => get(r, 'body'));
+    const op = request.get(url);
+    addAuth(op);
+    return op.send().then(r => get(r, 'body'));
 }
 export function doPostOp(url, data) {
-    return request.post(getUrl(url)).send(data).then(r => get(r, 'body'));
+    const op = request.post(getUrl(url));
+    addAuth(op);
+    return op.send(data).then(r => get(r, 'body'));
 }
  
 export async function getData(sql) {
@@ -132,6 +142,66 @@ export function updateGoogleSheet(name, id, data)
 
 export function updateCashflowGSheet(data) {
     return updateGoogleSheet('gzprem', '1MO27odjCsxk6MWL0DygubU53hrtt3OB8SEnqjpUHJ-U', data);
+}
+
+
+export function getMinDatesForMaintenance(ownerID) {
+    return sqlGet({
+        table: 'maintenanceRecords',
+        fields: [{
+            op: 'min',
+            field: 'date',
+            name:'minDate'
+        }],
+        whereArray: [{
+            field: 'ownerID',
+            op: '=',
+            val: ownerID || ''
+        }],  
+    })
+}
+
+export function getWorkerInfo() {    
+    return sqlGet({
+        table: 'workerInfo',
+        fields: ['workerID', 'firstName', 'lastName', 'email',
+            'phone', 'taxID','address','vdPosControl'],
+    })
+}
+
+export function getExpenseCategories() {    
+    return sqlGet({
+        table: 'expenseCategories',
+        fields: ['expenseCategoryID', 'expenseCategoryName', 'displayOrder',],        
+    })
+}
+
+export function getAllMaintenanceData(ownerID, startDate, endDate) {
+    /*
+    'maintenanceID','date','month','description','amount','houseID',
+    'expenseCategoryId','hours','workerID','comment','vdPosControl',
+    */
+    return sqlGet({
+        table: 'maintenanceRecords',
+        fields: ['maintenanceID', 'date', 'month', 'description', 'amount', 'houseID',
+            'expenseCategoryId', 'hours', 'workerID', 'comment', 'vdPosControl',],
+        whereArray: [{
+            field: 'ownerID',
+            op: '=',
+            val: ownerID || ''
+        },
+            {
+                field: 'date',
+                op: '>=',
+                val: startDate,
+            },
+            {
+                field: 'date',
+                op: '<',
+                val: endDate,
+            }
+        ],
+    })
 }
 /*
 module.exports = {
