@@ -8,7 +8,7 @@ import { saveToGS } from '../reports/utils/updateGS';
 import { sortBy } from 'lodash';
 import EditDropdown from '../paymentMatch/EditDropdown';
 
-export function YearlyIncomeByHouseReport(props) {
+export function YearlyIncomeByHouseReport(props: any) {
     const jjctx = props.jjctx;
     const {
         payments,
@@ -23,11 +23,17 @@ export function YearlyIncomeByHouseReport(props) {
         //selectedMonths,
     } = jjctx;
 
-    const [selectedMonths, setSelectedMonths] = useState([]);
-    const [state, setState] = useState({});
+    const [selectedMonths, setSelectedMonths] = useState<StringBoolHash>({});
+    const [state, setState] = useState({
+        dspYear: '',
+        curYearSelection: null,
+        curYearOptions: [],
+    });
+
+    interface StringBoolHash { [x: string]: boolean; };
     useEffect(() => {
-        const years = sortBy(monthes.reduce((acc, m) => {
-            const year = m.substr(0, 4);
+        const years = sortBy(monthes.reduce((acc: { yearMap: StringBoolHash; yearAry: string[]; }, m: string) => {
+            const year = m.substring(0, 4);
             if (!acc.yearMap[year]) {
                 acc.yearMap[year] = true;
                 acc.yearAry.push(year);
@@ -51,8 +57,8 @@ export function YearlyIncomeByHouseReport(props) {
     }, [monthes]);
 
     useEffect(() => {
-        const selectedMonths = monthes.reduce((acc, m) => {
-            if (m.substr(0, 4) === state.dspYear) {
+        const selectedMonths = monthes.reduce((acc: { [x: string]: boolean; }, m: string) => {
+            if (m.substring(0, 4) === state.dspYear) {
                 acc[m] = true;
             } else {
                 acc[m] = false;
@@ -65,8 +71,8 @@ export function YearlyIncomeByHouseReport(props) {
     }, [state.dspYear]);
 
     const paymentCalcOpts = {
-        isGoodMonth: m => selectedMonths[m],
-        isGoodHouseId: id => selectedHouses[id],
+        isGoodMonth: (m: string) => selectedMonths[m],
+        isGoodHouseId: (id: string | number) => selectedHouses[id],
         getHouseShareInfo: () => [...houseAnchorInfo],
     };
 
@@ -80,7 +86,7 @@ export function YearlyIncomeByHouseReport(props) {
         var link = document.createElement("a");
         const csvContent = [];
 
-        const fMoneyformat = d => (d || d === 0) ? d.toFixed(2) : '';
+        const fMoneyformat = (d: number) => (d || d === 0) ? d.toFixed(2) : '';
         csvContent.push(['', 'Total', ...monthes]);
         monAddr.houseAry.filter(h => (selectedHouses[h.addressId])).forEach((house, key) => {
             csvContent.push([house.address, fMoneyformat(house.total),
@@ -135,7 +141,7 @@ export function YearlyIncomeByHouseReport(props) {
             document.body.appendChild(link);
             link.click();
             setTimeout(function () {
-                window.URL.revokeObjectURL(link);
+                window.URL.revokeObjectURL(link.href);
             }, 200);
         } else {
             saveToGS(csvContent)
