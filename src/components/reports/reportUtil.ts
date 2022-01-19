@@ -231,6 +231,11 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
         keys: {} as { [id: string]: IMaintenanceMonthCatAmtRec},
     }).data;
     const { isGoodMonth, isGoodHouseId, getHouseShareInfo } = opts;
+    const houseInfo = getHouseShareInfo();
+    const validHouseIds = houseInfo.reduce((acc, h) => {        
+        acc[h.id] = true;
+        return acc;
+    }, {} as { [id: string]: boolean });
     const calcHouseSpreadShare = (r: IMaintenanceMonthCatAmtRec) => {
         const ramount = r.amount;
         if (isGoodHouseId(r.houseID)) {
@@ -249,7 +254,7 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
         }
         if (r.address) return { amount: 0 } as IMaintenanceMonthCatAmtRecWithHousePartCalc; //belong to a not shown house.
         //need to return based on enabled house shares.
-        const houseInfo = getHouseShareInfo();
+        
         if (!houseInfo.length)
             return { ...r, amount: ramount, message: 'Warning: no house found return as is' } as IMaintenanceMonthCatAmtRecWithHousePartCalc;
         const total = Math.round(ramount * 100);
@@ -271,8 +276,10 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
                     info: `${h.address} ${dspAmount} cumulated: ${(acc.amount/100).toFixed(2)} from total ${r.amount.toFixed(2)} of ${r.category}`,
                 });                
             }
+            acc.validHouseIds[h.id] = true;
             return acc;
         }, {
+            validHouseIds: {} as {[id:string]:boolean},
             amount: 0,
             calcInfo: [] as IHousePartsCalcInfo[],
         });
@@ -321,19 +328,25 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
         catMonth.amount += amount;
         if (amount) {
             catMonth.amountCalcParts.push(calcInfo);
-            const cat = getSetIfNull(getSetIfNull(acc.byHouseIdByCat, r.houseID, {}), r.category, {
-                amount: 0,
-                records: [],
-            }) as IMaintenceAmtByHouseByCat;
-            const houseAmount = sum(calcInfo.records.filter(cr => cr.houseID === r.houseID).map(cr => cr.amount));
-            cat.amount += houseAmount;
-            cat.records = cat.records.concat(calcInfo.calcInfo);
+            calcInfo.calcInfo.forEach(ci => {
+                const cat = getSetIfNull(getSetIfNull(acc.byHouseIdByCat, ci.house.houseID, {}), r.category, {
+                    amount: 0,
+                    records: [],
+                }) as IMaintenceAmtByHouseByCat;
+                
+                cat.amount += ci.amount;
+                cat.records.push(ci);
 
-            const hs = getSetIfNull(acc.byHouseIdOnly, r.houseID, { amount: 0, records: [],}) as IMaintenceAmtByHouseByCat;
-            hs.amount += houseAmount;
-            hs.records = hs.records.concat(calcInfo.calcInfo);
+                const hs = getSetIfNull(acc.byHouseIdOnly, ci.house.houseID, { amount: 0, records: [], }) as IMaintenceAmtByHouseByCat;
+                hs.amount += ci.amount;
+                hs.records.push(ci);
+
+                acc.totalExpByHouse += ci.amount;    
+            });
             
-            acc.totalExpByHouse += houseAmount;
+        } else {
+            console.log(`Impossible !!!!!!! for r`);
+            console.log(r);
         }
         catMonth.records.push(r);
         acc.categoryTotals[r.category] = (acc.categoryTotals[r.category] || 0) + amount;
