@@ -78,7 +78,15 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
     const monAddr = getPaymentsByMonthAddress(payments, paymentCalcOpts);
 
     const calculatedMaintData = getMaintenanceData(rawExpenseData, paymentCalcOpts);
-    const [showDetail, setShowDetail] = useState(null);
+
+    interface IShowDetailsData {
+        amount: number;
+        address: string;
+        notes: string;
+        date: string;
+        debugText?: string;
+    }
+    const [showDetail, setShowDetail] = useState<IShowDetailsData[]>(null);
     const [showExpenseDetail, setShowExpenseDetail] = useState(null);
 
     const saveCsvGS = csv => {
@@ -151,7 +159,7 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
             setShowDetail(null);
         }}>
             <Modal.Header closeButton>
-                <Modal.Body>{(showDetail || []).map(d => {
+                <Modal.Body>{(showDetail || [] as IShowDetailsData[]).map(d => {
                     return <div>{d.amount.toFixed(2)} {d.date} {d.address} {d.notes} {d.debugText}</div>
                 })}</Modal.Body>
             </Modal.Header>
@@ -216,7 +224,13 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
                                 }}
                             >{fMoneyformat(house.total)}</td>
                             <td onClick={() => {
-                                setShowDetail(calculatedMaintData.byHouseIdOnly[house.addressId]?.records)
+                                setShowDetail(calculatedMaintData.byHouseIdOnly[house.addressId]?.records.map(r => {
+                                    return {
+                                        address: r.house.address,
+                                        notes: r.info,
+                                        amount: r.amount,
+                                    } as IShowDetailsData;
+                                }))
                             }}>
                                 {fMoneyformat(calculatedMaintData.byHouseIdOnly[house.addressId]?.amount)}
                             </td>
