@@ -200,7 +200,14 @@ export function YearlyIncomeByHouseReport(props) {
                             <td className='tdLeftSubCategoryHeader'>{house.address}</td>
                             <td className='tdCenter  tdTotalItalic'
                                 onClick={() => {
-                                    
+                                    const all = monthes.reduce((acc,mon) => {
+                                        const curHouseMon = (house.monthes[mon] || {});
+                                        if (curHouseMon.records) {
+                                            acc = acc.concat(curHouseMon.records);
+                                        }
+                                        return acc;
+                                    }, []);
+                                    setShowDetail(all)
                                 }}
                             >{fMoneyformat(house.total)}</td>
                             {
@@ -215,9 +222,9 @@ export function YearlyIncomeByHouseReport(props) {
                         </tr>
                     })
                 }
-                <tr><td>Non Rent</td></tr>
+                { false && <tr><td>Non Rent</td></tr>}
                 {
-                    monAddr.nonRentAry.map((nonRent, key) => {
+                    false && monAddr.nonRentAry.map((nonRent, key) => {
                         return <tr key={key}>
                             <td className='tdLeftSubCategoryHeader'>{nonRent.displayName}</td>
                             <td className='tdCenter  tdTotalItalic' onClick={() => setShowDetail(nonRent.records)}>{fMoneyformat(nonRent.total)}</td>
@@ -238,7 +245,7 @@ export function YearlyIncomeByHouseReport(props) {
                     <td className='tdLeftSubCategoryHeader'>Sub Total:
                     </td><td className='tdCenter  tdTotalItalic'>{fMoneyformat(monAddr.total)}</td>
                     {
-                        monthes.map((name, key) => {
+                        false && monthes.map((name, key) => {
                             //const monDbg = paymentsByMonth[name];
                             const mon = monAddr.monthTotal[name];
                             // dbg={ monDbg?.total}

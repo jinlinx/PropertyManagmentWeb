@@ -164,13 +164,16 @@ export function getMaintenanceData(maintenanceRecordsRaw, opts) {
 
         const calcRes = houseInfo.reduce((acc, h) => {
             if (isGoodHouseId(h.id)) {
-                const toAdd = h.isAnchor ? anchorShare : eachShare;
+                const amount = h.isAnchor ? anchorShare : eachShare;
                 const curTotal = acc.amount;
-                acc.amount += toAdd;
+                acc.amount += amount;
+                const dspAmount = (amount / 100.0).toFixed(2);
                 acc.calcInfo.push({
                     curTotal,
                     house: h,
-                    info: `${h.address} ${(toAdd/100.0).toFixed(2)} cumulated: ${(acc.amount/100).toFixed(2)}`,
+                    amount,
+                    dspAmount,
+                    info: `${h.address} ${(amount/100.0).toFixed(2)} cumulated: ${(acc.amount/100).toFixed(2)}`,
                 });                
             }
             return acc;
