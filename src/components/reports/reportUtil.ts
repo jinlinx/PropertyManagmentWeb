@@ -6,7 +6,12 @@ import { TOTALCOLNAME, fMoneyformat } from './rootData';
 
 
 export interface MonthlyHouseData {
-    monthes: {};
+    monthes: {
+        [mon: string]: {
+            amount: number,
+            records: IPayment[],
+        };
+    };
     isNotRent: boolean;
     addressId: string;
     address: string;

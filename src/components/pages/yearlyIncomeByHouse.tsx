@@ -206,8 +206,8 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
                             <td className='tdCenter  tdTotalItalic'
                                 onClick={() => {
                                     const all = monthes.reduce((acc,mon) => {
-                                        const curHouseMon = (house.monthes[mon] || {});
-                                        if (curHouseMon.records) {
+                                        const curHouseMon = house.monthes[mon];
+                                        if (curHouseMon?.records) {
                                             acc = acc.concat(curHouseMon.records);
                                         }
                                         return acc;
@@ -217,9 +217,9 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
                             >{fMoneyformat(house.total)}</td>
                             {
                                 false && monthes.map((mon, key) => {
-                                    const curHouseMon = (house.monthes[mon] || {});
-                                    return < td key={key} className='tdCenter' onClick={() => setShowDetail(curHouseMon.records)}> {
-                                        fMoneyformat(curHouseMon.amount)
+                                    const curHouseMon = house.monthes[mon];
+                                    return < td key={key} className='tdCenter' onClick={() => setShowDetail(curHouseMon?.records)}> {
+                                        fMoneyformat(curHouseMon?.amount)
 
                                     }</td>
                                 })
@@ -235,9 +235,9 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
                             <td className='tdCenter  tdTotalItalic' onClick={() => setShowDetail(nonRent.records)}>{fMoneyformat(nonRent.total)}</td>
                             {
                                 monthes.map((mon, key) => {
-                                    const curMon = (nonRent.monthes[mon] || {});
-                                    return < td key={key} className='tdCenter' onClick={() => setShowDetail(curMon.records)}> {
-                                        fMoneyformat(curMon.amount)
+                                    const curMon = nonRent.monthes[mon];
+                                    return < td key={key} className='tdCenter' onClick={() => setShowDetail(curMon?.records)}> {
+                                        fMoneyformat(curMon?.amount)
 
                                     }</td>
                                 })
