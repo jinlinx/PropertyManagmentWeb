@@ -193,7 +193,7 @@ export function YearlyIncomeByHouseReport(props) {
                 <td className='tdColumnHeader'>Total</td>                
             </thead>
             <tbody><tr>
-                <td className='tdLeftSubHeader' colSpan={monthes.length + 2}>Income</td></tr>
+                <td className='tdLeftSubHeader' colSpan={calculatedMaintData.categoryNames.length + 2}>Income</td></tr>
                 {
                     monAddr.houseAry.filter(h => (selectedHouses[h.addressId])).map((house, key) => {
                         return <tr key={key}>
