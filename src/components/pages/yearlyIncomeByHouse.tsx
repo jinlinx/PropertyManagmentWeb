@@ -215,6 +215,11 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
                                     setShowDetail(all)
                                 }}
                             >{fMoneyformat(house.total)}</td>
+                            <td onClick={() => {
+                                setShowDetail(calculatedMaintData.byHouseIdOnly[house.addressId]?.records)
+                            }}>
+                                {fMoneyformat(calculatedMaintData.byHouseIdOnly[house.addressId]?.amount)}
+                            </td>
                             {
                                 false && monthes.map((mon, key) => {
                                     const curHouseMon = house.monthes[mon];
@@ -257,7 +262,9 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
                             if (!mon && mon !== 0) return <td className='tdCenter  tdTotalItalic' key={key}></td>;
                             return <td className='tdCenter  tdTotalItalic' key={key}>{fMoneyformat(mon)}</td>
                         })
-                    }</tr>
+                    }
+                    <td>{fMoneyformat(calculatedMaintData.totalExpByHouse) }</td>
+                </tr>
 
                 <tr><td className='tdLeftSubHeader' colSpan={monthes.length + 2}>Expenses</td></tr>
 

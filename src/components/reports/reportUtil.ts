@@ -1,6 +1,6 @@
 import { each } from 'bluebird';
 import moment from 'moment';
-import { sortBy } from 'lodash';
+import { sortBy, sum } from 'lodash';
 import { IExpenseData, IHouseInfo, IPayment, IPaymentCalcOpts } from './reportTypes';
 import { TOTALCOLNAME, fMoneyformat } from './rootData';
 
@@ -157,6 +157,11 @@ export interface IMaintenceCatMonData
     amountCalcParts: IMaintenanceMonthCatAmtRecWithHousePartCalc[];
 };
 
+interface IMaintenceAmtByHouseByCat {
+    amount: number;
+    records: IHousePartsCalcInfo[];
+}
+
 export interface IMaintenanceDataByMonthRes {    
     monthByName: {[mon:string]:{ total: number}},
     monthes: string[],
@@ -169,7 +174,16 @@ export interface IMaintenanceDataByMonthRes {
     categoryTotals: {},
     monthlyTotal: {},
     total: 0,    
+    byHouseIdByCat: {
+        [houseId: string]: {
+            [cat: string]: IMaintenceAmtByHouseByCat;
+        }
+    },
+    byHouseIdOnly: {
+        [houseId: string]: IMaintenceAmtByHouseByCat;        
+    }
     getCatMonth: (cat: string, mon: string) => IMaintenceCatMonData;
+    totalExpByHouse: number; //a santity check
 }
 
 
@@ -226,7 +240,7 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
                     {
                         curTotal: ramount,
                         amount: ramount,
-                        dspAmount: (ramount/100).toFixed(2),
+                        dspAmount: ramount.toFixed(2),
                         house: r,
                         info: `${r.address} ==> ${(ramount).toFixed(2)}`,
                     } as IHousePartsCalcInfo
@@ -244,16 +258,17 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
 
         const calcRes = houseInfo.reduce((acc, h) => {
             if (isGoodHouseId(h.id)) {
-                const amount = h.isAnchor ? anchorShare : eachShare;
+                const amount100 = h.isAnchor ? anchorShare : eachShare;
                 const curTotal = acc.amount;
-                acc.amount += amount;
-                const dspAmount = (amount / 100.0).toFixed(2);
+                acc.amount += amount100;
+                const amount = amount100 / 100.0;
+                const dspAmount = amount.toFixed(2);
                 acc.calcInfo.push({
                     curTotal,
                     house: {houseID: h.id, address: h.address},
                     amount,
                     dspAmount,
-                    info: `${h.address} ${(amount/100.0).toFixed(2)} cumulated: ${(acc.amount/100).toFixed(2)}`,
+                    info: `${h.address} ${dspAmount} cumulated: ${(acc.amount/100).toFixed(2)} from total ${r.amount.toFixed(2)} of ${r.category}`,
                 });                
             }
             return acc;
@@ -273,6 +288,11 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
         if (!isGoodMonth(month)) return acc;
         if (!isGoodHouseId(r.houseID) && !r.houseID) return acc;
         
+        const getSetIfNull = (dict, name, def) => {
+            if (!dict[name])
+                dict[name] = def || {};
+            return dict[name];
+        }
         let monthData = acc.monthByName[month];
         if (!monthData) {
             acc.monthByName[month] = {
@@ -299,8 +319,22 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
             cats[month] = catMonth;
         }
         catMonth.amount += amount;
-        if (amount)
+        if (amount) {
             catMonth.amountCalcParts.push(calcInfo);
+            const cat = getSetIfNull(getSetIfNull(acc.byHouseIdByCat, r.houseID, {}), r.category, {
+                amount: 0,
+                records: [],
+            }) as IMaintenceAmtByHouseByCat;
+            const houseAmount = sum(calcInfo.records.filter(cr => cr.houseID === r.houseID).map(cr => cr.amount));
+            cat.amount += houseAmount;
+            cat.records = cat.records.concat(calcInfo.calcInfo);
+
+            const hs = getSetIfNull(acc.byHouseIdOnly, r.houseID, { amount: 0, records: [],}) as IMaintenceAmtByHouseByCat;
+            hs.amount += houseAmount;
+            hs.records = hs.records.concat(calcInfo.calcInfo);
+            
+            acc.totalExpByHouse += houseAmount;
+        }
         catMonth.records.push(r);
         acc.categoryTotals[r.category] = (acc.categoryTotals[r.category] || 0) + amount;
         acc.monthlyTotal[month] = (acc.monthlyTotal[month] || 0) + amount;
@@ -316,6 +350,9 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
         monthlyTotal: {},
         total: 0,
         getCatMonth: null,
+        byHouseIdByCat: {},
+        byHouseIdOnly: {},
+        totalExpByHouse: 0,
     } as IMaintenanceDataByMonthRes);
 
     const sortLowOthers = cats => {
