@@ -1,8 +1,34 @@
 import { each } from 'bluebird';
 import moment from 'moment';
-import sortBy from 'lodash/sortBy';
-import { TOTALCOLNAME,fMoneyformat } from './rootData';
-export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
+import { sortBy } from 'lodash';
+import { IPayment, IPaymentCalcOpts } from './reportTypes';
+import { TOTALCOLNAME, fMoneyformat } from './rootData';
+
+
+export interface MonthlyHouseData {
+    monthes: {};
+    isNotRent: boolean;
+    addressId: string;
+    address: string;
+    displayName: string;
+    records: IPayment[],
+    total: number,
+}
+
+export interface MonthlyPaymentData {
+    monthAry: string[];
+    monthByKey: { [mon: string]: boolean };
+    houseAry: MonthlyHouseData[],
+    houseByKey: { [id: string]: MonthlyHouseData };
+
+    nonRentByKey: { [id: string]: MonthlyHouseData };
+    nonRentAry: MonthlyHouseData[];
+    monthTotal: {},
+    dbgMonthTotalRecords: {},
+    total: number,
+};
+
+export function getPaymentsByMonthAddress(paymentsByMonth: IPayment[], opts: IPaymentCalcOpts): MonthlyPaymentData {
     if (!opts) opts = {
         isGoodMonth: () => true,
         isGoodHouseId: () => true,
@@ -56,7 +82,7 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
                 displayName: isNotRent ? d.paymentTypeName : d.address,
                 records: [],
                 total: 0,
-            };
+            } as MonthlyHouseData;
             catByKey[catId] = addData;
             catAry.push(addData);
         }
@@ -100,7 +126,7 @@ export function getPaymentsByMonthAddress(paymentsByMonth, opts) {
         monthTotal: {},
         dbgMonthTotalRecords: {},
         total: 0,
-    });
+    } as MonthlyPaymentData);
 
     monAddr.monthAry.sort();
     ['houseAry', 'nonRentAry'].forEach(name => {
@@ -159,7 +185,7 @@ export function getMaintenanceData(maintenanceRecordsRaw, opts) {
         if (!houseInfo.length)
             return { ...r, amount: ramount, message:'Warning: no house found return as is' };
         const total = Math.round(ramount * 100);
-        const eachShare = parseInt(total / houseInfo.length);
+        const eachShare = Math.trunc(total / houseInfo.length);
         const anchorShare = total - (eachShare * (houseInfo.length - 1));
 
         const calcRes = houseInfo.reduce((acc, h) => {

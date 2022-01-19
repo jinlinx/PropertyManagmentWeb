@@ -7,8 +7,9 @@ import moment from 'moment';
 import { saveToGS } from '../reports/utils/updateGS';
 import { sortBy } from 'lodash';
 import EditDropdown from '../paymentMatch/EditDropdown';
+import { IIncomeExpensesContextValue } from '../reports/reportTypes';
 
-export function YearlyIncomeByHouseReport(props: any) {
+export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContextValue}) {
     const jjctx = props.jjctx;
     const {
         payments,
@@ -65,9 +66,7 @@ export function YearlyIncomeByHouseReport(props: any) {
             }
             return acc;
         }, {});
-        setSelectedMonths(selectedMonths);
-        console.log('selected months');
-        console.log(selectedMonths)
+        setSelectedMonths(selectedMonths);        
     }, [state.dspYear]);
 
     const paymentCalcOpts = {

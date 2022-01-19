@@ -2,6 +2,14 @@ import React, { useState, useEffect } from 'react';
 import moment from 'moment';
 import { getMaintenanceReport, getPaymnents, getHouseAnchorInfo, getOwners } from '../aapi';
 import { sumBy, sortBy, pick, uniqBy, uniq } from 'lodash';
+import {
+    IPayment, IIncomeExpensesContextValue,
+    IHouseInfo,
+    IDropdownOption,
+    IPageProps,
+    IOwnerInfo,
+    IExpenseData,
+} from './reportTypes';
 export const TOTALCOLNAME = 'coltotal';
 export const fMoneyformat = amt=> {
     if (!amt) return '-';
@@ -28,15 +36,15 @@ const getInitExpenseTableData = () => ({
     categoryNames: [],
 });
 
-export const IncomeExpensesContext = React.createContext();
+export const IncomeExpensesContext = React.createContext({} as IIncomeExpensesContextValue);
 
 export function JJDataRoot(props) {
     //const {ownerInfo} = props.dataRootParam;
-    const [pageProps, setPageProps] = useState({});
+    const [pageProps, setPageProps] = useState<IPageProps>({} as IPageProps);
     const [ownerInfo, setOwnerInfo] = useState({ ownerID: '', ownerName: '' });
-    const [owners, setOwners] = useState([]);
-    const [rawExpenseData, setRawExpenseData] = useState([]);
-    const [payments, setPayments] = useState([]);
+    const [owners, setOwners] = useState<IOwnerInfo[]>([]);
+    const [rawExpenseData, setRawExpenseData] = useState([] as IExpenseData[]);
+    const [payments, setPayments] = useState<IPayment[]>([]);
     
     const [allMonthes, setAllMonths] = useState([]);
     const [allHouses, setAllHouses] = useState([]); //{houseID, address}
@@ -44,8 +52,8 @@ export function JJDataRoot(props) {
     const [houseAnchorInfo, setHouseAnchorInfo] = useState([]);
 
     //month selection states
-    const [monthes, setMonthes] = useState([]);
-    const [curMonthSelection, setCurMonthSelection] = useState({label: ''});
+    const [monthes, setMonthes] = useState<string[]>([]);
+    const [curMonthSelection, setCurMonthSelection] = useState<IDropdownOption>({label: '', value: null});
     const [selectedMonths, setSelectedMonths] = useState({});
     const [selectedHouses, setSelectedHouses] = useState({});
 
@@ -67,7 +75,7 @@ export function JJDataRoot(props) {
         });
     }
 
-    function addHouses(housesAll) {
+    function addHouses(housesAll: IHouseInfo[]) {
         const houses = uniqBy(housesAll.map(h => pick(h, ['houseID', 'address'])), 'houseID').filter(h => h.address);
         setAllHouses(orig => {
             const r = orig.concat(houses).reduce((acc, m) => {
@@ -149,7 +157,7 @@ export function JJDataRoot(props) {
 
 
     const beginReLoadPaymentData = ownerInfo => {
-        getHouseAnchorInfo(ownerInfo).then(r => {
+        getHouseAnchorInfo(ownerInfo).then(r => {            
             setHouseAnchorInfo(r);
         })
         return getPaymnents(ownerInfo).then(r => {
@@ -164,7 +172,7 @@ export function JJDataRoot(props) {
                 if (a.date < b.date) return -1;
                 return 0;
             });
-
+            
             setPayments(r);
             //addMonths(pm.monthNames);
             addMonths(uniq(r.map(r=>r.month)))
@@ -175,7 +183,7 @@ export function JJDataRoot(props) {
     useEffect(() => {
         getMaintenanceReport(ownerInfo).then(d => {
             addMonths(uniq(d.map(r => r.month)));
-            addHouses(d);
+            addHouses(d);            
             setRawExpenseData(d);
         });
         
@@ -184,27 +192,26 @@ export function JJDataRoot(props) {
 
 
 
-    return <IncomeExpensesContext.Provider value={
-        {
-            pageProps, setPageProps,
-            ownerInfo, setOwnerInfo,
-            rawExpenseData,
-            payments,
-            allMonthes,
-            allHouses,
-            houseAnchorInfo,
-            monthes, setMonthes,
-            curMonthSelection, setCurMonthSelection,
-            selectedMonths, setSelectedMonths,
-            selectedHouses, setSelectedHouses,
-            beginReLoadPaymentData,
-            paymentCalcOpts: {
-                isGoodMonth: m => selectedMonths[m],
-                isGoodHouseId: id => selectedHouses[id],
-                getHouseShareInfo: () => [...houseAnchorInfo],
-            },
+    const incomExpCtx: IIncomeExpensesContextValue = {
+        pageProps, setPageProps,
+        ownerInfo, setOwnerInfo,
+        rawExpenseData,
+        payments,
+        allMonthes,
+        allHouses,
+        houseAnchorInfo,
+        monthes, setMonthes,
+        curMonthSelection, setCurMonthSelection,
+        selectedMonths, setSelectedMonths,
+        selectedHouses, setSelectedHouses,
+        beginReLoadPaymentData,
+        paymentCalcOpts: {
+            isGoodMonth: m => selectedMonths[m],
+            isGoodHouseId: id => selectedHouses[id],
+            getHouseShareInfo: () => [...houseAnchorInfo],
         }
-    }>
+    };
+    return <IncomeExpensesContext.Provider value={incomExpCtx}>
         { props.children}
-    </IncomeExpensesContext.Provider>;
+        </IncomeExpensesContext.Provider>;
 }
