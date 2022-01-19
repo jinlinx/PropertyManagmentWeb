@@ -72,7 +72,7 @@ export interface IHouseAnchorInfo {
 export interface IPaymentCalcOpts {
     isGoodMonth: (mon: string) => boolean;
     isGoodHouseId: (mon: string) => boolean;
-    getHouseShareInfo: () => any[];
+    getHouseShareInfo: () => IHouseAnchorInfo[];
 }
 
 export interface IIncomeExpensesContextValue {

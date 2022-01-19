@@ -33,7 +33,26 @@ export async function getModel(name) {
     return doGetOp(`${apiBase}/getModel?name=${name}`);
 }
 
-export async function sqlGet({table, fields, joins, whereArray, groupByArray, order, rowCount, offset}) {
+export interface ISqlGetParams {
+    table: String;
+    fields?: string[] | {
+        op: 'min' | 'max';
+        field: string;
+        name: string;
+    }[];
+    joins?: [];
+    whereArray?: {
+        field: string,
+        op: '=' | '>' | '<' | '>=' | '<=',
+        val: string
+    }[];
+    groupByArray?: [];
+    order?: string[];
+    rowCount?: number;
+    offset?: number;
+}
+export async function sqlGet(param: ISqlGetParams) {
+    const { table, fields, joins, whereArray, groupByArray, order, rowCount, offset } = param;
     // "table":"tenantInfo",
     // "field":["tenantID", "firstName"],
     // joins:[{ table:{col:als}}]
@@ -77,7 +96,7 @@ export function sqlGetTableInfo(table) {
     return doGetOp(`sql/getTableInfo?table=${table}`); 
 }
 
-export function sqlFreeForm(sql, parms) {
+export function sqlFreeForm(sql: string, parms?: any[]) {
     return doPostOp(`sql/freeFormSql`, {
         sql,
         parms,
@@ -99,6 +118,7 @@ const statementSocket = {
 export const statementFuncs = {
     listener: null,
     askCodeListener: null,
+    freeFormMsgListener: null as (msg:any)=>void,
 }
 export function getSocket() {
     return statementSocket.socket;

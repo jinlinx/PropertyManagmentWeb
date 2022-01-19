@@ -1,7 +1,7 @@
 import { sqlFreeForm, doPostOp, sqlGet } from './api';
 import { get } from 'lodash';
-
-
+import { IHouseAnchorInfo } from './reports/reportTypes';
+ 
 export async function checkTenantProcessorPayee({ source, name }) {
     const tnts = await sqlFreeForm(`select tn.tenantID 
                                                      from tenantInfo tn
@@ -106,7 +106,7 @@ export async function getMaintenanceReport(ownerInfo) {
     });    
 }
 
-export async function getHouseAnchorInfo(ownerInfo) {
+export async function getHouseAnchorInfo(ownerInfo): Promise<IHouseAnchorInfo[]> {
     if (!ownerInfo) return [];
     return sqlGet({
         fields: ['houseID','address'],
@@ -122,7 +122,7 @@ export async function getHouseAnchorInfo(ownerInfo) {
                 id: r.houseID,
                 address: r.address,
                 isAnchor: r.address.includes('1633'),
-            }
+            } as IHouseAnchorInfo;
         }).filter(x=>x.address);
     });    
 }

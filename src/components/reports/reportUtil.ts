@@ -1,7 +1,7 @@
 import { each } from 'bluebird';
 import moment from 'moment';
 import { sortBy } from 'lodash';
-import { IPayment, IPaymentCalcOpts } from './reportTypes';
+import { IExpenseData, IHouseInfo, IPayment, IPaymentCalcOpts } from './reportTypes';
 import { TOTALCOLNAME, fMoneyformat } from './rootData';
 
 
@@ -136,13 +136,59 @@ export function getPaymentsByMonthAddress(paymentsByMonth: IPayment[], opts: IPa
     return monAddr;
 }
 
+export interface IMaintenanceMonthCatAmtRec {
+    month: string;
+    amount: number;
+    category: string;
+    address: string;
+    houseID: string;
+    records: IExpenseData[];
+};
 
-export function getMaintenanceData(maintenanceRecordsRaw, opts) {
+export interface IMaintenceCatMonData 
+{
+    amount: number;
+    records: IMaintenanceMonthCatAmtRec[];
+    amountCalcParts: IMaintenanceMonthCatAmtRecWithHousePartCalc[];
+};
+
+export interface IMaintenanceDataByMonthRes {    
+    monthByName: {[mon:string]:{ total: number}},
+    monthes: string[],
+    categoriesByKey: {
+        [cat: string]: {
+            [mon: string]: IMaintenceCatMonData;
+        }
+    },
+    categoryNames: string[],
+    categoryTotals: {},
+    monthlyTotal: {},
+    total: 0,    
+    getCatMonth: (cat: string, mon: string) => IMaintenceCatMonData;
+}
+
+
+export interface IHousePartsCalcInfo {
+    curTotal: number;
+    house: IHouseInfo;
+    amount: number;
+    dspAmount: string;
+    info: string;
+}
+
+export interface IMaintenanceMonthCatAmtRecWithHousePartCalc extends IMaintenanceMonthCatAmtRec {
+    calcInfo: IHousePartsCalcInfo[];
+    message?: string;
+}
+
+export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: IPaymentCalcOpts) {
     if (!opts) opts = {
         isGoodMonth: () => true,
         isGoodHouseId: () => true,
         getHouseShareInfo: () => [],
     };
+
+    
     const maintenanceRecords = maintenanceRecordsRaw.reduce((acc, r) => {
         const key = `${r.month}-${r.houseID}-${r.expenseCategoryName}`;
         let keyData = acc.keys[key];
@@ -154,7 +200,7 @@ export function getMaintenanceData(maintenanceRecordsRaw, opts) {
                 address: r.address,
                 houseID: r.houseID,
                 records: [],
-            };
+            } as IMaintenanceMonthCatAmtRec;
             acc.keys[key] = keyData;
             acc.data.push(keyData);
         }
@@ -162,11 +208,11 @@ export function getMaintenanceData(maintenanceRecordsRaw, opts) {
         keyData.records.push(r);
         return acc;
     }, {
-        data: [],
-        keys:{}
+        data: [] as IMaintenanceMonthCatAmtRec[],
+        keys: {} as { [id: string]: IMaintenanceMonthCatAmtRec},
     }).data;
     const { isGoodMonth, isGoodHouseId, getHouseShareInfo } = opts;
-    const calcHouseSpreadShare = r => {
+    const calcHouseSpreadShare = (r: IMaintenanceMonthCatAmtRec) => {
         const ramount = r.amount;
         if (isGoodHouseId(r.houseID)) {
             return {
@@ -174,16 +220,19 @@ export function getMaintenanceData(maintenanceRecordsRaw, opts) {
                 calcInfo: [
                     {
                         curTotal: ramount,
+                        amount: ramount,
+                        dspAmount: (ramount/100).toFixed(2),
                         house: r,
                         info: `${r.address} ==> ${(ramount).toFixed(2)}`,
-                    }
-            ]};
+                    } as IHousePartsCalcInfo
+                ]
+            } as IMaintenanceMonthCatAmtRecWithHousePartCalc;
         }
-        if (r.address) return { amount: 0 }; //belong to a not shown house.
+        if (r.address) return { amount: 0 } as IMaintenanceMonthCatAmtRecWithHousePartCalc; //belong to a not shown house.
         //need to return based on enabled house shares.
         const houseInfo = getHouseShareInfo();
         if (!houseInfo.length)
-            return { ...r, amount: ramount, message:'Warning: no house found return as is' };
+            return { ...r, amount: ramount, message: 'Warning: no house found return as is' } as IMaintenanceMonthCatAmtRecWithHousePartCalc;
         const total = Math.round(ramount * 100);
         const eachShare = Math.trunc(total / houseInfo.length);
         const anchorShare = total - (eachShare * (houseInfo.length - 1));
@@ -196,7 +245,7 @@ export function getMaintenanceData(maintenanceRecordsRaw, opts) {
                 const dspAmount = (amount / 100.0).toFixed(2);
                 acc.calcInfo.push({
                     curTotal,
-                    house: h,
+                    house: {houseID: h.id, address: h.address},
                     amount,
                     dspAmount,
                     info: `${h.address} ${(amount/100.0).toFixed(2)} cumulated: ${(acc.amount/100).toFixed(2)}`,
@@ -205,13 +254,13 @@ export function getMaintenanceData(maintenanceRecordsRaw, opts) {
             return acc;
         }, {
             amount: 0,
-            calcInfo:[],
+            calcInfo: [] as IHousePartsCalcInfo[],
         });
         return {
             ...r,
             amount: calcRes.amount / 100.0,
             calcInfo: calcRes.calcInfo,
-        }
+        } as IMaintenanceMonthCatAmtRecWithHousePartCalc;
     }
 
     const maintenceData = maintenanceRecords.reduce((acc, r) => {
@@ -261,7 +310,8 @@ export function getMaintenanceData(maintenanceRecordsRaw, opts) {
         categoryTotals: {},
         monthlyTotal: {},
         total: 0,
-    });
+        getCatMonth: null,
+    } as IMaintenanceDataByMonthRes);
 
     const sortLowOthers = cats => {
         const others = 'Others';
@@ -274,10 +324,10 @@ export function getMaintenanceData(maintenanceRecordsRaw, opts) {
     }
 
     maintenceData.categoryNames = sortLowOthers(maintenceData.categoryNames);
-    maintenceData.getCatMonth = (cat, mon) => {
+    maintenceData.getCatMonth = (cat: string, mon:string) => {
         const catMon = maintenceData.categoriesByKey[cat];
-        if (!catMon) return {};
-        return catMon[mon] || {};
+        if (!catMon) return {} as IMaintenceCatMonData;
+        return (catMon[mon] || {}) as IMaintenceCatMonData;
     };
     return maintenceData;
 }
