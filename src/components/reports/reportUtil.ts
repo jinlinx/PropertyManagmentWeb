@@ -186,7 +186,7 @@ export interface IMaintenanceMonthCatAmtRecWithHousePartCalc extends IMaintenanc
     message?: string;
 }
 
-export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: IPaymentCalcOpts) {
+export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: IPaymentCalcOpts): IMaintenanceDataByMonthRes {
     if (!opts) opts = {
         isGoodMonth: () => true,
         isGoodHouseId: () => true,
@@ -268,8 +268,8 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
         } as IMaintenanceMonthCatAmtRecWithHousePartCalc;
     }
 
-    const maintenceData = maintenanceRecords.reduce((acc, r) => {
-        const month = moment(r.month).add(2, 'days').format('YYYY-MM');
+    const maintenceData: IMaintenanceDataByMonthRes = maintenanceRecords.reduce((acc, r) => {
+        const month = r.month.length === 7? r.month:moment(r.month).add(2, 'days').format('YYYY-MM');
         if (!isGoodMonth(month)) return acc;
         if (!isGoodHouseId(r.houseID) && !r.houseID) return acc;
         
