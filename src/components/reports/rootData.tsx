@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactHTML } from 'react';
 import moment from 'moment';
 import { getMaintenanceReport, getPaymnents, getHouseAnchorInfo, getOwners } from '../aapi';
 import { sumBy, sortBy, pick, uniqBy, uniq } from 'lodash';
@@ -40,11 +40,15 @@ const getInitExpenseTableData = () => ({
 
 export const IncomeExpensesContext = React.createContext({} as IIncomeExpensesContextValue);
 
-export function JJDataRoot(props: {children:any}) {
-    //const {ownerInfo} = props.dataRootParam;
-    const [pageProps, setPageProps] = useState<IPageProps>({} as IPageProps);
-    const [ownerInfo, setOwnerInfo] = useState({ ownerID: '', ownerName: '' });
-    const [owners, setOwners] = useState<IOwnerInfo[]>([]);
+export function JJDataRoot(props: {
+    children: any, dataRootParam: {
+        ownerInfo: IOwnerInfo;
+        setOwnerInfo: React.Dispatch<React.SetStateAction<IOwnerInfo>>;
+        owners: IOwnerInfo[];
+    }
+}) {
+    const {ownerInfo, setOwnerInfo, owners} = props.dataRootParam;
+    const [pageProps, setPageProps] = useState<IPageProps>({} as IPageProps);    
     const [rawExpenseData, setRawExpenseData] = useState([] as IExpenseData[]);
     const [payments, setPayments] = useState<IPayment[]>([]);
     
@@ -93,18 +97,7 @@ export function JJDataRoot(props: {children:any}) {
             return sortBy(r,['address']);
         });
     }
-
-    useEffect(() => {
-        getOwners().then(owners => {
-            //console.log(owners);
-            if (owners) {
-                setOwners(owners);
-                setOwnerInfo(owners[0] || {});
-            }
-        }).catch(err => {
-            console.log('network failed');
-        })
-    },[]);
+    
     useEffect(() => {
         setMonthes(allMonthes);
 
@@ -208,6 +201,7 @@ export function JJDataRoot(props: {children:any}) {
         selectedMonths, setSelectedMonths,
         selectedHouses, setSelectedHouses,
         beginReLoadPaymentData,
+        owners,
         paymentCalcOpts: {
             isGoodMonth: m => selectedMonths[m],
             isGoodHouseId: id => selectedHouses[id],

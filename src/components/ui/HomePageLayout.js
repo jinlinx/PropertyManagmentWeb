@@ -5,11 +5,10 @@ import {
     Route,
 } from "react-router-dom";
 import SideBar from './sidebar'
-import { JJDataRoot, IncomeExpensesContext } from '../reports/rootData';
+import { IncomeExpensesContext } from '../reports/rootData';
 export default function HomePageLayout(props) {
     const controlsGrp = props.controlsGrp || [];
-    return <JJDataRoot>
-        <IncomeExpensesContext.Consumer>
+    return <IncomeExpensesContext.Consumer>
             {
                 value => {
                     return <Router>
@@ -44,8 +43,6 @@ export default function HomePageLayout(props) {
                 }
             }
         </IncomeExpensesContext.Consumer>
-
-    </JJDataRoot>
 }
 
 function TopNav() {

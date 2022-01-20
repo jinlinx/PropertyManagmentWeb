@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import HomePageLayout from "./HomePageLayout";
 import { JJDataRoot, IncomeExpensesContext } from '../reports/rootData';    
 
@@ -17,10 +17,26 @@ import ExepenseCategory from '../dataEntry/expenseCategory';
 import ReportList from "../reportlist";
 import Developer from "../Developer";
 import { YearlyMaintenanceReport } from '../pages/yearlyMaintenanceReport';
-import { YearlyIncomeByHouseReport} from '../pages/yearlyIncomeByHouse';
+import { YearlyIncomeByHouseReport } from '../pages/yearlyIncomeByHouse';
+import { IOwnerInfo } from '../reports/reportTypes';
+import { getOwners } from '../aapi';
 
-export default function HomePageContents() {    
-    return <JJDataRoot>
+
+export default function HomePageContents() { 
+    const [owners, setOwners] = useState<IOwnerInfo[]>([]);
+    const [ownerInfo, setOwnerInfo] = useState<IOwnerInfo>({ ownerID: '', ownerName: '', shortName: '', vdPosControl: '' });
+    useEffect(() => {
+        getOwners().then(owners => {
+            //console.log(owners);
+            if (owners) {
+                setOwners(owners);
+                setOwnerInfo(owners[0] || {});
+            }
+        }).catch(err => {
+            console.log('network failed');
+        })
+    }, []);
+    return <JJDataRoot dataRootParam={{owners, ownerInfo, setOwnerInfo}}>
         <IncomeExpensesContext.Consumer>
             {
                 value => {
@@ -32,9 +48,9 @@ export default function HomePageContents() {
                                 { path: 'cashFlowSummary', name: 'CashFlow', element: <CashFlowReport jjctx={value} /> },
                                 { path: 'maintenanceReport', element: <MaintenanceReport jjctx={value} /> },
                                 { path: 'paymentReport', element: <PaymentReport jjctx={value} /> },
-                                { path: 'workerCompensationReport', element: <MonthlyComp compPrm={value.ownerInfo}></MonthlyComp> },
+                                { path: 'workerCompensationReport', element: <MonthlyComp></MonthlyComp> },
                                 { path: 'yearlyMaintenanceReport', element: <YearlyMaintenanceReport jjctx={value}></YearlyMaintenanceReport> },
-                                { path: 'YearlyIncomeByHouseReport', element: <YearlyIncomeByHouseReport jjctx={value} ownerInfo={value.ownerInfo}></YearlyIncomeByHouseReport>}
+                                { path: 'YearlyIncomeByHouseReport', element: <YearlyIncomeByHouseReport jjctx={value}></YearlyIncomeByHouseReport>}
                             ]
                         },
                         {
@@ -56,7 +72,7 @@ export default function HomePageContents() {
                                 { path: 'workerCompList', element: <WorkerCompList pageState={value}></WorkerCompList> },
                                 { path: 'expenseCategory', element: <ExepenseCategory pageState={value}></ExepenseCategory> },
                                 { path: 'developer', element: <div><Developer /></div> },
-                                { path: 'importPayments', element: <ReportList pageState={value} /> },
+                                { path: 'importPayments', element: <ReportList /> },
                             ]
                         },                        
                         //{ path: 'oldapp', element: <div><AppOld /></div> },                                                

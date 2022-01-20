@@ -185,7 +185,7 @@ function App() {
                     </Row>
                 </Container>
             </div>
-            <JJDataRoot dataRootParam ={{ownerInfo}}>
+            <JJDataRoot dataRootParam ={{ownerInfo, owners, setOwnerInfo}}>
 
             
                 <div className='divMain'>

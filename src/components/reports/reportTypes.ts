@@ -39,6 +39,8 @@ export interface IPageProps {
 export interface IOwnerInfo {
     ownerID: string;
     ownerName: string;
+    shortName: string;
+    vdPosControl: string;
 }
 
 export interface IHouseInfo {
@@ -113,6 +115,7 @@ export interface IIncomeExpensesContextValue {
     setPageProps: (a: IPageProps) => void;
     ownerInfo: IOwnerInfo;
     setOwnerInfo: (a: IOwnerInfo) => void;
+    owners: IOwnerInfo[];
     rawExpenseData: IExpenseData[];
     payments: IPayment[];
     allMonthes: string[];

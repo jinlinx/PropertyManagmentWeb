@@ -17,6 +17,7 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
         //paymentCalcOpts,
 
         ownerInfo,
+        setOwnerInfo,
         houseAnchorInfo,
 
         //selectedMonths,
