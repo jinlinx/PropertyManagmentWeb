@@ -1,20 +1,68 @@
 import React, { useState, useEffect } from "react";
 import { getMinDatesForMaintenance, getWorkerInfo, getAllMaintenanceData, getExpenseCategories } from '../api';
 import moment from 'moment';
-import EditDropdown from '../paymentMatch/EditDropdown';
+import EditDropdown, {IOptions} from '../paymentMatch/EditDropdown';
 import { sortBy } from "lodash";
-export function YearlyMaintenanceReport(props) {
-    const { ownerInfo } = props;
-    const [state, setState] = useState({
-        curYearSelection: { label: 'NA', value: 'NA' },
+import {
+    IIncomeExpensesContextValue, IWorkerInfo,
+    IMaintenanceRawData,
+} from '../reports/reportTypes';
+
+
+interface IWithTotal {
+    total: number;
+}
+interface IHashWithTotal {
+    [catOrWkr: string]: IWithTotal;
+}
+
+interface IByWorkerByCat {
+    byWorker: {
+        [wkr: string]: {
+            [cat: string]: {
+                amount: number;
+            };
+        };
+    };
+    byWorkerTotal: IHashWithTotal;
+    byCats: IHashWithTotal;
+    total: number;
+    workerIds: string[];
+    workerIdHashFind: { [id: string]: boolean };
+    catIds: string[];
+    catIdHashFind: { [id: string]: boolean };
+}
+
+interface IYearlyMaintenanceReportState {
+    curYearSelection: IOptions;
+    curYearOptions: IOptions[];
+    expenseCategories: { id: string, name: string; }[];
+    expenseCategoriesMapping: { [id: string]: string };
+    workerInfos: IWorkerInfo[];
+    workerInfoMapping: { [id: string]: IWorkerInfo };
+    showWorkers: { [id: string]: boolean };
+    showCategories: {[cat:string]:boolean};
+    rawData: IMaintenanceRawData[];
+    dspYear: string,
+    byWorkerByCat: IByWorkerByCat;
+    ownerID: string;
+}
+
+export function YearlyMaintenanceReport(props: { jjctx: IIncomeExpensesContextValue }) {
+    const { ownerInfo } = props.jjctx;
+    const [state, setState] = useState<IYearlyMaintenanceReportState>({
+        curYearSelection: { label: 'NA', value: 'NA' } as IOptions,
         curYearOptions: [],
-        expenseCategories:[],
+        expenseCategories: [],
         expenseCategoriesMapping: {},
-        workerInfos:[],
+        workerInfos: [],
         workerInfoMapping: {},
         showWorkers: {},
         showCategories: {},
-        rawData:[],
+        rawData: [],
+        dspYear: '',
+        byWorkerByCat: {} as IByWorkerByCat,
+        ownerID: '',
     });
     useEffect(() => {
         if (!ownerInfo.ownerID) {
@@ -26,7 +74,7 @@ export function YearlyMaintenanceReport(props) {
                 const { minDate } = res.rows[0];
                 const fromYYYY = moment(minDate).format('YYYY');
                 const currentYYYY = moment().format('YYYY');
-                const years = [];
+                const years = [] as string[];
                 for (let i = parseInt(currentYYYY); i >= parseInt(fromYYYY); i--) {
                     years.push(i.toString());
                 }
@@ -59,12 +107,12 @@ export function YearlyMaintenanceReport(props) {
             const expenseCategoriesMapping = expenseCategories.reduce((acc, r) => {
                 acc[r.id] = r.name;
                 return acc;
-            }, {});
+            }, {} as {[id:string]:string});
 
             const showCategories = exp.rows.reduce((acc, r) => {
                 acc[r.expenseCategoryID] = true;
                 return acc;
-            }, {});
+            }, {} as {[id:string]:boolean});
                         
             setState(prev=>({
                 ...prev,
@@ -79,11 +127,11 @@ export function YearlyMaintenanceReport(props) {
             const workerInfoMapping = wkrs.rows.reduce((acc, r) => {
                 acc[r.workerID] = r;
                 return acc;
-            }, {});
+            }, {} as { [id: string]: IWorkerInfo });
             const showWorkers = wkrs.rows.reduce((acc, r) => {
                 acc[r.workerID] = true;
                 return acc;
-            }, {});
+            }, {} as {[id:string]:boolean});
             setState(prev=>({
                 ...prev,
                 workerInfos: wkrs.rows,
@@ -104,9 +152,9 @@ export function YearlyMaintenanceReport(props) {
         formatData(state, setState);
     }, [state.rawData, state.showCategories]);
 
-    let names = [];
-    let categoryNames = [];
-    if (state.byWorkerByCat) {
+    let names: { id: string; name: string; }[] = [];
+    let categoryNames: { id: string; name: string; }[] = [];
+    if (state.byWorkerByCat && state.byWorkerByCat.workerIds) {
         names = state.byWorkerByCat.workerIds.map(id => {
             const wi = state.workerInfoMapping[id];
             if (!wi) {
@@ -121,7 +169,7 @@ export function YearlyMaintenanceReport(props) {
                 }
             }
         });
-        names = sortBy(names, 'name');
+        names = sortBy(names, 'name') as { id: string; name: string;}[];
 
         categoryNames = state.byWorkerByCat.catIds.map(id => {
             const name = state.expenseCategoriesMapping[id] || id;            
@@ -133,7 +181,7 @@ export function YearlyMaintenanceReport(props) {
     }
     
 
-    const amtDsp = amt => {
+    const amtDsp = (amt: number) => {
         if (!amt) return 0;
         return amt.toFixed(2);
     }
@@ -143,21 +191,21 @@ export function YearlyMaintenanceReport(props) {
         setCurSelection: s => {
             setState({
                 ...state,
-                dspYear: s?.value,
+                dspYear: s?.value || '',
                 curYearSelection: s || {},
             })
         },
         getCurSelectionText: o => o.label || '',
         options: state.curYearOptions,
-        setOptions: null,
-        loadOptions: () => [],
+        setOptions: ()=>{},
+        loadOptions: async () => [],
     }}></EditDropdown>
         <div>
             <div className="container">
             {
                 state.expenseCategories.map((exp,keyi) => {
                     return <>
-                        <input type="checkbox" class="form-check-input" id="exampleCheck1"
+                        <input type="checkbox" className="form-check-input" id="exampleCheck1"
                             checked={state.showCategories[exp.id]}
                             onClick={() => {
                                 setState(prev => ({
@@ -199,7 +247,7 @@ export function YearlyMaintenanceReport(props) {
                                         }</td>
                                     })
                                 }
-                                <td>{amtDsp(state.byWorkerByCat.byWorker[n.id].total)}</td>
+                                <td>{amtDsp(state.byWorkerByCat.byWorkerTotal[n.id].total)}</td>
                             </tr>
                         })
                     }
@@ -222,7 +270,7 @@ export function YearlyMaintenanceReport(props) {
     </div>
 }
 
-function getDataForYYYY(state, setState) {
+function getDataForYYYY(state: IYearlyMaintenanceReportState, setState: React.Dispatch<React.SetStateAction<IYearlyMaintenanceReportState>>) {
     const { dspYear, ownerID } = state;
     if (!dspYear) return;
     const m = moment(dspYear, 'YYYY');
@@ -242,9 +290,9 @@ function getDataForYYYY(state, setState) {
 }
 
 
-function formatData(state, setState) {
+function formatData(state: IYearlyMaintenanceReportState, setState: React.Dispatch<React.SetStateAction<IYearlyMaintenanceReportState>>) {
     const dataRows = state.rawData;
-    const getSet = (obj, id, init) => {
+    const getSet = (obj: any, id: string, init: object) => {
         let r = obj[id];
         if (!r) {
             r = init || {};
@@ -264,16 +312,18 @@ function formatData(state, setState) {
             acc.catIdHashFind[d.expenseCategoryId] = true;
             acc.catIds.push(d.expenseCategoryId);
         }
-        const wkr = getSet(acc.byWorker, d.workerID);
+        const wkr = getSet(acc.byWorker, d.workerID, {});
         const exp = getSet(wkr, d.expenseCategoryId, {
             amount: 0,
             items: [],
         });
         exp.amount += d.amount;
         exp.items.push(d);
-        wkr.total = (wkr.total || 0) + d.amount;
 
-        const byCats = getSet(acc.byCats, d.expenseCategoryId, { total: 0 });
+        const wkrTotal = getSet(acc.byWorkerTotal, d.workerID, {total: 0}) as IWithTotal;
+        wkrTotal.total += d.amount;
+
+        const byCats = getSet(acc.byCats, d.expenseCategoryId, { total: 0 }) as IWithTotal;
         byCats.total += d.amount;
         acc.total += d.amount;
         return acc;
@@ -281,11 +331,12 @@ function formatData(state, setState) {
         byWorker: {},
         byCats: {},
         total: 0,
-        workerIds: [],
+        workerIds: [] as string[],
         workerIdHashFind: {},
         catIds: [],
         catIdHashFind: {},
-    });
+        byWorkerTotal: {},
+    } as IByWorkerByCat);
     setState(prev => ({
         ...prev,
         byWorkerByCat,

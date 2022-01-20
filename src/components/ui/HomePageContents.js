@@ -33,7 +33,7 @@ export default function HomePageContents() {
                                 { path: 'maintenanceReport', element: <MaintenanceReport jjctx={value} /> },
                                 { path: 'paymentReport', element: <PaymentReport jjctx={value} /> },
                                 { path: 'workerCompensationReport', element: <MonthlyComp compPrm={value.ownerInfo}></MonthlyComp> },
-                                { path: 'yearlyMaintenanceReport', element: <YearlyMaintenanceReport ownerInfo={value.ownerInfo}></YearlyMaintenanceReport> },
+                                { path: 'yearlyMaintenanceReport', element: <YearlyMaintenanceReport jjctx={value}></YearlyMaintenanceReport> },
                                 { path: 'YearlyIncomeByHouseReport', element: <YearlyIncomeByHouseReport jjctx={value} ownerInfo={value.ownerInfo}></YearlyIncomeByHouseReport>}
                             ]
                         },

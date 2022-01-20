@@ -1,3 +1,8 @@
+import {
+    IExpenseCategory,
+    IWorkerInfo,
+    IMaintenanceRawData,
+} from './reports/reportTypes';
 //import { get } from 'superagent';
 //const urlBase = 'http://localhost:8081';
 console.log(`test process.env.NODE_ENV ${process.env.REACT_APP_ENDPOINT_ENV}`)
@@ -6,6 +11,8 @@ const apiBase=`${urlBase}/pmapi`;
 export const getUrl= (path: string) => `${apiBase}/${path}`;
 const request = require('superagent');
 const get = require('lodash/get');
+
+
 
 function addAuth(op: any) {
     const auth = sessionStorage.getItem('loginInfoSess');
@@ -190,7 +197,7 @@ export function getMinDatesForMaintenance(ownerID:string) {
     })
 }
 
-export function getWorkerInfo() {    
+export function getWorkerInfo(): Promise<{ rows: IWorkerInfo[]}>{    
     return sqlGet({
         table: 'workerInfo',
         fields: ['workerID', 'firstName', 'lastName', 'email',
@@ -198,14 +205,14 @@ export function getWorkerInfo() {
     })
 }
 
-export function getExpenseCategories() {    
+export function getExpenseCategories(): Promise<{ rows: IExpenseCategory[]}>{    
     return sqlGet({
         table: 'expenseCategories',
         fields: ['expenseCategoryID', 'expenseCategoryName', 'displayOrder',],        
     })
 }
 
-export function getAllMaintenanceData(ownerID:string, startDate:string, endDate:string) {
+export function getAllMaintenanceData(ownerID: string, startDate: string, endDate: string): Promise<{ rows: IMaintenanceRawData[]}> {
     /*
     'maintenanceID','date','month','description','amount','houseID',
     'expenseCategoryId','hours','workerID','comment','vdPosControl',

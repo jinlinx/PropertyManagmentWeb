@@ -63,6 +63,23 @@ export interface IExpenseData {
     month: string;
 }
 
+export interface IExpenseCategory {
+    expenseCategoryID: string;
+    expenseCategoryName: string;
+    displayOrder: string;
+}
+
+export interface IWorkerInfo {
+    workerID: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    taxID: string;
+    address: string;
+    vdPosControl: string;
+}
+
 export interface IHouseAnchorInfo {
     address: string;
     id: string;
@@ -73,6 +90,20 @@ export interface IPaymentCalcOpts {
     isGoodMonth: (mon: string) => boolean;
     isGoodHouseId: (mon: string) => boolean;
     getHouseShareInfo: () => IHouseAnchorInfo[];
+}
+
+export interface IMaintenanceRawData {
+    maintenanceID: string;
+    date: string;
+    month: string;
+    description: string;
+    amount: number; 
+    houseID: string;
+    expenseCategoryId: string;
+    hours: string;
+    workerID: string;
+    comment: string;
+    vdPosControl: string;
 }
 
 export type IStringBoolMap = { [id: string]: boolean };
