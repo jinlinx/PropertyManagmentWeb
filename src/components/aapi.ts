@@ -1,31 +1,32 @@
 import { sqlFreeForm, doPostOp, sqlGet } from './api';
 import { get } from 'lodash';
-import { IHouseAnchorInfo } from './reports/reportTypes';
- 
-export async function checkTenantProcessorPayee({ source, name }) {
-    const tnts = await sqlFreeForm(`select tn.tenantID 
-                                                     from tenantInfo tn
-                                                     inner join payerTenantMapping ptn on tn.tenantID = ptn.tenantID
-                                                      where ptn.name=? and ptn.source=?`,
-        [name, source]);
-    const existing = get(tnts, '0.tenantID');
-    return existing;
+import {
+    IHouseAnchorInfo, IOwnerInfo,
+    IExpenseData,
+    IHouseInfo,
+    IPayment,
+} from './reports/reportTypes';
+
+
+export interface ITenantProcessorPayeeMappingObj {
+    source: string;
+    name: string;
+    tenantID: string;
 }
-
-
-export async function saveTenantProcessorPayeeMapping({ source, name, tenantID }) {
+export async function saveTenantProcessorPayeeMapping(prms: ITenantProcessorPayeeMappingObj) {
+    const { source, name, tenantID } = prms;
     const parms = [tenantID, name, source];
     const exists = await sqlFreeForm(`select 1 from payerTenantMapping where tenantID=? and name=? and source=?`, parms);
     if (exists.length) return;
     await sqlFreeForm(`insert into payerTenantMapping(tenantID, name, source) values(?,?,?)`,parms);
 }
 
-export async function getTenants(firstName, lastName) {
+export async function getTenants(firstName: string, lastName: string) {
     const res = await sqlFreeForm(`select tenantID, firstName, lastName from tenantInfo 
         where firstName like ? or lastName like ?`, [`%${firstName}%`, `%${lastName}%`]);
     return res;
 }
-export async function getHouses(address) {
+export async function getHouses(address: string) {
     const houses = await sqlFreeForm(`select houseID,address,city,state
                                                      from houseInfo                                                     
                                                       where address like ?`,
@@ -33,7 +34,7 @@ export async function getHouses(address) {
     return houses;
 }
 
-export async function getLeases(houseID, leaseComment='') {
+export async function getLeases(houseID: string, leaseComment='') {
     const leases = await sqlFreeForm(`select leaseID, deposit, endDate, startDate, houseID, comment, monthlyRent
                                                      from leaseInfo                                                     
                                                       where houseID =? and comment like ?`,
@@ -41,7 +42,7 @@ export async function getLeases(houseID, leaseComment='') {
     return leases;
 }
 
-export async function getLeaseByTenant(tenantID) {
+export async function getLeaseByTenant(tenantID: string) {
     const leaseTenants = await sqlFreeForm(`select l.leaseID, l.deposit, l.endDate, l.startDate, h.houseID, l.comment, l.monthlyRent,
         h.address, h.city, h.state
                                                      from leaseInfo l
@@ -51,7 +52,7 @@ export async function getLeaseByTenant(tenantID) {
     return leaseTenants;
 }
 
-export async function createLeaseTenantLink(leaseID, tenantID) {
+export async function createLeaseTenantLink(leaseID: string, tenantID: string) {
     const parms = [leaseID, tenantID];
     const existing = await sqlFreeForm(`select 1 from leaseTenantInfo where leaseID=? and tenantId=?`, parms);
     if (!existing.length) {
@@ -59,10 +60,10 @@ export async function createLeaseTenantLink(leaseID, tenantID) {
     }
 }
 
-export async function deletePaymentImport(id) {
+export async function deletePaymentImport(id: string) {
     sqlFreeForm(`update importPayments set deleted='1' where id=? `, [id])
 }
-export async function linkPayments(data) {
+export async function linkPayments(data: any) {
     return doPostOp('misc/matchPayments', data);
 }
 
@@ -84,7 +85,7 @@ export async function getOwners() {
     return sqlFreeForm(`select * from ownerInfo`);
 }
 
-export async function getMaintenanceReport(ownerInfo) {
+export async function getMaintenanceReport(ownerInfo: IOwnerInfo): Promise<IExpenseData[]> {
     if (!ownerInfo) return [];
     return sqlGet({
         //fields:['month', 'houseID','address', {op:'sum', field:'amount', name:'amount'},'expenseCategoryName','displayOrder'],
@@ -96,7 +97,7 @@ export async function getMaintenanceReport(ownerInfo) {
             val: ownerInfo.ownerID || ''
         }],
         //groupByArray: [{ field: 'month' }, { field: 'houseID' }, { field: 'address' }, { field: 'expenseCategoryID' }, { field: 'expenseCategoryName'},{field:'displayOrder'}]
-    }).then(r=>{
+    }).then((r: { rows: IExpenseData[]})=>{
         return r.rows.map(r=>{
             return {
                 ...r,
@@ -106,7 +107,7 @@ export async function getMaintenanceReport(ownerInfo) {
     });    
 }
 
-export async function getHouseAnchorInfo(ownerInfo): Promise<IHouseAnchorInfo[]> {
+export async function getHouseAnchorInfo(ownerInfo: IOwnerInfo): Promise<IHouseAnchorInfo[]> {
     if (!ownerInfo) return [];
     return sqlGet({
         fields: ['houseID','address'],
@@ -116,7 +117,7 @@ export async function getHouseAnchorInfo(ownerInfo): Promise<IHouseAnchorInfo[]>
             op: '=',
             val: ownerInfo.ownerID || ''
         }],        
-    }).then(r => {
+    }).then((r: { rows: IHouseInfo[]}) => {
         return r.rows.map(r => {
             return {
                 id: r.houseID,
@@ -128,7 +129,7 @@ export async function getHouseAnchorInfo(ownerInfo): Promise<IHouseAnchorInfo[]>
 }
 
 // Used by cashflow
-export async function getPaymnents(ownerInfo) {
+export async function getPaymnents(ownerInfo: IOwnerInfo) : Promise<IPayment[]> {
     if (!ownerInfo) return [];
     return sqlGet({
         table:'rentPaymentInfo',
@@ -137,7 +138,7 @@ export async function getPaymnents(ownerInfo) {
             op: '=',
             val: ownerInfo.ownerID || ''
         }]
-    }).then(r=>{
+    }).then((r: {rows:IPayment[]})=>{
         return r.rows.map(r=>{
             return {
                 ...r,

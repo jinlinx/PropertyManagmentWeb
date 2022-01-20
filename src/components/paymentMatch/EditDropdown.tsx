@@ -2,10 +2,28 @@ import React, { useState, useEffect, createRef } from 'react';
 import { Table, Form, DropdownButton, Dropdown, Button, Toast, InputGroup, ButtonGroup } from 'react-bootstrap';
 import { get } from 'lodash';
 
+export interface IOptions {
+    label: string;
+    value: string | null;
+}
 
-export default function EditDropdown(props) {
+export interface IPropContext {
+    context: {
+        options: IOptions[];
+        loadOptions: (starts: string) => Promise<IOptions[]>;
+        setOptions: (opt:IOptions[])=> void;
+        getCurSelectionText: (cur: IOptions) => string;
+        curSelection: IOptions;
+        setCurSelection: (sel: IOptions) => void;
+        disabled: boolean;
+        MAXITEMS?: number;
+    }
+}
+
+export default function EditDropdown(props: IPropContext) {
     const {
-        options, loadOptions,
+        options,
+        loadOptions,
         setOptions,
         getCurSelectionText,
         curSelection, setCurSelection,
@@ -13,7 +31,7 @@ export default function EditDropdown(props) {
         MAXITEMS = 20,
     } = props.context;
 
-    const selTextRef = createRef();
+    const selTextRef = createRef<HTMLInputElement>();
     const [show, setShow] = useState(false);
     const dropdownShowClassName = show ? "dropdown-menu show" : "dropdown-menu";
     return <div>
@@ -34,7 +52,8 @@ export default function EditDropdown(props) {
                         if (e.key !== 'Tab' && e.key !== 'Home') {
                             setShow(true);
                             e.preventDefault();
-                            const { selectionStart, selectionEnd } = e.target
+                            const { selectionStart } = e.target as any;
+                            
 
                             const starts = (curSelection.label || '').substring(0, selectionStart) + (e.key.length === 1 ? e.key : '');
                                               

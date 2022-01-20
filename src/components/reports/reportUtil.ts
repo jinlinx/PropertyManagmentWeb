@@ -1,4 +1,3 @@
-import { each } from 'bluebird';
 import moment from 'moment';
 import { sortBy, sum } from 'lodash';
 import { IExpenseData, IHouseInfo, IPayment, IPaymentCalcOpts } from './reportTypes';
@@ -23,14 +22,20 @@ export interface MonthlyHouseData {
 export interface MonthlyPaymentData {
     monthAry: string[];
     monthByKey: { [mon: string]: boolean };
-    houseAry: MonthlyHouseData[],
+    houseAry: MonthlyHouseData[];
     houseByKey: { [id: string]: MonthlyHouseData };
 
     nonRentByKey: { [id: string]: MonthlyHouseData };
     nonRentAry: MonthlyHouseData[];
-    monthTotal: {},
-    dbgMonthTotalRecords: {},
-    total: number,
+    monthTotal: {
+        [mon: string]: number;
+    };
+    dbgMonthTotalRecords: {
+        [mon: string]: IPayment[];
+    };
+    total: number;
+
+    [houseAry:string]: any;
 };
 
 export function getPaymentsByMonthAddress(paymentsByMonth: IPayment[], opts: IPaymentCalcOpts): MonthlyPaymentData {
@@ -171,8 +176,12 @@ export interface IMaintenanceDataByMonthRes {
         }
     },
     categoryNames: string[],
-    categoryTotals: {},
-    monthlyTotal: {},
+    categoryTotals: {
+        [cat: string]: number;
+    },
+    monthlyTotal: {
+        [mon: string]: number;
+    },
     total: 0,    
     byHouseIdByCat: {
         [houseId: string]: {
@@ -182,7 +191,7 @@ export interface IMaintenanceDataByMonthRes {
     byHouseIdOnly: {
         [houseId: string]: IMaintenceAmtByHouseByCat;        
     }
-    getCatMonth: (cat: string, mon: string) => IMaintenceCatMonData;
+    getCatMonth: ((cat: string, mon: string) => IMaintenceCatMonData);
     totalExpByHouse: number; //a santity check
 }
 
@@ -295,7 +304,7 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
         if (!isGoodMonth(month)) return acc;
         if (!isGoodHouseId(r.houseID) && !r.houseID) return acc;
         
-        const getSetIfNull = (dict, name, def) => {
+        const getSetIfNull = (dict: {[id:string]:object}, name: string, def: object|null) => {
             if (!dict[name])
                 dict[name] = def || {};
             return dict[name];
@@ -329,7 +338,7 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
         if (amount) {
             catMonth.amountCalcParts.push(calcInfo);
             calcInfo.calcInfo.forEach(ci => {
-                const cat = getSetIfNull(getSetIfNull(acc.byHouseIdByCat, ci.house.houseID, {}), r.category, {
+                const cat = getSetIfNull(getSetIfNull(acc.byHouseIdByCat, ci.house.houseID, {}) as {[id:string]:object}, r.category, {
                     amount: 0,
                     records: [],
                 }) as IMaintenceAmtByHouseByCat;
@@ -362,13 +371,17 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
         categoryTotals: {},
         monthlyTotal: {},
         total: 0,
-        getCatMonth: null,
+        getCatMonth: () => ({
+            amount: 0,
+            amountCalcParts: [],
+            records:[],
+        }),
         byHouseIdByCat: {},
         byHouseIdOnly: {},
         totalExpByHouse: 0,
     } as IMaintenanceDataByMonthRes);
 
-    const sortLowOthers = cats => {
+    const sortLowOthers = (cats: string[]) => {
         const others = 'Others';
         const res = cats.filter(k => k !== others);
         res.sort();

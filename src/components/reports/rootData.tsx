@@ -9,9 +9,11 @@ import {
     IPageProps,
     IOwnerInfo,
     IExpenseData,
+    IHouseAnchorInfo,
+    IStringBoolMap,
 } from './reportTypes';
 export const TOTALCOLNAME = 'coltotal';
-export const fMoneyformat = amt=> {
+export const fMoneyformat = (amt:number)=> {
     if (!amt) return '-';
     const formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -38,7 +40,7 @@ const getInitExpenseTableData = () => ({
 
 export const IncomeExpensesContext = React.createContext({} as IIncomeExpensesContextValue);
 
-export function JJDataRoot(props) {
+export function JJDataRoot(props: {children:any}) {
     //const {ownerInfo} = props.dataRootParam;
     const [pageProps, setPageProps] = useState<IPageProps>({} as IPageProps);
     const [ownerInfo, setOwnerInfo] = useState({ ownerID: '', ownerName: '' });
@@ -46,19 +48,19 @@ export function JJDataRoot(props) {
     const [rawExpenseData, setRawExpenseData] = useState([] as IExpenseData[]);
     const [payments, setPayments] = useState<IPayment[]>([]);
     
-    const [allMonthes, setAllMonths] = useState([]);
-    const [allHouses, setAllHouses] = useState([]); //{houseID, address}
+    const [allMonthes, setAllMonths] = useState<string[]>([]);
+    const [allHouses, setAllHouses] = useState<IHouseInfo[]>([]); //{houseID, address}
 
-    const [houseAnchorInfo, setHouseAnchorInfo] = useState([]);
+    const [houseAnchorInfo, setHouseAnchorInfo] = useState<IHouseAnchorInfo[]>([]);
 
     //month selection states
     const [monthes, setMonthes] = useState<string[]>([]);
-    const [curMonthSelection, setCurMonthSelection] = useState<IDropdownOption>({label: '', value: null});
-    const [selectedMonths, setSelectedMonths] = useState({});
-    const [selectedHouses, setSelectedHouses] = useState({});
+    const [curMonthSelection, setCurMonthSelection] = useState<IDropdownOption>({ label: '', value: '' });    
+    const [selectedMonths, setSelectedMonths] = useState<IStringBoolMap>({});
+    const [selectedHouses, setSelectedHouses] = useState<IStringBoolMap>({});
 
 
-    function addMonths(mons) {
+    function addMonths(mons: string[]) {
         setAllMonths(orig => {
             const r = orig.concat(mons).reduce((acc, m) => {
                 if (!acc.dict[m]) {
@@ -67,8 +69,8 @@ export function JJDataRoot(props) {
                 }
                 return acc;
             }, {
-                dict: {},
-                res: []
+                dict: {} as {[mon:string]:boolean},
+                res: [] as string[],
             }).res;
             r.sort();
             return r;
@@ -85,8 +87,8 @@ export function JJDataRoot(props) {
                 }
                 return acc;
             }, {
-                dict: {},
-                res: []
+                dict: {} as {[hid:string]: boolean},
+                res: [] as IHouseInfo[],
             }).res;            
             return sortBy(r,['address']);
         });
@@ -116,7 +118,7 @@ export function JJDataRoot(props) {
 
     useEffect(() => {
         allMonthes.forEach(m => selectedMonths[m] = false);
-        let lm;
+        let lm: string;
         switch (curMonthSelection.value) {
             case 'LastMonth':
                 lm = moment().subtract(1, 'month').format('YYYY-MM');
@@ -151,12 +153,13 @@ export function JJDataRoot(props) {
         setSelectedHouses(allHouses.reduce((acc, h) => {
             acc[h.houseID] = true;
             return acc;
-        }, {}));
+        }, {} as {[id:string]:boolean}
+        ));
     }, [rawExpenseData, payments,curMonthSelection]);
     
 
 
-    const beginReLoadPaymentData = ownerInfo => {
+    const beginReLoadPaymentData = (ownerInfo:IOwnerInfo) => {
         getHouseAnchorInfo(ownerInfo).then(r => {            
             setHouseAnchorInfo(r);
         })

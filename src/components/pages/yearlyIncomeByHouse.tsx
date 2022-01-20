@@ -6,8 +6,8 @@ import { Modal, Container, Button } from 'react-bootstrap';
 import moment from 'moment';
 import { saveToGS } from '../reports/utils/updateGS';
 import { sortBy } from 'lodash';
-import EditDropdown from '../paymentMatch/EditDropdown';
-import { IIncomeExpensesContextValue } from '../reports/reportTypes';
+import EditDropdown, {IOptions} from '../paymentMatch/EditDropdown';
+import { IIncomeExpensesContextValue, IPayment } from '../reports/reportTypes';
 
 export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContextValue}) {
     const jjctx = props.jjctx;
@@ -27,8 +27,9 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
     const [selectedMonths, setSelectedMonths] = useState<StringBoolHash>({});
     const [state, setState] = useState({
         dspYear: '',
-        curYearSelection: null,
-        curYearOptions: [],
+        ownerID:'',
+        curYearSelection: {} as IOptions,
+        curYearOptions: [] as IOptions[],
     });
 
     interface StringBoolHash { [x: string]: boolean; };
@@ -86,10 +87,10 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
         date: string;
         debugText?: string;
     }
-    const [showDetail, setShowDetail] = useState<IShowDetailsData[]>(null);
-    const [showExpenseDetail, setShowExpenseDetail] = useState(null);
+    const [showDetail, setShowDetail] = useState<IShowDetailsData[]|null>(null);
+    const [showExpenseDetail, setShowExpenseDetail] = useState<{debugText:string}[] | null>(null);
 
-    const saveCsvGS = csv => {
+    const saveCsvGS = (csv:boolean) => {
         var link = document.createElement("a");
         const csvContent = [];
 
@@ -171,9 +172,9 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
             setShowExpenseDetail(null);
         }}>
             <Modal.Header closeButton>
-                <Modal.Body>{(showExpenseDetail || []).map(d => {
+                <Modal.Body>{showExpenseDetail?showExpenseDetail.map(d => {
                     return <div>{d.debugText}</div>
-                })}</Modal.Body>
+                }):''}</Modal.Body>
             </Modal.Header>
             <Container>
             </Container>
@@ -181,18 +182,18 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
         <MonthRange jjctx={jjctx}></MonthRange>
         <EditDropdown context={{
             disabled: false,
-            curSelection: state.curYearSelection || {},
+            curSelection: state.curYearSelection || {label:'', value:''},
             setCurSelection: s => {
                 setState({
                     ...state,
-                    dspYear: s?.value,
+                    dspYear: s?.value || '',
                     curYearSelection: s || {},
                 })
             },
             getCurSelectionText: o => o.label || '',
             options: state.curYearOptions || [],
-            setOptions: null,
-            loadOptions: () => [],
+            setOptions: opt => { },
+            loadOptions: async () => [],
         }}></EditDropdown>
         <table className='tableReport'>
             <thead>
@@ -219,7 +220,7 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
                                             acc = acc.concat(curHouseMon.records);
                                         }
                                         return acc;
-                                    }, []);
+                                    }, [] as IPayment[]);
                                     setShowDetail(all)
                                 }}
                             >{fMoneyformat(house.total)}</td>
@@ -316,7 +317,7 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
                                                         });
                                                     })
                                                     return acc;
-                                                }, []),
+                                                }, [] as { debugText:string}[]),
                                                 {
                                                     debugText: '====== breakdowns '
                                                 }

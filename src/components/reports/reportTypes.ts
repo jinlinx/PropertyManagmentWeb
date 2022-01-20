@@ -75,6 +75,8 @@ export interface IPaymentCalcOpts {
     getHouseShareInfo: () => IHouseAnchorInfo[];
 }
 
+export type IStringBoolMap = { [id: string]: boolean };
+
 export interface IIncomeExpensesContextValue {
     pageProps: IPageProps;
     setPageProps: (a: IPageProps) => void;
@@ -91,7 +93,7 @@ export interface IIncomeExpensesContextValue {
     setCurMonthSelection: (a: any) => void;
     selectedMonths: { [mon: string]: boolean };
     setSelectedMonths: (a: { [mon: string]: boolean }) => void;
-    selectedHouses: any;
+    selectedHouses: {[id:string]:boolean};
     setSelectedHouses: (a: any) => void;
     beginReLoadPaymentData: (o: IOwnerInfo) => Promise<void>;
     paymentCalcOpts: IPaymentCalcOpts;
