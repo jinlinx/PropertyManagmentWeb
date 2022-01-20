@@ -101,12 +101,7 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
             ...monthes.map(mon => fMoneyformat((house.monthes[mon] || {}).amount))
             ]);
         })
-        csvContent.push(['Non Rent']);
-        monAddr.nonRentAry.forEach(nonRent => {
-            csvContent.push([nonRent.displayName, fMoneyformat(nonRent.total),
-            ...monthes.map(mon => fMoneyformat((nonRent.monthes[mon] || {}).amount))
-            ])
-        })
+        
         csvContent.push(['Sub Total:', fMoneyformat(monAddr.total),
             ...monthes.map((name, key) => {
                 const mon = monAddr.monthTotal[name];
@@ -195,24 +190,22 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
             setOptions: opt => { },
             loadOptions: async () => [],
         }}></EditDropdown>
-        <table className='tableReport'>
-            <thead>
-
-                <td className='tdColumnHeader'>
-                    <table><tr>
-                        <td><Button onClick={() => saveCsvGS(true)}>CSV</Button></td>
-                        <td><Button onClick={() => saveCsvGS(false)}>Sheet</Button></td>
-                    </tr></table>
-                </td>
-                <td className='tdColumnHeader'>Total</td>                
-            </thead>
+        <table><tr>
+            <td><Button onClick={() => saveCsvGS(true)}>CSV</Button></td>
+            <td><Button onClick={() => saveCsvGS(false)}>Sheet</Button></td>
+        </tr></table>
+        <table className='table'>
             <tbody><tr>
-                <td className='tdLeftSubHeader' colSpan={calculatedMaintData.categoryNames.length + 2}>Income</td></tr>
+                <td></td>
+                <td className='tdRight'>Income</td>
+                <td className='tdRight'>Expense</td>
+                <td className='tdRight'>Revenue</td>
+            </tr>
                 {
                     monAddr.houseAry.filter(h => (selectedHouses[h.addressId])).map((house, key) => {
                         return <tr key={key}>
-                            <td className='tdLeftSubCategoryHeader'>{house.address}</td>
-                            <td className='tdCenter  tdTotalItalic'
+                            <td className=''>{house.address}</td>
+                            <td className='tdRight'
                                 onClick={() => {
                                     const all = monthes.reduce((acc,mon) => {
                                         const curHouseMon = house.monthes[mon];
@@ -224,7 +217,7 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
                                     setShowDetail(all)
                                 }}
                             >{fMoneyformat(house.total)}</td>
-                            <td onClick={() => {
+                            <td className='tdRight' onClick={() => {
                                 setShowDetail(calculatedMaintData.byHouseIdOnly[house.addressId]?.records.map(r => {
                                     return {
                                         address: r.house.address,
@@ -234,6 +227,9 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
                                 }))
                             }}>
                                 {fMoneyformat(calculatedMaintData.byHouseIdOnly[house.addressId]?.amount)}
+                            </td>
+                            <td className='tdRight'>
+                                {fMoneyformat(house.total - calculatedMaintData.byHouseIdOnly[house.addressId]?.amount)}
                             </td>
                             {
                                 false && monthes.map((mon, key) => {
@@ -247,40 +243,25 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
                         </tr>
                     })
                 }
-                { false && <tr><td>Non Rent</td></tr>}
                 {
-                    false && monAddr.nonRentAry.map((nonRent, key) => {
-                        return <tr key={key}>
-                            <td className='tdLeftSubCategoryHeader'>{nonRent.displayName}</td>
-                            <td className='tdCenter  tdTotalItalic' onClick={() => setShowDetail(nonRent.records)}>{fMoneyformat(nonRent.total)}</td>
-                            {
-                                monthes.map((mon, key) => {
-                                    const curMon = nonRent.monthes[mon];
-                                    return < td key={key} className='tdCenter' onClick={() => setShowDetail(curMon?.records)}> {
-                                        fMoneyformat(curMon?.amount)
-
-                                    }</td>
-                                })
-                            }
-                        </tr>
-                    })
+                    //monAddr.nonRentAry.map((nonRent, key) => fMoneyformat(nonRent.total)
+                    //    monthes.map((mon=>nonRent.monthes[mon].amount                    
                 }
                 <tr>
 
-                    <td className='tdLeftSubCategoryHeader'>Sub Total:
-                    </td><td className='tdCenter  tdTotalItalic'>{fMoneyformat(monAddr.total)}</td>
+                    <td>Sub Total:
+                    </td><td className='tdRight'>{fMoneyformat(monAddr.total)}</td>
                     {
-                        false && monthes.map((name, key) => {
-                            //const monDbg = paymentsByMonth[name];
-                            const mon = monAddr.monthTotal[name];
-                            // dbg={ monDbg?.total}
-                            if (!mon && mon !== 0) return <td className='tdCenter  tdTotalItalic' key={key}></td>;
-                            return <td className='tdCenter  tdTotalItalic' key={key}>{fMoneyformat(mon)}</td>
-                        })
+                        //monthes.map((name, key) => monAddr.monthTotal[name]                            
                     }
-                    <td>{fMoneyformat(calculatedMaintData.totalExpByHouse) }</td>
+                    <td className='tdRight'>{fMoneyformat(calculatedMaintData.totalExpByHouse)}</td>
+                    <td className='tdRight'>{fMoneyformat(monAddr.total - calculatedMaintData.totalExpByHouse)}</td>
                 </tr>
 
+            </tbody>
+        </table>
+        <table className='table'>
+            <tbody>
                 <tr><td className='tdLeftSubHeader' colSpan={monthes.length + 2}>Expenses</td></tr>
 
 

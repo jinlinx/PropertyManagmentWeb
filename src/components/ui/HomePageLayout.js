@@ -15,7 +15,8 @@ export default function HomePageLayout(props) {
                     return <Router>
                         <div className="wrapper fontawesome-i2svg-active fontawesome-i2svg-complete">
                             <SideBar controlsGrp={controlsGrp} />
-                            <div id="content">               
+                            <div id="content"> 
+                            <div style={{paddingRight:250}}>
                                 <Routes>
                                     {
                                         controlsGrp.reduce((acc, c) => {
@@ -35,7 +36,8 @@ export default function HomePageLayout(props) {
                                     </Route>
                                     <Route path="/">
                                     </Route>
-                                </Routes>                                                                
+                                    </Routes>                                                                
+                                </div>    
                             </div>
                         </div>
                     </Router>

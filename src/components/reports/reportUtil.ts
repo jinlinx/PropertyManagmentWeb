@@ -256,7 +256,7 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
                         amount: ramount,
                         dspAmount: ramount.toFixed(2),
                         house: r,
-                        info: `${r.address} ==> ${(ramount).toFixed(2)}`,
+                        info: `${r.address} ==> ${(ramount).toFixed(2)} of ${r.category}`,
                     } as IHousePartsCalcInfo
                 ]
             } as IMaintenanceMonthCatAmtRecWithHousePartCalc;
