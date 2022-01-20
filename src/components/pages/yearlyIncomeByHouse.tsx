@@ -3,8 +3,6 @@ import { fMoneyformat } from '../reports/rootData';
 import { MonthRange } from '../reports/monthRange';
 import { getPaymentsByMonthAddress, getMaintenanceData } from '../reports/reportUtil';
 import { Modal, Container, Button } from 'react-bootstrap';
-import moment from 'moment';
-import { saveToGS } from '../reports/utils/updateGS';
 import { sortBy } from 'lodash';
 import EditDropdown, {IOptions} from '../paymentMatch/EditDropdown';
 import { IIncomeExpensesContextValue, IPayment } from '../reports/reportTypes';
@@ -90,66 +88,37 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
     const [showDetail, setShowDetail] = useState<IShowDetailsData[]|null>(null);
     const [showExpenseDetail, setShowExpenseDetail] = useState<{debugText:string}[] | null>(null);
 
-    const saveCsvGS = (csv:boolean) => {
+    const saveCsvGS = () => {
         var link = document.createElement("a");
         const csvContent = [];
 
         const fMoneyformat = (d: number) => (d || d === 0) ? d.toFixed(2) : '';
-        csvContent.push(['', 'Total', ...monthes]);
-        monAddr.houseAry.filter(h => (selectedHouses[h.addressId])).forEach((house, key) => {
-            csvContent.push([house.address, fMoneyformat(house.total),
-            ...monthes.map(mon => fMoneyformat((house.monthes[mon] || {}).amount))
-            ]);
-        })
+        csvContent.push(['Address', 'Income', 'Expense', 'Revenue']);
+
+        monAddr.houseAry.filter(h => (selectedHouses[h.addressId])).map((house, key) => {
+            csvContent.push(
+                [
+                    fMoneyformat(house.total),
+                    fMoneyformat(calculatedMaintData.byHouseIdOnly[house.addressId]?.amount),
+                    fMoneyformat(house.total - calculatedMaintData.byHouseIdOnly[house.addressId]?.amount)
+                ]);
+        });
+
+        csvContent.push([monAddr.total, (calculatedMaintData.totalExpByHouse), (monAddr.total - calculatedMaintData.totalExpByHouse)]
+            .map(fMoneyformat));
+        link.href = window.URL.createObjectURL(
+            new Blob([csvContent.map(c => c.join(', ')).join('\n')], { type: "application/txt" })
+        );
+        link.download = `report-cashflow.csv`;
+
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(function () {
+            window.URL.revokeObjectURL(link.href);
+        }, 200);
         
-        csvContent.push(['Sub Total:', fMoneyformat(monAddr.total),
-            ...monthes.map((name, key) => {
-                const mon = monAddr.monthTotal[name];
-                if (!mon && mon !== 0) return '';
-                return fMoneyformat(mon);
-            })
-        ]);
-
-        csvContent.push(['']);
-        csvContent.push(['Expenses', '', ...monthes.map(() => '')]);
-
-
-        [...calculatedMaintData.categoryNames].forEach(cat => {
-            csvContent.push([cat, fMoneyformat(calculatedMaintData.categoryTotals[cat]),
-                ...monthes.map(mon => fMoneyformat(calculatedMaintData.getCatMonth(cat, mon).amount))
-            ])
-
-        })
-
-        csvContent.push(['Sub Total', fMoneyformat(calculatedMaintData.total),
-            ...monthes.map(mon => fMoneyformat((calculatedMaintData.monthlyTotal[mon] || 0)))
-        ])
-
-        csvContent.push(['']);
-        csvContent.push(['Net Income', fMoneyformat((monAddr.total - calculatedMaintData.total)),
-            ...monthes.map(mon => {
-                const incTotal = monAddr.monthTotal[mon] || 0;
-                const cost = calculatedMaintData.monthlyTotal[mon] || 0;
-                return fMoneyformat((incTotal - cost));
-            })
-        ]);
-
-
-        if (csv) {
-            link.href = window.URL.createObjectURL(
-                new Blob([csvContent.map(c => c.join(', ')).join('\n')], { type: "application/txt" })
-            );
-            link.download = `report-cashflow.csv`;
-
-            document.body.appendChild(link);
-            link.click();
-            setTimeout(function () {
-                window.URL.revokeObjectURL(link.href);
-            }, 200);
-        } else {
-            saveToGS(csvContent)
-        }
     }
+
     return <>
         <Modal show={!!showDetail} onHide={() => {
             setShowDetail(null);
@@ -191,8 +160,7 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
             loadOptions: async () => [],
         }}></EditDropdown>
         <table><tr>
-            <td><Button onClick={() => saveCsvGS(true)}>CSV</Button></td>
-            <td><Button onClick={() => saveCsvGS(false)}>Sheet</Button></td>
+            <td><Button onClick={() => saveCsvGS()}>CSV</Button></td>
         </tr></table>
         <table className='table'>
             <tbody><tr>
@@ -262,77 +230,38 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
         </table>
         <table className='table'>
             <tbody>
-                <tr><td className='tdLeftSubHeader' colSpan={monthes.length + 2}>Expenses</td></tr>
-
-
+                <tr><td>Address</td><td className='tdRight'>Total</td>
+                    {
+                        [...calculatedMaintData.houses].map((house, key) => {
+                            return <td className='tdRight' key={key}>{ house.address }</td>
+                        })
+                    }
+                </tr>
                 {
                     [...calculatedMaintData.categoryNames].map((cat, key) => {
                         return <tr key={key}>
-                            <td className='tdLeftSubCategoryHeader'>{cat}</td><td className="tdCenter  tdTotalItalic">{fMoneyformat(calculatedMaintData.categoryTotals[cat])}</td>
+                            <td className='tdRight'>{cat}</td><td className="tdRight">{fMoneyformat(calculatedMaintData.categoryTotals[cat])}</td>
                             {
-                                monthes.map((mon, key) => {
-                                    const catMon = calculatedMaintData.getCatMonth(cat, mon);
-                                    return <td key={key} className="tdCenter" onClick={() => {
-                                        if (catMon.amountCalcParts) {
-                                            console.log('catMon')
-                                            console.log(catMon)
-                                            const msgs = catMon.amountCalcParts.reduce((acc, r) => {
-                                                console.log(r)
-                                                if (r.calcInfo) {
-                                                    r.calcInfo.forEach(i => acc.push({
-                                                        debugText: i.info
-                                                    }));
-                                                }
-                                                return acc;
-                                            }, [
-                                                {
-                                                    debugText: `For Total expense of ${catMon.amount.toFixed(2)}`
-                                                },
-                                                ...catMon.records.reduce((acc, r) => {
-                                                    acc.push({
-                                                        debugText: `=> ${r.amount} is from`
-                                                    });
-                                                    r.records.forEach(r => {
-                                                        acc.push({
-                                                            debugText: `===> ${moment(r.date).format('YYYY-MM-DD')} ${r.amount} ${r.comment} ${r.description}`
-                                                        });
-                                                    })
-                                                    return acc;
-                                                }, [] as { debugText:string}[]),
-                                                {
-                                                    debugText: '====== breakdowns '
-                                                }
-                                            ]);
-                                            setShowExpenseDetail(msgs)
-                                        }
-                                    }}>{fMoneyformat(catMon.amount)}</td>
-                                })
+                                calculatedMaintData.houses.map((house, key) => {
+                                    const hcat = calculatedMaintData.byHouseIdByCat[house.houseID][cat];
+                                    return <td key={key} className='tdRight'>
+                                        {fMoneyformat(hcat?.amount)}
+                                    </td>
+                                })                                
                             }
                         </tr>
                     })
                 }
-                <tr><td className='tdLeftSubCategoryHeader'>Sub Total</td><td className="tdCenter  tdTotalItalic">{
+                <tr><td className='tdLeftSubCategoryHeader'>Sub Total</td><td className="tdRight">{
                     fMoneyformat(calculatedMaintData.total)
                 }</td>
                     {
-                        monthes.map((mon, key) => {
-                            return <td key={key} className="tdCenter tdTotalItalic">{fMoneyformat((calculatedMaintData.monthlyTotal[mon] || 0))}</td>
-                        })
-                    }
-                </tr>
-                <tr>
-                    <td colSpan={monthes.length + 2}></td>
-                </tr>
-                <tr>
-                    <td className="tdLeftSubHeader tdButtomTotalCell">Net Income</td>
-                    <td className="tdCenter tdTotalBold">{fMoneyformat((monAddr.total - calculatedMaintData.total))}</td>
-                    {
-                        monthes.map((mon, key) => {
-                            const incTotal = monAddr.monthTotal[mon] || 0; //paymentsByMonth[mon] || {};
-                            //const incTotal = inc.total || 0;
-                            const cost = calculatedMaintData.monthlyTotal[mon] || 0;
-                            return <td key={key} className='tdButtomTotalCell tdTotalBold tdCenter t'>{fMoneyformat((incTotal - cost))}</td>
-                        })
+                        calculatedMaintData.houses.map((house, key) => {
+                            const hcat = calculatedMaintData.byHouseIdOnly[house.houseID];
+                            return <td key={key} className='tdRight'>
+                                {fMoneyformat(hcat?.amount)}
+                            </td>
+                        })                        
                     }
                 </tr>
             </tbody>

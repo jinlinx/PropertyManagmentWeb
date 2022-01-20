@@ -190,7 +190,8 @@ export interface IMaintenanceDataByMonthRes {
     },
     byHouseIdOnly: {
         [houseId: string]: IMaintenceAmtByHouseByCat;        
-    }
+    },
+    houses: IHouseInfo[];
     getCatMonth: ((cat: string, mon: string) => IMaintenceCatMonData);
     totalExpByHouse: number; //a santity check
 }
@@ -338,6 +339,9 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
         if (amount) {
             catMonth.amountCalcParts.push(calcInfo);
             calcInfo.calcInfo.forEach(ci => {
+                if (!acc.byHouseIdByCat[ci.house.houseID]) {
+                    acc.houses.push(ci.house);
+                }
                 const cat = getSetIfNull(getSetIfNull(acc.byHouseIdByCat, ci.house.houseID, {}) as {[id:string]:object}, r.category, {
                     amount: 0,
                     records: [],
@@ -378,6 +382,7 @@ export function getMaintenanceData(maintenanceRecordsRaw: IExpenseData[], opts: 
         }),
         byHouseIdByCat: {},
         byHouseIdOnly: {},
+        houses: [],
         totalExpByHouse: 0,
     } as IMaintenanceDataByMonthRes);
 
