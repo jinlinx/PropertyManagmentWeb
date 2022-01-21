@@ -11,3 +11,8 @@ code_nouse {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.dialog90vw {
+    
+    max-width: 90vw !important;
+}

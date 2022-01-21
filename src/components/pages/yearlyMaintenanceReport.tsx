@@ -215,7 +215,7 @@ export function YearlyMaintenanceReport(props: { jjctx: IIncomeExpensesContextVa
         setOptions: ()=>{},
         loadOptions: async () => [],
     }}></EditDropdown>
-        <Modal show={!!showDetail} onHide={() => {
+        <Modal dialogClassName="dialog90vw" show={!!showDetail} onHide={() => {
             setShowDetail(null);
         }}>
             <Modal.Header closeButton>
@@ -286,7 +286,20 @@ export function YearlyMaintenanceReport(props: { jjctx: IIncomeExpensesContextVa
                                         }</td>
                                     })
                                 }
-                                <td>{amtDsp(state.byWorkerByCat.byWorkerTotal[n.id].total)}</td>
+                                <td onClick={() => {
+                                    const wkrCat = state.byWorkerByCat.byWorkerTotal[n.id];
+                                    if (!wkrCat) return;
+                                    setShowDetail(wkrCat.items.map(itm => {
+                                        let date = itm.date;
+                                        if (date.length > 10) date = date.substring(0, 10);
+                                        return {
+                                            address: houseIdToAddrMap[itm.houseID],
+                                            amount: itm.amount,
+                                            date,
+                                            notes: itm.description,
+                                        } as IShowDetailsData;
+                                    }))
+                                }}>{amtDsp(state.byWorkerByCat.byWorkerTotal[n.id].total)}</td>
                             </tr>
                         })
                     }
