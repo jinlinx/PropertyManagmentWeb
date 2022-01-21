@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Modal, Container, Button } from 'react-bootstrap';
 import { getMinDatesForMaintenance, getWorkerInfo, getAllMaintenanceData, getExpenseCategories } from '../api';
 import moment from 'moment';
 import EditDropdown, {IOptions} from '../paymentMatch/EditDropdown';
@@ -152,6 +153,15 @@ export function YearlyMaintenanceReport(props: { jjctx: IIncomeExpensesContextVa
         formatData(state, setState);
     }, [state.rawData, state.showCategories]);
 
+    interface IShowDetailsData {
+        amount: number;
+        address: string;
+        notes: string;
+        date: string;
+        debugText?: string;
+    }
+    const [showDetail, setShowDetail] = useState<IShowDetailsData[] | null>(null);
+    
     let names: { id: string; name: string; }[] = [];
     let categoryNames: { id: string; name: string; }[] = [];
     if (state.byWorkerByCat && state.byWorkerByCat.workerIds) {
@@ -200,6 +210,17 @@ export function YearlyMaintenanceReport(props: { jjctx: IIncomeExpensesContextVa
         setOptions: ()=>{},
         loadOptions: async () => [],
     }}></EditDropdown>
+        <Modal show={!!showDetail} onHide={() => {
+            setShowDetail(null);
+        }}>
+            <Modal.Header closeButton>
+                <Modal.Body>{(showDetail || [] as IShowDetailsData[]).map(d => {
+                    return <div>{d.amount.toFixed(2)} {d.date} {d.address} {d.notes} {d.debugText}</div>
+                })}</Modal.Body>
+            </Modal.Header>
+            <Container>
+            </Container>
+        </Modal>
         <div>
             <div className="container">
             {
