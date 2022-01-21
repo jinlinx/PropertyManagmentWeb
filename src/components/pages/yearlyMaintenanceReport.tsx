@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Container, Button } from 'react-bootstrap';
-import { getMinDatesForMaintenance, getWorkerInfo, getAllMaintenanceData, getExpenseCategories } from '../api';
+import {
+    getMinDatesForMaintenance, getWorkerInfo, getAllMaintenanceData, getExpenseCategories,
+} from '../api';
 import moment from 'moment';
 import EditDropdown, {IOptions} from '../paymentMatch/EditDropdown';
 import { sortBy } from "lodash";
@@ -12,19 +14,17 @@ import {
 
 interface IWithTotal {
     total: number;
+    items: IMaintenanceRawData[];
 }
 interface IHashWithTotal {
     [catOrWkr: string]: IWithTotal;
 }
 
+interface IByWorkerIdByCatId {
+    [wkr: string]: IHashWithTotal;
+}
 interface IByWorkerByCat {
-    byWorker: {
-        [wkr: string]: {
-            [cat: string]: {
-                amount: number;
-            };
-        };
-    };
+    byWorker: IByWorkerIdByCatId;
     byWorkerTotal: IHashWithTotal;
     byCats: IHashWithTotal;
     total: number;
@@ -50,7 +50,7 @@ interface IYearlyMaintenanceReportState {
 }
 
 export function YearlyMaintenanceReport(props: { jjctx: IIncomeExpensesContextValue }) {
-    const { ownerInfo } = props.jjctx;
+    const { ownerInfo, houseAnchorInfo } = props.jjctx;
     const [state, setState] = useState<IYearlyMaintenanceReportState>({
         curYearSelection: { label: 'NA', value: 'NA' } as IOptions,
         curYearOptions: [],
@@ -65,6 +65,11 @@ export function YearlyMaintenanceReport(props: { jjctx: IIncomeExpensesContextVa
         byWorkerByCat: {} as IByWorkerByCat,
         ownerID: '',
     });
+
+    const houseIdToAddrMap = houseAnchorInfo.reduce((acc, h) => {
+        acc[h.id] = h.address;
+        return acc;
+    }, {} as {[id:string]:string});
     useEffect(() => {
         if (!ownerInfo.ownerID) {
             return console.log(`no owner id yet, continue`);            
@@ -161,7 +166,7 @@ export function YearlyMaintenanceReport(props: { jjctx: IIncomeExpensesContextVa
         debugText?: string;
     }
     const [showDetail, setShowDetail] = useState<IShowDetailsData[] | null>(null);
-    
+
     let names: { id: string; name: string; }[] = [];
     let categoryNames: { id: string; name: string; }[] = [];
     if (state.byWorkerByCat && state.byWorkerByCat.workerIds) {
@@ -263,8 +268,21 @@ export function YearlyMaintenanceReport(props: { jjctx: IIncomeExpensesContextVa
                                 <th scope="row">{n.name}</th>
                                 {
                                     categoryNames.map((cat, keyi) => {
-                                        return <td scope="col" key={keyi}>{
-                                            amtDsp(state.byWorkerByCat.byWorker[n.id][cat.id]?.amount)
+                                        return <td scope="col" key={keyi} onClick={() => {
+                                            const wkrCat = state.byWorkerByCat.byWorker[n.id][cat.id];
+                                            if (!wkrCat) return;
+                                            setShowDetail(wkrCat.items.map(itm => {
+                                                let date = itm.date;
+                                                if (date.length > 10) date = date.substring(0, 10);
+                                                return {
+                                                    address: houseIdToAddrMap[itm.houseID],
+                                                    amount: itm.amount,
+                                                    date,
+                                                    notes: itm.description,
+                                                } as IShowDetailsData;
+                                            }))
+                                        }}>{
+                                            amtDsp(state.byWorkerByCat.byWorker[n.id][cat.id]?.total)
                                         }</td>
                                     })
                                 }
@@ -313,10 +331,10 @@ function getDataForYYYY(state: IYearlyMaintenanceReportState, setState: React.Di
 
 function formatData(state: IYearlyMaintenanceReportState, setState: React.Dispatch<React.SetStateAction<IYearlyMaintenanceReportState>>) {
     const dataRows = state.rawData;
-    const getSet = (obj: any, id: string, init: object) => {
+    function getSet<T extends (IWithTotal | IHashWithTotal)>(obj: {[id:string]:T}, id: string, init: T) {
         let r = obj[id];
         if (!r) {
-            r = init || {};
+            r = init;
             obj[id] = r;
         }
         return r;
@@ -335,17 +353,19 @@ function formatData(state: IYearlyMaintenanceReportState, setState: React.Dispat
         }
         const wkr = getSet(acc.byWorker, d.workerID, {});
         const exp = getSet(wkr, d.expenseCategoryId, {
-            amount: 0,
+            total: 0,
             items: [],
         });
-        exp.amount += d.amount;
+        exp.total += d.amount;
         exp.items.push(d);
 
-        const wkrTotal = getSet(acc.byWorkerTotal, d.workerID, {total: 0}) as IWithTotal;
+        const wkrTotal = getSet(acc.byWorkerTotal, d.workerID, {total: 0, items:[]}) as IWithTotal;
         wkrTotal.total += d.amount;
+        wkrTotal.items.push(d);
 
-        const byCats = getSet(acc.byCats, d.expenseCategoryId, { total: 0 }) as IWithTotal;
+        const byCats = getSet(acc.byCats, d.expenseCategoryId, { total: 0, items:[] }) as IWithTotal;
         byCats.total += d.amount;
+        byCats.items.push(d);
         acc.total += d.amount;
         return acc;
     }, {
