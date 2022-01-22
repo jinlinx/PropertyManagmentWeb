@@ -229,6 +229,72 @@ export function YearlyIncomeByHouseReport(props: { jjctx: IIncomeExpensesContext
 
             </tbody>
         </table>
+        {
+            //house to cat
+        }
+        <table className='table'>
+            <tbody>
+                <tr><td>Address</td><td className='tdRight'>Total</td>
+                    {
+                        [...calculatedMaintData.categoryNames].map((cat, key) => {
+                            return <td className='tdRight' key={key}>{cat}</td>
+                        })
+                    }                    
+                </tr>
+                {
+                    calculatedMaintData.houses.map((house, key) => {
+                        return <tr key={key}>                            
+                            <td className='tdRight'>{house.address}</td>
+                            <td className='tdRight'
+                                onClick={() => {
+                                    if (!calculatedMaintData.byHouseIdOnly[house.houseID]) return;
+                                    const itms = calculatedMaintData.byHouseIdOnly[house.houseID].records;
+                                    setShowDetail(itms.map(itm => {
+                                        return {
+                                            address: itm.house.address,
+                                            amount: itm.amount,
+                                            notes: itm.info,
+                                        } as IShowDetailsData;
+                                    }));
+                                }}
+                            >{fMoneyformat(calculatedMaintData.byHouseIdOnly[house.houseID].amount)}</td>
+                            {
+                                [...calculatedMaintData.categoryNames].map((cat, key) => {
+                                    const hcat = calculatedMaintData.byHouseIdByCat[house.houseID][cat];
+                                    return <td key={key} className='tdRight'
+                                        onClick={() => {
+                                            if (!hcat) return;
+                                            const itms = hcat.records;
+                                            setShowDetail(itms.map(itm => {
+                                                return {
+                                                    address: itm.house.address,
+                                                    amount: itm.amount,
+                                                    notes: itm.info,
+                                                } as IShowDetailsData;
+                                            }));
+                                        }}
+                                    >
+                                        {fMoneyformat(hcat?.amount)}
+                                    </td>
+                                })
+                            }
+                        </tr>
+                    })
+                }                
+                <tr><td className='tdRight'>Sub Total</td><td className="tdRight">{
+                    fMoneyformat(calculatedMaintData.total)
+                }</td>
+                    {
+                        calculatedMaintData.categoryNames.map((cat, key) => {
+                            const hcat = calculatedMaintData.categoryTotals[cat];
+                            return <td key={key} className='tdRight'>
+                                {fMoneyformat(hcat)}
+                            </td>
+                        })
+                    }
+                </tr>
+            </tbody>
+        </table>
         <table className='table'>
             <tbody>
                 <tr><td>Address</td><td className='tdRight'>Total</td>
