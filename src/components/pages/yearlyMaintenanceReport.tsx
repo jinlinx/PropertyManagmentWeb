@@ -219,9 +219,16 @@ export function YearlyMaintenanceReport(props: { jjctx: IIncomeExpensesContextVa
             setShowDetail(null);
         }}>
             <Modal.Header closeButton>
-                <Modal.Body>{(showDetail || [] as IShowDetailsData[]).map(d => {
-                    return <div>{d.amount.toFixed(2)} {d.date} {d.address} {d.notes} {d.debugText}</div>
-                })}</Modal.Body>
+                <Modal.Body>
+                    <table>
+                    {
+                    sortBy((showDetail || [] as IShowDetailsData[]), 'date').map(d => {
+                        return <tr><td>{d.amount.toFixed(2)}</td><td>{d.date}</td> <td>{d.address}</td><td> {d.notes}</td> <td>{d.debugText}</td></tr>
+                    })
+                    
+                        }
+                    </table>
+                </Modal.Body>
             </Modal.Header>
             <Container>
             </Container>
